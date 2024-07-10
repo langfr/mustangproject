@@ -250,6 +250,7 @@ public class ZUGFeRDValidator {
 				isPDF = ByteArraySearcher.contains(content, new byte[]{'%', 'P', 'D', 'F'});
 				XMLValidator xv = new XMLValidator(context);
 				if (isPDF) {
+					pdfv.setAutoload(false);
 					pdfv.setFilename(fileNameOfInputStream);
 					pdfv.setFileContents(content);
 
@@ -289,7 +290,7 @@ public class ZUGFeRDValidator {
 					if (isXML) {
 						pdfValidity = true;
 						optionsRecognized = true;
-						xv.disableAutoload();
+						xv.setAutoload(false);
 						xv.setFilename(fileNameOfInputStream);
 						sha1Checksum = calcSHA1(inputStream);
 
