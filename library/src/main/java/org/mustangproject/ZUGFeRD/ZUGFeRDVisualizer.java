@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,13 +54,11 @@ import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.FopFactoryBuilder;
-
 import org.apache.fop.apps.io.ResourceResolverFactory;
 import org.apache.fop.configuration.Configuration;
 import org.apache.fop.configuration.ConfigurationException;
 import org.apache.fop.configuration.DefaultConfigurationBuilder;
 import org.apache.xmlgraphics.util.MimeConstants;
-import org.mustangproject.CII.CIIToUBL;
 import org.mustangproject.ClasspathResolverURIAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,7 +195,7 @@ public class ZUGFeRDVisualizer {
 
 		}
 
-		return baos.toString("UTF-8");
+		return baos.toString(StandardCharsets.UTF_8.name());
 	}
 
 	protected String toFOP(String xmlFilename)
@@ -216,9 +215,9 @@ public class ZUGFeRDVisualizer {
 		}
 
 		FileInputStream fis = new FileInputStream(xmlFilename);
-		String fileContent = "";
 		try {
-			fileContent = new String(Files.readAllBytes(Paths.get(xmlFilename)), StandardCharsets.UTF_8);
+			// TODO why are we reading the whole file here and discarding the content?
+			new String(Files.readAllBytes(Paths.get(xmlFilename)), StandardCharsets.UTF_8);
 		} catch (IOException e2) {
 			LOGGER.error ("Failed to read file", e2);
 		}
@@ -256,17 +255,14 @@ public class ZUGFeRDVisualizer {
 		}
 
 
-		return baos.toString("UTF-8");
+		return baos.toString(StandardCharsets.UTF_8.name());
 	}
 
-	public void toPDF(String xmlFilename, String pdfFilename) {
+	public void toPDF(String xmlFilename, String pdfFilename) throws UnsupportedEncodingException {
 
 		// the writing part
-		CIIToUBL c2u = new CIIToUBL();
-		String sourceFilename = "factur-x.xml";
 		File CIIinputFile = new File(xmlFilename);
 
-		String expected = null;
 		String result = null;
 
 		ZUGFeRDVisualizer zvi = new ZUGFeRDVisualizer();
