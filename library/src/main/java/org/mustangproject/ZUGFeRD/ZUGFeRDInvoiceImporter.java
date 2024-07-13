@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -204,7 +205,7 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 
 		xpr = xpath.compile("//*[local-name()=\"ApplicableHeaderTradeSettlement\"]|//*[local-name()=\"ApplicableSupplyChainTradeSettlement\"]");
 		NodeList headerTradeSettlementNodes = (NodeList) xpr.evaluate(getDocument(), XPathConstants.NODESET);
-		String IBAN = null, BIC = null;
+		List<BankDetails> bankDetails = new ArrayList<>();
 
 		for (int i = 0; i < headerTradeSettlementNodes.getLength(); i++) {
 			// nodes.item(i).getTextContent())) {
@@ -239,6 +240,7 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 					NodeList paymentMeansChilds = headerTradeSettlementChilds.item(settlementChildIndex).getChildNodes();
 					for (int paymentMeansChildIndex = 0; paymentMeansChildIndex < paymentMeansChilds
 						.getLength(); paymentMeansChildIndex++) {
+						String IBAN = null, BIC = null;
 						if ((paymentMeansChilds.item(paymentMeansChildIndex).getLocalName() != null) && (paymentMeansChilds
 							.item(paymentMeansChildIndex).getLocalName().equals("PayeePartyCreditorFinancialAccount"))) {
 							NodeList accountChilds = paymentMeansChilds.item(paymentMeansChildIndex).getChildNodes();
@@ -260,6 +262,13 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 									BIC = accountChilds.item(accountChildIndex).getTextContent();
 								}
 							}
+						}
+						if (IBAN != null) {
+							BankDetails bd = new BankDetails(IBAN);
+							if (BIC != null) {
+								bd.setBIC(BIC);
+							}
+							bankDetails.add(bd);
 						}
 					}
 				}
@@ -284,7 +293,11 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 						.getLength(); paymentTermChildIndex++) {
 						if ((paymentTermChilds.item(paymentTermChildIndex).getLocalName() != null) && (paymentTermChilds
 							.item(paymentTermChildIndex).getLocalName().equals("ID"))) {
-							IBAN = paymentTermChilds.item(paymentTermChildIndex).getTextContent();
+							String IBAN = paymentTermChilds.item(paymentTermChildIndex).getTextContent();
+							if (IBAN != null) {
+								BankDetails bd = new BankDetails(IBAN);
+								bankDetails.add(bd);
+							}
 						}
 					}
 				}
@@ -293,13 +306,7 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 
 		zpp.setDueDate(dueDate).setDeliveryDate(deliveryDate).setIssueDate(issueDate)
 			.setSender(new TradeParty(SellerNodes)).setRecipient(new TradeParty(BuyerNodes)).setNumber(number);
-		if (IBAN != null) {
-			BankDetails bd = new BankDetails(IBAN);
-			if (BIC != null) {
-				bd.setBIC(BIC);
-			}
-			zpp.getSender().addBankDetails(bd);
-		}
+		bankDetails.forEach(bankDetail -> zpp.getSender().addBankDetails(bankDetail));
 
 		if (buyerOrderIssuerAssignedID != null) {
 			zpp.setBuyerOrderReferencedDocumentID(buyerOrderIssuerAssignedID);
