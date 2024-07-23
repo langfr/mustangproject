@@ -1,9 +1,21 @@
 package org.mustangproject.ZUGFeRD;
 
-import javax.xml.transform.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
 
 
 /***
@@ -45,7 +57,7 @@ public class XMLUpgrader {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		applySchematronXsl(new FileInputStream(xmlFilename), baos);
 		String res = null;
-		res = baos.toString("UTF-8");
+		res = baos.toString(StandardCharsets.UTF_8.name());
 		return res;
 	}
 

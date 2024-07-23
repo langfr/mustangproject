@@ -18,8 +18,17 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
@@ -32,14 +41,8 @@ import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
 import org.mustangproject.ZUGFeRD.model.DocumentContextParameterTypeConstants;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MustangReaderWriterTest extends MustangReaderTestCase {
@@ -367,7 +370,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ze.export(baos);
 			ze.close();
-			String pdfContent = baos.toString("UTF-8");
+			String pdfContent = baos.toString(StandardCharsets.UTF_8.name());
 			assertFalse(pdfContent.indexOf("(via mustangproject.org") == -1);
 			// check for pdf-a schema extension
 //			assertFalse(pdfContent.indexOf("<zf:ConformanceLevel>EN 16931</zf:ConformanceLevel>") == -1);
@@ -411,7 +414,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ze.export(baos);
 			ze.close();
-			String pdfContent = baos.toString("UTF-8");
+			String pdfContent = baos.toString(StandardCharsets.UTF_8.name());
 			assertFalse(pdfContent.indexOf(DocumentContextParameterTypeConstants.BASIC) >= 0);
 			assertFalse(pdfContent.indexOf(DocumentContextParameterTypeConstants.EXTENDED) >= 0);
 			assertTrue(pdfContent.indexOf(DocumentContextParameterTypeConstants.COMFORT) >= 0);
@@ -447,7 +450,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ze.export(baos);
 			ze.close();
-			String pdfContent = baos.toString("UTF-8");
+			String pdfContent = baos.toString(StandardCharsets.UTF_8.name());
 			assertFalse(pdfContent.indexOf("(via mustangproject.org") == -1);
 			// check for pdf-a schema extension
 			assertFalse(pdfContent.indexOf("<fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>") == -1);

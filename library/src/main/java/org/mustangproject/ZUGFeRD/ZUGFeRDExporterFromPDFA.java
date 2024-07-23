@@ -20,6 +20,14 @@
  */
 package org.mustangproject.ZUGFeRD;
 
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import javax.activation.DataSource;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
@@ -29,9 +37,6 @@ import org.apache.xmpbox.xml.DomXmpParser;
 import org.apache.xmpbox.xml.XmpParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.activation.DataSource;
-import java.io.*;
 
 /***
  * Auto-detects the source PDF-A-Version and acts accordingly
@@ -162,7 +167,7 @@ public class ZUGFeRDExporterFromPDFA implements IZUGFeRDExporter {
 	}
 
 	public IZUGFeRDExporter setProfile(Profile p) {
-		return (IZUGFeRDExporter) getExporter().setProfile(p);
+		return getExporter().setProfile(p);
 	}
 
 	public IZUGFeRDExporter setProfile(String profileName) {
@@ -170,7 +175,7 @@ public class ZUGFeRDExporterFromPDFA implements IZUGFeRDExporter {
 		if (p==null)  {
 			throw new RuntimeException("Profile not found.");
 		}
-		return (IZUGFeRDExporter) getExporter().setProfile(p);
+		return getExporter().setProfile(p);
 	}
 
 	public IZUGFeRDExporter setConformanceLevel(PDFAConformanceLevel newLevel) {
