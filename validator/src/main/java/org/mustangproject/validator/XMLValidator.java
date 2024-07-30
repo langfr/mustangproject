@@ -438,6 +438,7 @@ public class XMLValidator extends Validator {
 			} catch (final Exception e) {
 				throw new IrrecoverableValidationError(e.getMessage());
 			}
+			// SVRLHelper.getAllFailedAssertions (sout);
 			Document SVRLReport = new SVRLMarshaller().getAsDocument(sout);
 			XPath xPath = XPathFactory.newInstance().newXPath();
 			String expression = "//*[local-name() = 'failed-assert']";

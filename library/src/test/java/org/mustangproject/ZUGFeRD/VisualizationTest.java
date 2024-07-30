@@ -19,18 +19,15 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-
 import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
-import org.mustangproject.CII.CIIToUBL;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class VisualizationTest extends ResourceCase {
@@ -67,7 +64,6 @@ public class VisualizationTest extends ResourceCase {
 		} catch (SAXException e) {
 			fail("SAXException should not happen: "+e.getMessage());
 		}
-
 
 
 		assertNotNull(result);
@@ -107,7 +103,6 @@ public class VisualizationTest extends ResourceCase {
 		}
 
 
-
 		assertNotNull(result);
 		// Reading ZUGFeRD
 		assertEquals(expected, result);
@@ -143,7 +138,6 @@ public class VisualizationTest extends ResourceCase {
 		} catch (SAXException e) {
 			fail("SAXException should not happen: "+e.getMessage());
 		}
-
 
 
 		assertNotNull(result);

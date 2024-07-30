@@ -1,20 +1,20 @@
 package org.mustangproject.ZUGFeRD;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import junit.framework.TestCase;
 
 import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import junit.framework.TestCase;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
+@Ignore
 public class ResourceCase extends TestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCase.class.getCanonicalName()); // log output is
 	
-	@Ignore
 	public static File getResourceAsFile(String resourcePath) {
 		try {
 			InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(resourcePath);

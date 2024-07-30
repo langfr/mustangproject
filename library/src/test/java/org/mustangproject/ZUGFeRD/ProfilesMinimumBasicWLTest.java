@@ -20,19 +20,13 @@
  */
 package org.mustangproject.ZUGFeRD;
 
+import junit.framework.TestCase;
+import org.mustangproject.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
-
-import org.mustangproject.BankDetails;
-import org.mustangproject.Invoice;
-import org.mustangproject.Item;
-import org.mustangproject.LegalOrganisation;
-import org.mustangproject.Product;
-import org.mustangproject.TradeParty;
-
-import junit.framework.TestCase;
 
 /***
  * This is a test to confirm the minimum steps to implement a interface are still sufficient

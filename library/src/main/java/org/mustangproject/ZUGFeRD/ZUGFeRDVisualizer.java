@@ -65,12 +65,12 @@ import org.apache.xmlgraphics.util.MimeConstants;
 import org.mustangproject.ClasspathResolverURIAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.helger.commons.io.stream.StreamHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import com.helger.commons.io.stream.StreamHelper;
 
 public class ZUGFeRDVisualizer {
 
@@ -108,7 +108,7 @@ public class ZUGFeRDVisualizer {
 	}
 
 	public String visualize(String xmlFilename, Language lang)
-			throws TransformerException, ParserConfigurationException, SAXException, IOException {
+		throws FileNotFoundException, TransformerException, IOException, SAXException, ParserConfigurationException {
 
 		try {
 			if (mXsltXRTemplate == null) {
@@ -162,9 +162,7 @@ public class ZUGFeRDVisualizer {
 		fis = new FileInputStream(xmlFilename); // fis wont reset() so re-read from beginning
 		if (root.getLocalName().equals(zf1Signature)) {
 			applyZF1XSLT(fis, baos);
-
 		} else if (root.getLocalName().equals(zf2Signature)) {
-
 			//zf2 or fx
 			applyZF2XSLT(fis, iaos);
 			doPostProcessing = true;
@@ -172,7 +170,6 @@ public class ZUGFeRDVisualizer {
 			//zf2 or fx
 			applyUBL2XSLT(fis, iaos);
 			doPostProcessing = true;
-
 		} else if (root.getLocalName().equals(ublCreditNoteSignature)) {
 			//zf2 or fx
 			applyUBLCreditNote2XSLT(fis, iaos);
@@ -214,7 +211,7 @@ public class ZUGFeRDVisualizer {
 	}
 
 	protected String toFOP(String xmlFilename)
-			throws FileNotFoundException, TransformerException, UnsupportedEncodingException {
+		throws FileNotFoundException, TransformerException, UnsupportedEncodingException {
 
 		try {
 			if (mXsltXRTemplate == null) {

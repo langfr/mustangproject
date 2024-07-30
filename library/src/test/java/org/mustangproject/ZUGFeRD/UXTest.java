@@ -19,10 +19,9 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
+import junit.framework.TestCase;
 import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
-
-import junit.framework.TestCase;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class UXTest extends TestCase {

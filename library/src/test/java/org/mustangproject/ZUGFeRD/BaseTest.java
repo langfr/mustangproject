@@ -18,13 +18,12 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
-import java.math.BigDecimal;
-
-import org.mustangproject.XMLTools;
-
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import junit.framework.TestCase;
+
+import java.math.BigDecimal;
+import org.mustangproject.XMLTools;
 
 public class BaseTest extends TestCase {
 	/**

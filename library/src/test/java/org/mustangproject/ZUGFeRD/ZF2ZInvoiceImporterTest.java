@@ -21,18 +21,16 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import java.io.File;
-import java.io.IOException;
+import org.mustangproject.Invoice;
+
+import javax.xml.xpath.XPathExpressionException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import javax.xml.xpath.XPathExpressionException;
-
-import org.mustangproject.Invoice;
 
 
 /***

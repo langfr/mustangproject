@@ -21,8 +21,6 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import static org.xmlunit.assertj.XmlAssert.assertThat;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,23 +30,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.xml.xpath.XPathExpressionException;
-
+import org.mustangproject.*;
 import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
-import org.mustangproject.Allowance;
-import org.mustangproject.BankDetails;
-import org.mustangproject.CashDiscount;
-import org.mustangproject.Charge;
-import org.mustangproject.Contact;
-import org.mustangproject.Invoice;
-import org.mustangproject.Item;
-import org.mustangproject.Product;
-import org.mustangproject.SchemedID;
-import org.mustangproject.TradeParty;
-import org.mustangproject.ZUGFeRD.model.EventTimeCodeTypeConstants;
 
 import junit.framework.TestCase;
+
+import org.mustangproject.ZUGFeRD.model.EventTimeCodeTypeConstants;
+
+import javax.xml.xpath.XPathExpressionException;
+
+import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

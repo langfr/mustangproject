@@ -22,11 +22,12 @@ package org.mustangproject.ZUGFeRD;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.activation.DataSource;
-
 import org.apache.pdfbox.preflight.PreflightDocument;
+import org.apache.pdfbox.preflight.ValidationResult;
 import org.apache.pdfbox.preflight.exception.ValidationException;
 import org.apache.pdfbox.preflight.parser.PreflightParser;
+
+import javax.activation.DataSource;
 
 public class DXExporterFromA1 extends DXExporterFromA3 {
 	protected boolean ignorePDFAErrors = false;
@@ -69,8 +70,9 @@ public class DXExporterFromA1 extends DXExporterFromA3 {
 		 * NonSequentialParser. Some additional controls are present to check a set of
 		 * PDF/A requirements. (Stream length consistency, EOL after some Keyword...)
 		 */
-		parser.parse();// might add a Format.PDF_A1A as parameter and iterate through A1 and A3
+		// might add a Format.PDF_A1A as parameter and iterate through A1 and A3
 
+		parser.parse();
 		try (PreflightDocument document = parser.getPreflightDocument()) {
 			/*
 			 * Once the syntax validation is done, the parser can provide a

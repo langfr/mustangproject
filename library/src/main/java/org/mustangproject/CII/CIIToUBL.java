@@ -23,13 +23,13 @@ public class CIIToUBL {
 	   final Serializable aUBL = cc.convertCIItoUBL(input, occurred);
      if (aUBL instanceof oasis.names.specification.ubl.schema.xsd.invoice_23.InvoiceType)
 	   {
-		   UBL23Writer.invoice ()
+		   UBL23Writer.invoice()
 				   .setFormattedOutput (true)
 				   .write ((oasis.names.specification.ubl.schema.xsd.invoice_23.InvoiceType) aUBL, output);
 	   }
      else if (aUBL instanceof oasis.names.specification.ubl.schema.xsd.creditnote_23.CreditNoteType)
 	   {
-		   UBL23Writer.creditNote ()
+		   UBL23Writer.creditNote()
 				   .setFormattedOutput (true)
 				   .write ((oasis.names.specification.ubl.schema.xsd.creditnote_23.CreditNoteType) aUBL, output);
 	   }

@@ -21,7 +21,11 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import static org.xmlunit.assertj.XmlAssert.assertThat;
+import junit.framework.TestCase;
+import org.mustangproject.*;
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
+
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -30,18 +34,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import org.junit.FixMethodOrder;
-import org.junit.runners.MethodSorters;
-import org.mustangproject.BankDetails;
-import org.mustangproject.CashDiscount;
-import org.mustangproject.Contact;
-import org.mustangproject.FileAttachment;
-import org.mustangproject.Invoice;
-import org.mustangproject.Item;
-import org.mustangproject.Product;
-import org.mustangproject.TradeParty;
-
-import junit.framework.TestCase;
+import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
