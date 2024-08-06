@@ -122,11 +122,11 @@ public class CalculationTest {
 
 
 		if (item_increase.compareTo(BigDecimal.ZERO) > 0) {
-			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setCategoryCode("ZZZ").setReason("Zuschlag"));
+			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setReasonCode("ZZZ").setReason("Zuschlag"));
 		}
 
 		if (item_discount.compareTo(BigDecimal.ZERO) > 0) {
-			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setCategoryCode("95").setReason("Rabatt"));
+			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setReasonCode("95").setReason("Rabatt"));
 		}
 
 		invoice.addItem(item);
@@ -134,10 +134,10 @@ public class CalculationTest {
 		item = new Item(product, new BigDecimal("5.750"), new BigDecimal(4.00));
 		item_discount = BigDecimal.ZERO;
 		if (item_increase.compareTo(BigDecimal.ZERO) > 0) {
-			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setCategoryCode("ZZZ").setReason("Zuschlag"));
+			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setReasonCode("ZZZ").setReason("Zuschlag"));
 		}
 		if (item_discount.compareTo(BigDecimal.ZERO) > 0) {
-			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setCategoryCode("95").setReason("Rabatt"));
+			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setReasonCode("95").setReason("Rabatt"));
 		}
 
 		invoice.addItem(item);
@@ -145,11 +145,11 @@ public class CalculationTest {
 		item = new Item(product, new BigDecimal("6.750"), new BigDecimal(3.00));
 		item_discount = new BigDecimal("10.00");
 		if (item_increase.compareTo(BigDecimal.ZERO) > 0) {
-			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setCategoryCode("ZZZ").setReason("Zuschlag"));
+			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setReasonCode("ZZZ").setReason("Zuschlag"));
 		}
 
 		if (item_discount.compareTo(BigDecimal.ZERO) > 0) {
-			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setCategoryCode("95").setReason("Rabatt"));
+			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setReasonCode("95").setReason("Rabatt"));
 		}
 
 		invoice.addItem(item);
@@ -162,11 +162,11 @@ public class CalculationTest {
 
 
 		if (item_increase.compareTo(BigDecimal.ZERO) > 0) {
-			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setCategoryCode("ZZZ").setReason("Zuschlag"));
+			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setReasonCode("ZZZ").setReason("Zuschlag"));
 		}
 
 		if (item_discount.compareTo(BigDecimal.ZERO) > 0) {
-			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setCategoryCode("95").setReason("Rabatt"));
+			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setReasonCode("95").setReason("Rabatt"));
 		}
 
 		invoice.addItem(item);
@@ -179,21 +179,21 @@ public class CalculationTest {
 
 
 		if (item_increase.compareTo(BigDecimal.ZERO) > 0) {
-			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setCategoryCode("ZZZ").setReason("Zuschlag"));
+			item.addCharge(new Charge().setPercent(item_increase).setTaxPercent(sales_tax_percent1).setReasonCode("ZZZ").setReason("Zuschlag"));
 		}
 
 		if (item_discount.compareTo(BigDecimal.ZERO) > 0) {
-			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setCategoryCode("95").setReason("Rabatt"));
+			item.addAllowance(new Allowance().setPercent(item_discount).setTaxPercent(sales_tax_percent1).setReasonCode("95").setReason("Rabatt"));
 
 		}
 		invoice.addItem(item);
 
 		if (total_increase_percent.compareTo(BigDecimal.ZERO) > 0) {
-			invoice.addCharge(new Charge().setPercent(total_increase_percent).setTaxPercent(sales_tax_percent1).setCategoryCode("ZZZ").setReason("Zuschläge"));
+			invoice.addCharge(new Charge().setPercent(total_increase_percent).setTaxPercent(sales_tax_percent1).setReasonCode("ZZZ").setReason("Zuschläge"));
 		}
 
 		if (total_discount_percent.compareTo(BigDecimal.ZERO) > 0) {
-			invoice.addAllowance(new Allowance().setPercent(total_discount_percent).setTaxPercent(sales_tax_percent1).setCategoryCode("95").setReason("Rabatte"));
+			invoice.addAllowance(new Allowance().setPercent(total_discount_percent).setTaxPercent(sales_tax_percent1).setReasonCode("95").setReason("Rabatte"));
 		}
 		TransactionCalculator calculator = new TransactionCalculator(invoice);
 		assertEquals(valueOf(99.54).stripTrailingZeros(), calculator.getGrandTotal().stripTrailingZeros());

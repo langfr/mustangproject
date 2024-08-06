@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -16,14 +17,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.mustangproject.Allowance;
-import org.mustangproject.BankDetails;
-import org.mustangproject.Charge;
-import org.mustangproject.EStandard;
-import org.mustangproject.Invoice;
-import org.mustangproject.Item;
-import org.mustangproject.TradeParty;
-import org.mustangproject.XMLTools;
+import org.mustangproject.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -33,6 +27,7 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ZUGFeRDInvoiceImporter.class.getCanonicalName()); // log
 	private boolean recalcPrice = false;
 	private boolean ignoreCalculationErrors = false;
+	private ArrayList<FileAttachment> fileAttachments=new ArrayList<>();
 
 	public ZUGFeRDInvoiceImporter() {
 		super();
@@ -346,6 +341,16 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 
 			}
 
+			// now handling base64 encoded attachments AttachmentBinaryObject=CII, EmbeddedDocumentBinaryObject=UBL
+			xpr = xpath.compile("//*[local-name()=\"AttachmentBinaryObject\"]|//*[local-name()=\"EmbeddedDocumentBinaryObject\"]");
+			NodeList attachmentNodes = (NodeList) xpr.evaluate(getDocument(), XPathConstants.NODESET);
+			for (int i = 0; i < attachmentNodes.getLength(); i++) {
+				FileAttachment fa=new FileAttachment(attachmentNodes.item(i).getAttributes().getNamedItem("filename").getNodeValue(),attachmentNodes.item(i).getAttributes().getNamedItem("mimeCode").getNodeValue(),"",Base64.getDecoder().decode(attachmentNodes.item(i).getTextContent()));
+				fileAttachments.add(fa);
+			// filename = "Aufmass.png" mimeCode = "image/png"
+				//EmbeddedDocumentBinaryObject cbc:EmbeddedDocumentBinaryObject mimeCode="image/png" filename="Aufmass.png"
+			}
+
 			// item level charges+allowances are not yet handled but a lower item price will
 			// be read,
 			// so the invoice remains arithmetically correct
@@ -357,6 +362,7 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 				boolean isCharge = true;
 				String chargeAmount = null;
 				String reason = null;
+				String reasonCode = null;
 				String taxPercent = null;
 				for (int chargeChildIndex = 0; chargeChildIndex < chargeNodeChilds.getLength(); chargeChildIndex++) {
 					String chargeChildName = chargeNodeChilds.item(chargeChildIndex).getLocalName();
@@ -377,6 +383,8 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 							chargeAmount = chargeNodeChilds.item(chargeChildIndex).getTextContent();
 						} else if (chargeChildName.equals("Reason")) {
 							reason = chargeNodeChilds.item(chargeChildIndex).getTextContent();
+						} else if (chargeChildName.equals("ReasonCode")) {
+							reasonCode = chargeNodeChilds.item(chargeChildIndex).getTextContent();
 						} else if (chargeChildName.equals("CategoryTradeTax")) {
 							NodeList taxChilds = chargeNodeChilds.item(chargeChildIndex).getChildNodes();
 							for (int taxChildIndex = 0; taxChildIndex < taxChilds.getLength(); taxChildIndex++) {
@@ -395,15 +403,20 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 					if (reason != null) {
 						c.setReason(reason);
 					}
+					if (reasonCode != null) {
+						c.setReasonCode(reasonCode);
+					}
 					if (taxPercent != null) {
 						c.setTaxPercent(new BigDecimal(taxPercent));
 					}
-
 					zpp.addCharge(c);
 				} else {
 					Allowance a = new Allowance(new BigDecimal(chargeAmount));
 					if (reason != null) {
 						a.setReason(reason);
+					}
+					if (reasonCode != null) {
+						a.setReasonCode(reasonCode);
 					}
 					if (taxPercent != null) {
 						a.setTaxPercent(new BigDecimal(taxPercent));
@@ -432,6 +445,15 @@ public class ZUGFeRDInvoiceImporter extends ZUGFeRDImporter {
 		}
 		return zpp;
 
+	}
+
+	/***
+	 *
+	 * @return the file attachments embedded in XML using base64,
+	 * @see for PDF embedded files use getEmbeddedFilenames()/getEmbeddedFile()
+	 */
+	public List<FileAttachment> getFileAttachments() {
+		return fileAttachments;
 	}
 
 	/***
