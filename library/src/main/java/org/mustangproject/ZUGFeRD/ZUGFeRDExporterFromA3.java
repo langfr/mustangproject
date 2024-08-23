@@ -83,6 +83,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		this.ignorePDFAErrors = true;
 		return this;
 	}
+
 	protected PDFAConformanceLevel conformanceLevel = PDFAConformanceLevel.UNICODE;
 	protected ArrayList<FileAttachment> fileAttachments = new ArrayList<>();
 
@@ -221,17 +222,16 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	 * @return the filename of the file to be embedded
 	 */
 	public String getFilenameForVersion(int ver, Profile profile) {
+		if (profile.getName().equals("XRECHNUNG")) {
+			return "xrechnung.xml";
+		}
 		if (isFacturX) {
 			return "factur-x.xml";
 		} else {
 			if (ver == 1) {
 				return "ZUGFeRD-invoice.xml";
 			} else {
-				if (profile.getName().equals("XRECHNUNG")) {
-					return "xrechnung.xml";
-				} else {
-					return "zugferd-invoice.xml";
-				}
+				return "zugferd-invoice.xml";
 			}
 		}
 	}
@@ -258,10 +258,9 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	 *
 	 * @param XRechnungVersion the XRechnung version
 	 */
-    public void setXRechnungSpecificVersion(String XRechnungVersion)
-    {
-    	this.XRechnungVersion = XRechnungVersion;
-    }
+	public void setXRechnungSpecificVersion(String XRechnungVersion) {
+		this.XRechnungVersion = XRechnungVersion;
+	}
 
 
 	/***
@@ -312,7 +311,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		}
 		if ((!fileAttached) && (attachZUGFeRDHeaders)) {
 			throw new IOException(
-					"File must be attached (usually with setTransaction) before perfoming this operation");
+				"File must be attached (usually with setTransaction) before perfoming this operation");
 		}
 		doc.save(ZUGFeRDfilename);
 		if (!disableAutoClose) {
@@ -340,7 +339,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		}
 		if ((!fileAttached) && (attachZUGFeRDHeaders)) {
 			throw new IOException(
-					"File must be attached (usually with setTransaction) before perfoming this operation");
+				"File must be attached (usually with setTransaction) before perfoming this operation");
 		}
 		doc.save(output);
 		if (!disableAutoClose) {
@@ -438,7 +437,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 			cosArray.add(fs);
 			doc.getDocumentCatalog().getCOSObject().setItem("AF", cosArray);
 		} else if ((AFEntry instanceof COSObject) &&
-				((COSObject) AFEntry).getObject() instanceof COSArray) {
+			((COSObject) AFEntry).getObject() instanceof COSArray) {
 			COSArray cosArray = (COSArray) ((COSObject) AFEntry).getObject();
 			cosArray.add(fs);
 		} else {
@@ -532,19 +531,18 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	 */
 	protected void addXMP(XMPMetadata metadata) {
 
-    	String metaDataVersion = null; // default will be used
+		String metaDataVersion = null; // default will be used
 
-    	// The XRechnung version may be settable from outside.
-    	if ((this.XRechnungVersion != null) && (this.profile != null) &&
-    		this.profile.getName().equalsIgnoreCase(Profiles.getByName("XRECHNUNG").getName()))
-    	{
-    		metaDataVersion = this.XRechnungVersion;
-    	}
+		// The XRechnung version may be settable from outside.
+		if ((this.XRechnungVersion != null) && (this.profile != null) &&
+			this.profile.getName().equalsIgnoreCase(Profiles.getByName("XRECHNUNG").getName())) {
+			metaDataVersion = this.XRechnungVersion;
+		}
 
 		if (attachZUGFeRDHeaders) {
 			XMPSchemaZugferd zf = new XMPSchemaZugferd(metadata, ZFVersion, isFacturX, xmlProvider.getProfile(),
-					getNamespaceForVersion(ZFVersion), getPrefixForVersion(ZFVersion),
-					getFilenameForVersion(ZFVersion, xmlProvider.getProfile()), metaDataVersion);
+				getNamespaceForVersion(ZFVersion), getPrefixForVersion(ZFVersion),
+				getFilenameForVersion(ZFVersion, xmlProvider.getProfile()), metaDataVersion);
 
 			metadata.addSchema(zf);
 		}
@@ -555,8 +553,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	}
 
 	private void removeCidSet(PDDocument doc)
-	    throws IOException
-	{
+		throws IOException {
 		// https://github.com/ZUGFeRD/mustangproject/issues/249
 
 		COSName cidSet = COSName.getPDFName("CIDSet");
@@ -575,7 +572,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 							PDType0Font typedFont = (PDType0Font) pdFont;
 
 							if (typedFont.getDescendantFont() instanceof PDCIDFontType2) {
-								@SuppressWarnings ("unused")
+								@SuppressWarnings("unused")
 								PDCIDFontType2 f = (PDCIDFontType2) typedFont.getDescendantFont();
 								PDFontDescriptor fontDescriptor = pdFont.getFontDescriptor();
 
@@ -645,22 +642,20 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		xmlProvider.generateXML(trans);
 		String filename = getFilenameForVersion(ZFVersion, xmlProvider.getProfile());
 
-        String relationship = "Alternative";
-        // ZUGFeRD 2.1.1 Technical Supplement | Part A | 2.2.2. Data Relationship
-        // See documentation ZUGFeRD211_EN/Documentation/ZUGFeRD-2.1.1 - Specification_TA_Part-A.pdf
-        // https://www.ferd-net.de/standards/zugferd-2.1.1/index.html
-        if ((this.profile != null) && (ZFVersion >= 2))
-        {
-        	if (this.profile.getName().equalsIgnoreCase(Profiles.getByName("MINIMUM").getName()) ||
-        		this.profile.getName().equalsIgnoreCase(Profiles.getByName("BASICWL").getName()))
-        	{
-        		relationship = "Data";
-        	}
-        }
+		String relationship = "Alternative";
+		// ZUGFeRD 2.1.1 Technical Supplement | Part A | 2.2.2. Data Relationship
+		// See documentation ZUGFeRD211_EN/Documentation/ZUGFeRD-2.1.1 - Specification_TA_Part-A.pdf
+		// https://www.ferd-net.de/standards/zugferd-2.1.1/index.html
+		if ((this.profile != null) && (ZFVersion >= 2)) {
+			if (this.profile.getName().equalsIgnoreCase(Profiles.getByName("MINIMUM").getName()) ||
+				this.profile.getName().equalsIgnoreCase(Profiles.getByName("BASICWL").getName())) {
+				relationship = "Data";
+			}
+		}
 
 		PDFAttachGenericFile(doc, filename, relationship,
-				"Invoice metadata conforming to ZUGFeRD standard (http://www.ferd-net.de/front_content.php?idcat=231&lang=4)",
-				"text/xml", xmlProvider.getXML());
+			"Invoice metadata conforming to ZUGFeRD standard (http://www.ferd-net.de/front_content.php?idcat=231&lang=4)",
+			"text/xml", xmlProvider.getXML());
 
 		for (FileAttachment attachment : fileAttachments) {
 			PDFAttachGenericFile(doc, attachment.getFilename(), attachment.getRelation(), attachment.getDescription(), attachment.getMimetype(), attachment.getData());
@@ -672,12 +667,12 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	/**
 	 * Reads the XMPMetadata from the PDDocument, if it exists.
 	 * Otherwise creates XMPMetadata.
+	 *
 	 * @return the finished XMPMetadata object
 	 * @throws IOException when e.g. XmpParsingException
 	 */
 	protected XMPMetadata getXmpMetadata()
-	    throws IOException
-	{
+		throws IOException {
 		PDMetadata meta = doc.getDocumentCatalog().getMetadata();
 		if ((meta != null) && (meta.getLength() > 0)) {
 			try {
@@ -699,6 +694,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	/**
 	 * Sets the producer if the overwrite flag is set or the producer is not already set.
 	 * Sets the PDFVersion to 1.4 if the field is empty.
+	 *
 	 * @param xmp the metadata as XML
 	 */
 	protected void writeAdobePDFSchema(XMPMetadata xmp) {
@@ -821,11 +817,11 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 
 	/**
 	 * Adds an OutputIntent and the sRGB color profile if no OutputIntent exist
+	 *
 	 * @throws IOException if the ICC file cannot be read or attached to doc
 	 */
 	protected void addSRGBOutputIntend()
-	    throws IOException
-	{
+		throws IOException {
 		if (!doc.getDocumentCatalog().getOutputIntents().isEmpty()) {
 			return;
 		}
@@ -890,12 +886,12 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 
 	public ZUGFeRDExporterFromA3 setZUGFeRDVersion(EStandard est, int version) {
 		this.ZFVersion = version;
-		if ((version<1) || (version>2)) {
+		if ((version < 1) || (version > 2)) {
 			throw new IllegalArgumentException("Version not supported");
 		}
-		int generation=version;
-		if ((est==EStandard.facturx)&&(version==1)) {
-			generation=2;
+		int generation = version;
+		if ((est == EStandard.facturx) && (version == 1)) {
+			generation = 2;
 		}
 		if (generation == 1) {
 			ZUGFeRD1PullProvider z1p = new ZUGFeRD1PullProvider();
