@@ -1,5 +1,7 @@
 package org.mustangproject;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.mustangproject.ZUGFeRD.IZUGFeRDTradeSettlementPayment;
 
 /**
@@ -18,7 +20,11 @@ public class BankDetails implements IZUGFeRDTradeSettlementPayment {
 	 * the "name" of the bank account (holder)
 	 */
 	protected String accountName=null;
-
+	/***
+	 *  bean constructor
+	 */
+	public BankDetails() {	}
+	
 	/***
 	 * constructor for IBAN only :-)
 	 * @param IBAN the IBAN as string
@@ -80,12 +86,14 @@ public class BankDetails implements IZUGFeRDTradeSettlementPayment {
 	 * */
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public String getOwnBIC() {
 		return getBIC();
 	}
 
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public String getOwnIBAN() {
 		return getIBAN();
 	}

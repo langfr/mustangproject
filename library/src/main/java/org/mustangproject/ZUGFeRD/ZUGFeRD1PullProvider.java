@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZUGFeRD1PullProvider extends ZUGFeRD2PullProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger (ZUGFeRD1PullProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (ZUGFeRD1PullProvider.class);
 
 	//// MAIN CLASS
 
@@ -387,9 +387,10 @@ public class ZUGFeRD1PullProvider extends ZUGFeRD2PullProvider {
 					+ "<ram:LineTotalAmount currencyID=\"" + trans.getCurrency() + "\">" + currencyFormat(lc.getItemTotalNetAmount())
 					+ "</ram:LineTotalAmount>"
 					+ "</ram:SpecifiedTradeSettlementMonetarySummation>";
-			if (currentItem.getAdditionalReferencedDocumentID() != null) {
+			if (currentItem.getAdditionalReferences() != null) {
+				xml += "<ram:AdditionalReferencedDocument><ram:ID>" + currentItem.getAdditionalReferences()[0].getIssuerAssignedID() + "</ram:ID><ram:TypeCode>130</ram:TypeCode></ram:AdditionalReferencedDocument>";
+			} else if (currentItem.getAdditionalReferencedDocumentID() != null) {
 				xml += "<ram:AdditionalReferencedDocument><ram:ID>" + currentItem.getAdditionalReferencedDocumentID() + "</ram:ID><ram:TypeCode>130</ram:TypeCode></ram:AdditionalReferencedDocument>";
-
 			}
 			xml += "</ram:SpecifiedSupplyChainTradeSettlement>"
 					+ "<ram:SpecifiedTradeProduct>";

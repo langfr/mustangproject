@@ -7,6 +7,7 @@
     </parent>
 
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.mustangproject</groupId>
 	<artifactId>library</artifactId>
 	<packaging>jar</packaging>
 	<name>Library to write, read and validate e-invoices (Factur-X, ZUGFeRD, Order-X, XRechnung/CII)</name>
@@ -46,7 +47,8 @@
 		<!-- Skip error check for javadoc -->
 		<maven.compiler.source>8</maven.compiler.source>
 		<maven.compiler.target>8</maven.compiler.target>
-		<maven.deploy.skip>true</maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
+		<maven.deploy.skip>true
+		</maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
 
 	</properties>
 	<dependencies>
@@ -59,18 +61,19 @@
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
-			<version>9.9.0-1</version>
-		</dependency><!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+			<version>12.5</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.17.1</version>
+			<version>2.17.2</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>fop</artifactId>
-			<version>2.9</version>
+			<version>2.10</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>
@@ -78,33 +81,43 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
 		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>4.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.angus</groupId>
-			<artifactId>angus-activation</artifactId>
-			<version>2.0.2</version>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.9</version>
 		</dependency>
 
+		<dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-activation</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+		<!-- Apache PDFBox -->
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>preflight</artifactId>
-			<version>2.0.27</version>
+			<version>3.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>2.0.27</version>
+			<version>3.0.3</version>
 		</dependency>
+		<!-- DOM4j -->
 		<dependency>
 			<groupId>org.dom4j</groupId>
 			<artifactId>dom4j</artifactId>
 			<version>2.1.4</version>
 		</dependency>
+		<!-- CII to UBL conversion -->
+		<dependency>
+			<groupId>com.helger</groupId>
+			<artifactId>en16931-cii2ubl</artifactId>
+			<version>1.4.10</version><!-- Starting with v2.0.0 Java 11 is required. -->
+		</dependency>
+
+		<!-- test dependencies -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -117,19 +130,6 @@
 			<version>5.10.2</version>
 			<scope>test</scope>
 		 </dependency>
-
-		<!-- CII to UBL conversion -->
-		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>en16931-cii2ubl</artifactId>
-			<version>1.4.10</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-			<version>2.3.3</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.xmlunit</groupId>
@@ -165,6 +165,12 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <!-- http://stackoverflow.com/questions/574594/how-can-i-create-an-executable-jar-with-dependencies-using-maven
+                        mvn clean compile assembly:single -->
+                    <!-- or whatever version you use -->
 					<source>8</source>
 					<target>8</target>
 				</configuration>
@@ -223,7 +229,7 @@
 				<version>3.5.3</version>
 				<configuration>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
-					<minimizeJar>false</minimizeJar><!-- no longer java 11 compatible if set to true because it removes e.g. javax/xml/bind/annotation/XmlSchema-->
+					<createDependencyReducedPom>false</createDependencyReducedPom>
 					<filters>
 						<filter>
 							<artifact>*:*</artifact>
@@ -233,12 +239,6 @@
 								<exclude>META-INF/*.RSA</exclude>
 							</excludes>
 						</filter>
-						<filter>
-							<artifact>commons-logging:commons-logging</artifact>
-							<includes>
-								<include>**</include>
-							</includes>
-						</filter>
 					</filters>
 				</configuration>
 				<executions>
@@ -247,12 +247,6 @@
 						<goals>
 							<goal>shade</goal>
 						</goals>
-						<configuration>
-							<artifactSet>
-								<excludes>
-								</excludes>
-							</artifactSet>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

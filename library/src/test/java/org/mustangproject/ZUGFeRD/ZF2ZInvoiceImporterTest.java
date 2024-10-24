@@ -21,8 +21,8 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import org.mustangproject.FileAttachment;
-import org.mustangproject.Invoice;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mustangproject.*;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.*;
@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 
 /***
@@ -138,6 +139,9 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		assertEquals("12345", invoice.getSender().getZIP());
 		assertEquals("DE", invoice.getSender().getCountry());
 		assertEquals("Stadthausen", invoice.getSender().getLocation());
+
+		assertTrue(invoice.getPayee() != null);
+		assertEquals("VR Factoring GmbH", invoice.getPayee().getName());
 
 		TransactionCalculator tc = new TransactionCalculator(invoice);
 		assertEquals(new BigDecimal("571.04"), tc.getGrandTotal());
@@ -284,7 +288,15 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		assertFalse(hasExceptions);
 		TransactionCalculator tc = new TransactionCalculator(invoice);
 		assertEquals(new BigDecimal("1.00"), tc.getGrandTotal());
+		assertTrue(invoice.getTradeSettlement().length==1);
+		assertTrue(invoice.getTradeSettlement()[0] instanceof IZUGFeRDTradeSettlementPayment);
+		IZUGFeRDTradeSettlementPayment paym=(IZUGFeRDTradeSettlementPayment)invoice.getTradeSettlement()[0];
+		assertEquals("DE12500105170648489890", paym.getOwnIBAN());
+		assertEquals("COBADEFXXX", paym.getOwnBIC());
 
+
+		assertTrue(invoice.getPayee() != null);
+		assertEquals("VR Factoring GmbH", invoice.getPayee().getName());
 	}
 
 	/**
@@ -310,6 +322,63 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		assertEquals(fileA.length, 2);
 		assertTrue(Arrays.equals(fileB, b));
 		assertEquals(fileB.length, 2);
+	}
+
+
+
+	public void testImportDebit() {
+		File CIIinputFile = getResourceAsFile("cii/minimalDebit.xml");
+		try {
+			ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(new FileInputStream(CIIinputFile));
+			Invoice i=zii.extractInvoice();
+
+			assertEquals("DE21860000000086001055", i.getSender().getBankDetails().get(0).getIBAN());
+			ObjectMapper mapper = new ObjectMapper();
+
+			String jsonArray = mapper.writeValueAsString(i);
+
+	//		assertEquals("",jsonArray);
+
+		} catch (IOException e) {
+			fail("IOException not expected");
+		} catch (XPathExpressionException e) {
+			throw new RuntimeException(e);
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
+		}
+
+
+	}
+
+
+	public void testEEISI_300_cii_Import() {
+		boolean hasExceptions = false;
+	/*	File input = getResourceAsFile("not_validating_full_invoice_based_onTest_EeISI_300_CENfullmodel.cii.xml");
+
+
+		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter();
+		try {
+			zii.fromXML(new String(Files.readAllBytes(input.toPath()), StandardCharsets.UTF_8));
+
+		} catch (IOException e) {
+			hasExceptions = true;
+		}
+
+		Invoice invoice = null;
+		try {
+			invoice = zii.extractInvoice();
+			assertEquals("Seller contact point",invoice.getSender().getName());
+				/*
+				<cbc:Name>Seller contact point</cbc:Name>
+        <cbc:Telephone>+41 345 654455</cbc:Telephone>
+        <cbc:ElectronicMail>seller@contact.de);*
+		} catch (XPathExpressionException | ParseException e) {
+			hasExceptions = true;
+		}
+		assertFalse(hasExceptions);
+		TransactionCalculator tc = new TransactionCalculator(invoice);
+		assertEquals(new BigDecimal("205.00"), tc.getGrandTotal());
+*/
 	}
 
 

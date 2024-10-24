@@ -6,6 +6,7 @@
         <version>2.11.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <groupId>org.mustangproject</groupId>
     <artifactId>validator</artifactId>
     <name>Library to validate e-invoices (ZUGFeRD, Factur-X and Xrechnung)</name>
 
@@ -25,7 +26,8 @@
     </repositories>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.deploy.skip>false</maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
+        <maven.deploy.skip>false
+        </maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
@@ -35,6 +37,21 @@
             <artifactId>library</artifactId>
             <version>${project.version}</version>
         </dependency>
+		<dependency>
+			<groupId>org.dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>2.1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.16.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.3</version>
+		</dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
@@ -47,13 +64,13 @@
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model</artifactId>
-            <version>1.22.2</version>
+            <version>1.26.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.helger/ph-schematron -->
         <dependency>
             <groupId>com.helger.schematron</groupId>
             <artifactId>ph-schematron-xslt</artifactId>
-            <version>6.3.3</version>
+            <version>6.3.4</version>
         </dependency>
         <dependency>
             <groupId>org.xmlunit</groupId>
@@ -129,6 +146,12 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <!-- http://stackoverflow.com/questions/574594/how-can-i-create-an-executable-jar-with-dependencies-using-maven
+                             mvn clean compile assembly:single -->
+                    <!-- or whatever version you use -->
                     <source>8</source>
                     <target>8</target>
                 </configuration>
@@ -153,7 +176,19 @@
                             </excludes>
                         </filter>
                         <filter>
+                            <artifact>log4j:log4j</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                        <filter>
                             <artifact>commons-logging:commons-logging</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                        <filter>
+                            <artifact>com.sun.xml.bind:jaxb-impl</artifact>
                             <includes>
                                 <include>**</include>
                             </includes>
@@ -186,10 +221,10 @@
                         </goals>
 
                         <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/xslt/ZF_221/</outputDirectory>
+                            <outputDirectory>${basedir}/src/main/resources/xslt/ZF_230/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${basedir}/src/main/resources/schematron/ZF_221/</directory>
+                                    <directory>${basedir}/src/main/resources/schematron/ZF_230/</directory>
                                     <includes>
                                         <include>**/*.xml</include>
                                     </includes>
@@ -266,7 +301,7 @@
                     <plugin>
                         <groupId>com.helger.maven</groupId>
                         <artifactId>ph-schematron-maven-plugin</artifactId>
-                        <version>5.6.0</version>
+                        <version>8.0.0</version>
                         <configuration>
                             <schematronDirectory>${basedir}/src/main/resources/schematron</schematronDirectory>
                             <xsltDirectory>${basedir}/src/main/resources/xslt</xsltDirectory>

@@ -95,6 +95,7 @@ public class XRTest extends TestCase {
 			.setReferenceNumber("991-01484-64")//leitweg-id
 			// not using any VAT, this is also a test of zero-rated goods:
 			.setNumber(number).addItem(new Item(new Product("Testprodukt", "", "C62", BigDecimal.ZERO), amount, new BigDecimal(1.0)))
+			.setPayee( new TradeParty().setName("VR Factoring GmbH").setID("DE813838785").setLegalOrganisation(new LegalOrganisation("391200LDDFJDMIPPMZ54", "0199")))
 			.embedFileInXML(fe1);
 
 
@@ -109,6 +110,9 @@ public class XRTest extends TestCase {
 			.asInt()
 			.isEqualTo(1); //2 errors are OK because there is a known bug
 
+		assertThat(theXML).valueByXPath("count(//*[local-name()='PayeeTradeParty'])")
+			.asInt()
+			.isEqualTo(1);
 
 		assertThat(theXML).valueByXPath("//*[local-name()='DuePayableAmount']")
 			.asDouble()
@@ -125,16 +129,15 @@ public class XRTest extends TestCase {
 		Invoice readInvoice = new Invoice();
 		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter();
 		try {
-
-			zii.setRawXML(zf2p.getXML());
+			zii.setRawXML(zf2p.getXML(), false);
 			zii.extractInto(readInvoice);
 		} catch (ParseException | XPathExpressionException xp) {
-			fail("Exception not expected");
+			fail("ParseException not expected");
 		} catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+			fail("IOException not expected");
+		}
 		List<FileAttachment> attachedFiles=zii.getFileAttachmentsXML();
-        assertNotNull(attachedFiles);
+		assertNotNull(attachedFiles);
 		assertEquals(attachedFiles.size(), 1);
 
 		assertTrue(Arrays.equals(attachedFiles.get(0).getData(), b));

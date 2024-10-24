@@ -6,6 +6,7 @@
         <version>2.11.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <groupId>org.mustangproject</groupId>
     <artifactId>Mustang-CLI</artifactId>
     <name>e-invoices commandline tool, allowing to create(embed), split and validate Factur-X/ZUGFeRD files. Validation
         should also work for XRechnung/CII.
@@ -32,6 +33,32 @@
             <version>1.8.0</version>
         </dependency>
 
+
+        <!-- logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.13</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.2.13</version>
+        </dependency>
+        <dependency>
+            <!-- This library is needed so that logback stderr output is sent to, well, stderr, otherwise it lands in stdout -->
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>3.1.7</version>
+        </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>2.0.12</version>
+		</dependency>
+        <!-- end of logging -->
+
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -57,13 +84,6 @@
         </dependency>
 
         <!-- /directory validation: -->
-
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>4.0.2</version>
-        </dependency>
-
 
    </dependencies>
    <build>
@@ -107,6 +127,18 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>2.3.2</version>
             <configuration>
+               <archive>
+                   <manifest>
+                       <addClasspath>true</addClasspath>
+                       <mainClass>org.mustangproject.commandline.main</mainClass>
+                   </manifest>
+               </archive>
+               <descriptorRefs>
+                   <descriptorRef>jar-with-dependencies</descriptorRef>
+               </descriptorRefs>
+               <!-- http://stackoverflow.com/questions/574594/how-can-i-create-an-executable-jar-with-dependencies-using-maven
+                        mvn clean compile assembly:single -->
+               <!-- or whatever version you use -->
                <source>8</source>
                <target>8</target>
             </configuration>
@@ -134,10 +166,22 @@
                      </excludes>
                   </filter>
                   <filter>
+                      <artifact>log4j:log4j</artifact>
+                      <includes>
+                          <include>**</include>
+                      </includes>
+                  </filter>
+                  <filter>
                      <artifact>commons-logging:commons-logging</artifact>
                      <includes>
                         <include>**</include>
                      </includes>
+                  </filter>
+                  <filter>
+                      <artifact>com.sun.xml.bind:jaxb-impl</artifact>
+                      <includes>
+                          <include>**</include>
+                      </includes>
                   </filter>
                </filters>
             </configuration>

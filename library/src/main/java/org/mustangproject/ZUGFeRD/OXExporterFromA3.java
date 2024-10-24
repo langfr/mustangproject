@@ -34,6 +34,7 @@ import java.util.Map;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -184,7 +185,7 @@ public class OXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 	@Override
 	public OXExporterFromA3 load(byte[] pdfBinary) throws IOException {
 		ensurePDFIsValid(new ByteArrayDataSource(new ByteArrayInputStream(pdfBinary)));
-		doc = PDDocument.load(pdfBinary);
+		doc = Loader.loadPDF(pdfBinary);
 		return this;
 	}
 
@@ -576,13 +577,13 @@ public class OXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 
 	@Override
 	protected PDFAIdentificationSchema getPDFAIdentificationSchema(XMPMetadata xmp) {
-		PDFAIdentificationSchema pdfaid = xmp.getPDFIdentificationSchema();
+		PDFAIdentificationSchema pdfaid = xmp.getPDFAIdentificationSchema();
 		if (pdfaid != null)
 			if (overwrite)
 				xmp.removeSchema(pdfaid);
 			else
 				return pdfaid;
-		return xmp.createAndAddPFAIdentificationSchema();
+		return xmp.createAndAddPDFAIdentificationSchema();
 	}
 
 	@Override

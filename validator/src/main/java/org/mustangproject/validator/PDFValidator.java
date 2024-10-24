@@ -21,6 +21,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.mustangproject.util.ByteArraySearcher;
 import org.mustangproject.ZUGFeRD.ZUGFeRDImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,7 +239,8 @@ public class PDFValidator extends Validator {
 
 			boolean versionValid = false;
 			for (int i = 0; i < nodes.getLength(); i++) {
-				final String[] valueArray = {"1.0", "2p0", "1.2", "2.0", "2.1"}; //1.2, 2.0 and 2.1 are for xrechnung 1.2, 2p0 can be ZF 2.0, 2.1, 2.1.1
+				final String[] valueArray = {"1.0", "2p0", "1.2", "2.0", "2.1", "2.2", "2.3", "3.0"}; //1.2, 2.0, 2.1, 2.2, 2.3 and 3.0 are for xrechnung 1.2, 2p0 can be ZF 2.0, 2.1, 2.1.1
+
 				if (stringArrayContains(valueArray, nodes.item(i).getTextContent())) {
 					versionValid = true;
 				} // e.g. 1.0
@@ -321,14 +323,14 @@ public class PDFValidator extends Validator {
 		}
 	}
 
-	public void setFileContents(byte[] fileContents) {
-		this.fileContents = fileContents;
-	}
+  public void setFileContents(byte[] fileContents) {
+    this.fileContents = fileContents;
+  }
 
-	public void setFilenameAndContents(String filename, byte[] fileContents) {
-		this.pdfFilename = filename;
-		this.fileContents = fileContents;
-	}
+  public void setFilenameAndContents(String filename, byte[] fileContents) {
+    this.pdfFilename = filename;
+    this.fileContents = fileContents;
+  }
 
 	public String getRawXML() {
 		return zfXML;

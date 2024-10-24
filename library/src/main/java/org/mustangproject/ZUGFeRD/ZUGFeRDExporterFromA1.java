@@ -33,7 +33,7 @@ import javax.activation.DataSource;
 public class ZUGFeRDExporterFromA1 extends ZUGFeRDExporterFromA3 {
 
 	private static boolean isValidA1(DataSource dataSource) throws IOException {
-		return getPDFAParserValidationResult(new PreflightParser(dataSource));
+		return getPDFAParserValidationResult(PreflightParserHelper.createPreflightParser(dataSource));
 	}
 
 	private static boolean getPDFAParserValidationResult(PreflightParser parser) throws IOException {
@@ -44,18 +44,17 @@ public class ZUGFeRDExporterFromA1 extends ZUGFeRDExporterFromA3 {
 		 */
 		// might add a Format.PDF_A1A as parameter and iterate through A1 and A3
 
-		parser.parse();
-		try (PreflightDocument document = parser.getPreflightDocument()) {
+		try (PreflightDocument document = (PreflightDocument) parser.parse()) {
 			/*
 			 * Once the syntax validation is done, the parser can provide a
 			 * PreflightDocument (that inherits from PDDocument) This document process the
 			 * end of PDF/A validation.
 			 */
 
-			document.validate();
+			ValidationResult res = document.validate();
 
 			// Get validation result
-			return document.getResult().isValid();
+			return res.isValid();
 		} catch (ValidationException e) {
 			/*
 			 * the parse method can throw a SyntaxValidationException if the PDF file can't
