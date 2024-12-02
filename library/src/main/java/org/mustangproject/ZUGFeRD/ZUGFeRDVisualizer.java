@@ -250,6 +250,12 @@ public class ZUGFeRDVisualizer {
 		EStandard theStandard = findOutStandardFromRootNode(fis);
 		fis = new FileInputStream(xmlFilename);//rewind :-(
 
+		return toFOP(fis, theStandard);
+	}
+
+	protected String toFOP(InputStream is, EStandard theStandard)
+		throws FileNotFoundException, TransformerException, UnsupportedEncodingException {
+			
 		try {
 			if (mXsltPDFTemplate == null) {
 				mXsltPDFTemplate = mFactory.newTemplates(
@@ -264,11 +270,11 @@ public class ZUGFeRDVisualizer {
 
 		//zf2 or fx
 		if (theStandard == EStandard.facturx) {
-			applyZF2XSLT(fis, iaos);
+			applyZF2XSLT(is, iaos);
 		} else if (theStandard == EStandard.ubl) {
-			applyUBL2XSLT(fis, iaos);
+			applyUBL2XSLT(is, iaos);
 		} else if (theStandard == EStandard.ubl_creditnote) {
-			applyUBLCreditNote2XSLT(fis, iaos);
+			applyUBLCreditNote2XSLT(is, iaos);
 		}
 
 
@@ -302,7 +308,7 @@ public class ZUGFeRDVisualizer {
 		return baos.toString(StandardCharsets.UTF_8.name());
 	}
 
-	public void toPDF(String xmlFilename, String pdfFilename) throws UnsupportedEncodingException {
+	public void toPDF(String xmlFilename, String pdfFilename) {
 
 		// the writing part
 		File XMLinputFile = new File(xmlFilename);
@@ -314,7 +320,7 @@ public class ZUGFeRDVisualizer {
 			 */
 		try {
 			result = this.toFOP(XMLinputFile.getAbsolutePath());
-		} catch (FileNotFoundException | TransformerException e) {
+		} catch (FileNotFoundException | TransformerException | UnsupportedEncodingException e) {
 			LOGGER.error("Failed to apply FOP", e);
 		}
 		DefaultConfigurationBuilder cfgBuilder = new DefaultConfigurationBuilder();

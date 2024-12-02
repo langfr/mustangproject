@@ -54,15 +54,6 @@ public class ZUGFeRDImporter extends ZUGFeRDInvoiceImporter {
 	}
 
 
-	/***
-	 * Wrapper for protected method extractString
-	 * @param xpathStr the xpath expression to be evaluated
-	 * @return the extracted String for the specific path in the document
-	 */
-	public String wExtractString(String xpathStr) {
-		return extractString(xpathStr);
-	}
-
 
 	////////////////////////////////////
 
@@ -352,6 +343,9 @@ public class ZUGFeRDImporter extends ZUGFeRDInvoiceImporter {
 	 * @return the sender's account IBAN code
 	 */
 	public String getIBAN() {
+		if ((importedInvoice==null)||(importedInvoice.getTradeSettlement()==null)) {
+			return null;
+		}
 		for (IZUGFeRDTradeSettlement settlement : importedInvoice.getTradeSettlement()) {
 			if (settlement instanceof IZUGFeRDTradeSettlementDebit) {
 				return ((IZUGFeRDTradeSettlementDebit) settlement).getIBAN();
@@ -365,8 +359,6 @@ public class ZUGFeRDImporter extends ZUGFeRDInvoiceImporter {
 
 
 	public String getHolder() {
-
-
 		return extractString("//*[local-name() = 'SellerTradeParty']/*[local-name() = 'Name']");
 	}
 
@@ -375,7 +367,6 @@ public class ZUGFeRDImporter extends ZUGFeRDInvoiceImporter {
 	 * @return the total payable amount
 	 */
 	public String getAmount() {
-
 		return importedInvoice.getGrandTotal().toPlainString();
 	}
 
@@ -664,6 +655,7 @@ public class ZUGFeRDImporter extends ZUGFeRDInvoiceImporter {
 
 	/**
 	 * returns a list of LineItems
+	 * @deprecated use invoiceimporter getZFItems
 	 *
 	 * @return a List of LineItem instances
 	 */
