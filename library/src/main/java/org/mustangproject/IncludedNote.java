@@ -20,7 +20,7 @@ public class IncludedNote {
 	private static final String SUBJECT_CODE_START = "<ram:SubjectCode>";
 	private static final String SUBJECT_CODE_END = "</ram:SubjectCode>";
 
-	private IncludedNote(String content, SubjectCode subjectCode) {
+	public IncludedNote(String content, SubjectCode subjectCode) {
 		this.content = content;
 		this.subjectCode = subjectCode;
 	}
