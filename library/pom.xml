@@ -115,6 +115,12 @@
 			<groupId>org.dom4j</groupId>
 			<artifactId>dom4j</artifactId>
 			<version>2.1.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- CII to UBL conversion -->
 		<dependency>
@@ -193,21 +199,51 @@
                 </manifest>
                 <manifestSections>
                     <manifestSection>
-                        <name>FreeSans.ttf</name>
+                        <name>SourceSansPro-Regular.ttf</name>
                         <manifestEntries>
                             <Content-Type>font/ttf</Content-Type>
                         </manifestEntries>
                     </manifestSection>
                     <manifestSection>
-                        <name>FreeSerif.ttf</name>
+                        <name>SourceSansPro-It.ttf</name>
                         <manifestEntries>
-                            <Content-Type>application/x-font</Content-Type>
+                            <Content-Type>font/ttf</Content-Type>
                         </manifestEntries>
                     </manifestSection>
                     <manifestSection>
-                        <name>Times-Bold.ttf</name>
+                        <name>SourceSansPro-Bold.ttf</name>
                         <manifestEntries>
-                            <Content-Type>application/x-font</Content-Type>
+                            <Content-Type>font/ttf</Content-Type>
+                        </manifestEntries>
+                    </manifestSection>
+                    <manifestSection>
+                        <name>SourceSansPro-BoldIt.ttf</name>
+                        <manifestEntries>
+                            <Content-Type>font/ttf</Content-Type>
+                        </manifestEntries>
+                    </manifestSection>
+                    <manifestSection>
+                        <name>SourceSerifPro-Regular.ttf</name>
+                        <manifestEntries>
+                            <Content-Type>font/ttf</Content-Type>
+                        </manifestEntries>
+                    </manifestSection>
+                    <manifestSection>
+                        <name>SourceSerifPro-It.ttf</name>
+                        <manifestEntries>
+                            <Content-Type>font/ttf</Content-Type>
+                        </manifestEntries>
+                    </manifestSection>
+                    <manifestSection>
+                        <name>SourceSerifPro-Bold.ttf</name>
+                        <manifestEntries>
+                            <Content-Type>font/ttf</Content-Type>
+                        </manifestEntries>
+                    </manifestSection>
+                    <manifestSection>
+                        <name>SourceSerifPro-BoldIt.ttf</name>
+                        <manifestEntries>
+                            <Content-Type>font/ttf</Content-Type>
                         </manifestEntries>
                     </manifestSection>
                 </manifestSections>

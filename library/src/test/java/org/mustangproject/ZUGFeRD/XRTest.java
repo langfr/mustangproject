@@ -135,12 +135,12 @@ public class XRTest extends TestCase {
 			fail("ParseException not expected");
 		} catch (IOException e) {
 			fail("IOException not expected");
-		}
-		List<FileAttachment> attachedFiles=zii.getFileAttachmentsXML();
-		assertNotNull(attachedFiles);
-		assertEquals(attachedFiles.size(), 1);
+        }
+		FileAttachment[] attachedFiles=readInvoice.getAdditionalReferencedDocuments();
+        assertNotNull(attachedFiles);
+		assertEquals(attachedFiles.length, 1);
 
-		assertTrue(Arrays.equals(attachedFiles.get(0).getData(), b));
+		assertTrue(Arrays.equals(attachedFiles[0].getData(), b));
 
 
 	}

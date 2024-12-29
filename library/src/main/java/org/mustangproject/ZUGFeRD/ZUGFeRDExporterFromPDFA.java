@@ -26,8 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.activation.DataSource;
-
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -39,6 +37,8 @@ import org.apache.xmpbox.xml.XmpParsingException;
 import org.mustangproject.FileAttachment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.activation.DataSource;
 
 /***
  * Auto-detects the source PDF-A-Version and acts accordingly
@@ -83,8 +83,9 @@ public class ZUGFeRDExporterFromPDFA implements IZUGFeRDExporter {
 	}
 
 	protected byte[] filenameToByteArray(String pdfFilename) throws IOException {
-		FileInputStream fileInputStream = new FileInputStream(pdfFilename);
-		return inputstreamToByteArray(fileInputStream);
+		try (FileInputStream fileInputStream = new FileInputStream(pdfFilename)) {
+			return inputstreamToByteArray(fileInputStream);
+		}
 	}
 
 	protected byte[] inputstreamToByteArray(InputStream fileInputStream) throws IOException  {
