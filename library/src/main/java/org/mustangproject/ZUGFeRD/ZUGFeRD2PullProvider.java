@@ -45,6 +45,7 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.mustangproject.FileAttachment;
 import org.mustangproject.IncludedNote;
+import org.mustangproject.ReferencedDocument;
 import org.mustangproject.XMLTools;
 import org.mustangproject.ZUGFeRD.model.DocumentCodeTypeConstants;
 import org.slf4j.Logger;
@@ -276,20 +277,20 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 			chargeIndicator = "true";
 		}
 
-		String reason = "";
-		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung")) || profile == Profiles.getByName("EN16931")) {
-			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
-		}
 		String reasonCode = "";
 		if (allowance.getReasonCode() != null) {
 			// only in XRechnung profile
 			reasonCode = "<ram:ReasonCode>" + allowance.getReasonCode() + "</ram:ReasonCode>";
 		}
+		String reason = "";
+		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung")) || profile == Profiles.getByName("EN16931")) {
+			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
+		}
 		final String allowanceChargeStr = "<ram:AppliedTradeAllowanceCharge><ram:ChargeIndicator><udt:Indicator>" +
 			chargeIndicator + "</udt:Indicator></ram:ChargeIndicator>" + percentage +
 			"<ram:ActualAmount>" + priceFormat(allowance.getTotalAmount(item)) + "</ram:ActualAmount>" +
-			reason +
 			reasonCode +
+			reason +
 			"</ram:AppliedTradeAllowanceCharge>";
 		return allowanceChargeStr;
 	}
@@ -311,20 +312,20 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 			chargeIndicator = "true";
 		}
 
-		String reason = "";
-		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung"))) {
-			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
-		}
 		String reasonCode = "";
 		if ((allowance.getReasonCode() != null) && (profile == Profiles.getByName("XRechnung"))) {
 			// only in XRechnung profile
 			reasonCode = "<ram:ReasonCode>" + allowance.getReasonCode() + "</ram:ReasonCode>";
 		}
+		String reason = "";
+		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung"))) {
+			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
+		}
 		final String itemTotalAllowanceChargeStr = "<ram:SpecifiedTradeAllowanceCharge><ram:ChargeIndicator><udt:Indicator>" +
 			chargeIndicator + "</udt:Indicator></ram:ChargeIndicator>" + percentage +
 			"<ram:ActualAmount>" + currencyFormat(allowance.getTotalAmount(item)) + "</ram:ActualAmount>" +
-			reason +
 			reasonCode +
+			reason +
 			"</ram:SpecifiedTradeAllowanceCharge>";
 		return itemTotalAllowanceChargeStr;
 	}
@@ -744,11 +745,11 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 						"<udt:Indicator>true</udt:Indicator>" +
 						"</ram:ChargeIndicator>" +
 						"<ram:ActualAmount>" + currencyFormat(charge.getTotalAmount(calc)) + "</ram:ActualAmount>";
-					if (charge.getReason() != null) {
-						xml += "<ram:Reason>" + XMLTools.encodeXML(charge.getReason()) + "</ram:Reason>";
-					}
 					if (charge.getReasonCode() != null) {
 						xml += "<ram:ReasonCode>" + charge.getReasonCode() + "</ram:ReasonCode>";
+					}
+					if (charge.getReason() != null) {
+						xml += "<ram:Reason>" + XMLTools.encodeXML(charge.getReason()) + "</ram:Reason>";
 					}
 					xml += "<ram:CategoryTradeTax>" +
 						"<ram:TypeCode>VAT</ram:TypeCode>" +
@@ -787,11 +788,11 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 						"<udt:Indicator>false</udt:Indicator>" +
 						"</ram:ChargeIndicator>" +
 						"<ram:ActualAmount>" + currencyFormat(allowance.getTotalAmount(calc)) + "</ram:ActualAmount>";
-					if (allowance.getReason() != null) {
-						xml += "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
-					}
 					if (allowance.getReasonCode() != null) {
 						xml += "<ram:ReasonCode>" + allowance.getReasonCode() + "</ram:ReasonCode>";
+					}
+					if (allowance.getReason() != null) {
+						xml += "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
 					}
 					xml += "<ram:CategoryTradeTax>" +
 						"<ram:TypeCode>VAT</ram:TypeCode>" +
@@ -828,6 +829,12 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 			if (paymentTermsDescription != null) {
 				xml += "<ram:Description>" + paymentTermsDescription + "</ram:Description>";
 			}
+			
+			if (trans.getDueDate() != null) {
+				xml += "<ram:DueDateDateTime>" // $NON-NLS-2$
+					+ DATE.udtFormat(trans.getDueDate())
+					+ "</ram:DueDateDateTime>";// 20130704
+			}
 
 			if (trans.getTradeSettlement() != null) {
 				for (final IZUGFeRDTradeSettlement payment : trans.getTradeSettlement()) {
@@ -837,12 +844,6 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 				}
 			}
 
-			if (trans.getDueDate() != null) {
-				xml += "<ram:DueDateDateTime>" // $NON-NLS-2$
-					+ DATE.udtFormat(trans.getDueDate())
-					+ "</ram:DueDateDateTime>";// 20130704
-
-			}
 			xml += "</ram:SpecifiedTradePaymentTerms>";
 		} else {
 			xml += buildPaymentTermsXml();
@@ -892,6 +893,19 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 					+ "</ram:FormattedIssueDateTime>";
 			}
 			xml += "</ram:InvoiceReferencedDocument>";
+		}
+		if (trans.getInvoiceReferencedDocuments() != null) {
+			for (ReferencedDocument doc : trans.getInvoiceReferencedDocuments()) {
+				xml += "<ram:InvoiceReferencedDocument>"
+						+ "<ram:IssuerAssignedID>"
+						+ XMLTools.encodeXML(doc.getIssuerAssignedID()) + "</ram:IssuerAssignedID>";
+				if (doc.getFormattedIssueDateTime() != null) {
+					xml += "<ram:FormattedIssueDateTime>"
+							+ DATE.qdtFormat(doc.getFormattedIssueDateTime())
+							+ "</ram:FormattedIssueDateTime>";
+				}
+				xml += "</ram:InvoiceReferencedDocument>";
+			}
 		}
 
 		xml += "</ram:ApplicableHeaderTradeSettlement>";

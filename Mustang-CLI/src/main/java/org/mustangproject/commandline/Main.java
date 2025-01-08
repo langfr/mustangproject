@@ -866,10 +866,6 @@ public class Main {
 			LOGGER.error(e.getMessage(), e);
 		} catch (IOException e) {
 			LOGGER.error(e.getMessage(), e);
-		} catch (ParserConfigurationException e) {
-			LOGGER.error(e.getMessage(), e);
-		} catch (SAXException e) {
-			LOGGER.error(e.getMessage(), e);
 		}
 		System.out.println("Written to " + outName);
 

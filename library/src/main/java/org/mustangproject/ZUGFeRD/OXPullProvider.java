@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.mustangproject.EStandard;
 import org.mustangproject.FileAttachment;
+import org.mustangproject.ReferencedDocument;
 import org.mustangproject.XMLTools;
 
 public class OXPullProvider extends ZUGFeRD2PullProvider {
@@ -327,16 +328,16 @@ public class OXPullProvider extends ZUGFeRD2PullProvider {
 			}
 		}
 		if (trans.getDocumentCode() != null) {
-			if ((trans.getDocumentCode().equals(CORRECTEDINVOICE))/*||(trans.getDocumentCode().equals (DocumentCodeTypeConstants.CREDITNOTE))*/) {
-				hasDueDate = false;
-			}
+  		if ((trans.getDocumentCode().equals(CORRECTEDINVOICE))/*||(trans.getDocumentCode().equals (DocumentCodeTypeConstants.CREDITNOTE))*/) {
+  			hasDueDate = false;
+  		}
 		}
 
 		final Map<BigDecimal, VATAmount> VATPercentAmountMap = calc.getVATPercentAmountMap();
 		for (final BigDecimal currentTaxPercent : VATPercentAmountMap.keySet()) {
 			final VATAmount amount = VATPercentAmountMap.get(currentTaxPercent);
 			if (amount != null) {
-				/*final String amountCategoryCode = amount.getCategoryCode();
+			  /*final String amountCategoryCode = amount.getCategoryCode();
 				final boolean displayExemptionReason = CATEGORY_CODES_WITH_EXEMPTION_REASON.contains(amountCategoryCode);
 				xml += "<ram:ApplicableTradeTax>\n"
 						+ "<ram:CalculatedAmount>" + currencyFormat(amount.getCalculated())
@@ -458,6 +459,19 @@ public class OXPullProvider extends ZUGFeRD2PullProvider {
 						+ "</ram:FormattedIssueDateTime>";
 			}
 			xml += "</ram:InvoiceReferencedDocument>";
+		}
+		if (trans.getInvoiceReferencedDocuments() != null) {
+			for (ReferencedDocument doc : trans.getInvoiceReferencedDocuments()) {
+				xml += "<ram:InvoiceReferencedDocument>"
+						+ "<ram:IssuerAssignedID>"
+						+ XMLTools.encodeXML(doc.getIssuerAssignedID()) + "</ram:IssuerAssignedID>";
+				if (doc.getFormattedIssueDateTime() != null) {
+					xml += "<ram:FormattedIssueDateTime>"
+							+ DATE.qdtFormat(doc.getFormattedIssueDateTime())
+							+ "</ram:FormattedIssueDateTime>";
+				}
+				xml += "</ram:InvoiceReferencedDocument>";
+			}
 		}
 
 		xml += "</ram:ApplicableHeaderTradeSettlement>";
