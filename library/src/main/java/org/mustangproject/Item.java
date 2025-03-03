@@ -172,6 +172,39 @@ public class Item implements IZUGFeRDExportableItem {
 			icnm.getAsNodeMap("ApplicableTradeTax")
 				.flatMap(cnm -> cnm.getAsBigDecimal("RateApplicablePercent", "ApplicablePercent"))
 				.ifPresent(product::setVATPercent);
+			icnm.getAsNodeMap("ApplicableTradeTax")
+				.flatMap(cnm -> cnm.getAsString("ExemptionReason"))
+				.ifPresent(product::setTaxExemptionReason);
+			icnm.getAsNodeMap("SpecifiedTradeAllowanceCharge").ifPresent(stac -> {
+				stac.getAsNodeMap("ChargeIndicator").ifPresent(ci -> {
+					String isChargeString=ci.getAsString("Indicator").get();
+					String percentString=stac.getAsStringOrNull("CalculationPercent");
+					String amountString=stac.getAsStringOrNull("ActualAmount");
+					String reason=stac.getAsStringOrNull("Reason");
+					Charge izac= new Charge();
+					if (isChargeString.equalsIgnoreCase("false")) {
+						izac = new Allowance();
+					} else {
+						izac = new Charge();
+					}
+					if (amountString!=null) {
+						izac.setTotalAmount(new BigDecimal(amountString));
+					}
+					if(percentString!=null) {
+					izac.setPercent(new BigDecimal(percentString));
+					}
+					if(reason!=null) {
+					izac.setReason(reason);
+					}
+
+					if (isChargeString.equalsIgnoreCase("false")) {
+						addAllowance(izac);
+					} else {
+						addCharge(izac);
+					}
+				});
+
+			});
 
 			if (recalcPrice && !BigDecimal.ZERO.equals(quantity)) {
 				icnm.getAsNodeMap("SpecifiedTradeSettlementLineMonetarySummation")
@@ -180,6 +213,12 @@ public class Item implements IZUGFeRDExportableItem {
 			}
 
 			icnm.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).forEach(this::addAdditionalReference);
+
+			icnm.getAsNodeMap("BillingSpecifiedPeriod").ifPresent(periodNode -> {
+				Date start = periodNode.getAsNodeMap("StartDateTime").flatMap(dateTimeNode -> dateTimeNode.getNode("DateTimeString")).map(dts -> XMLTools.tryDate(dts)).orElse(null);
+				Date end = periodNode.getAsNodeMap("EndDateTime").flatMap(dateTimeNode -> dateTimeNode.getNode("DateTimeString")).map(dts -> XMLTools.tryDate(dts)).orElse(null);
+				setDetailedDeliveryPeriod(start, end);
+			});
 		});
 
 		itemMap.getAsNodeMap("AssociatedDocumentLineDocument").ifPresent(adld -> {
@@ -325,6 +364,29 @@ public class Item implements IZUGFeRDExportableItem {
 			return null;
 		} else
 			return Allowances.toArray(new IZUGFeRDAllowanceCharge[0]);
+	}
+
+	/***
+	 * jackson convenience method
+	 */
+	public void setItemAllowances(ArrayList<Allowance> theAllowances) {
+		if (theAllowances!=null) {
+			Allowances.clear();
+			for (Allowance theAllowance : theAllowances) {
+				Allowances.add(theAllowance);
+			}
+		}
+	}
+	/***
+	 * jackson convenience method
+	 */
+	public void setItemCharges(ArrayList<Charge> theCharges) {
+		if (theCharges!=null) {
+			Charges.clear();
+			for (Charge theCharge : theCharges) {
+				Charges.add(theCharge);
+			}
+		}
 	}
 
 	@Override

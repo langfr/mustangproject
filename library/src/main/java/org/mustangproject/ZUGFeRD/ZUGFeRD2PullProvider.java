@@ -150,7 +150,12 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 				if (profile == Profiles.getByName("Minimum")) {
 					xml += "<ram:ID>" + XMLTools.encodeXML(party.getLegalOrganisation().getSchemedID().getID()) + "</ram:ID>";
 				} else {
-					xml += "<ram:ID schemeID=\"" + XMLTools.encodeXML(party.getLegalOrganisation().getSchemedID().getScheme()) + "\">" + XMLTools.encodeXML(party.getLegalOrganisation().getSchemedID().getID()) + "</ram:ID>";
+					String schemeAttribute="";
+					if ((party.getLegalOrganisation().getSchemedID().getScheme()!=null)&&(party.getLegalOrganisation().getSchemedID().getScheme().length()>0)) {
+						schemeAttribute="schemeID=\"" + XMLTools.encodeXML(party.getLegalOrganisation().getSchemedID().getScheme())+"\"";
+
+					}
+					xml += "<ram:ID "+schemeAttribute+">" + XMLTools.encodeXML(party.getLegalOrganisation().getSchemedID().getID()) + "</ram:ID>";
 				}
 			}
 			if (party.getLegalOrganisation().getTradingBusinessName() != null) {
@@ -277,14 +282,14 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 			chargeIndicator = "true";
 		}
 
+		String reason = "";
+		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung") || profile == Profiles.getByName("EN16931"))) {
+			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
+		}
 		String reasonCode = "";
 		if (allowance.getReasonCode() != null) {
 			// only in XRechnung profile
 			reasonCode = "<ram:ReasonCode>" + allowance.getReasonCode() + "</ram:ReasonCode>";
-		}
-		String reason = "";
-		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung")) || profile == Profiles.getByName("EN16931")) {
-			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
 		}
 		final String allowanceChargeStr = "<ram:AppliedTradeAllowanceCharge><ram:ChargeIndicator><udt:Indicator>" +
 			chargeIndicator + "</udt:Indicator></ram:ChargeIndicator>" + percentage +
@@ -312,14 +317,14 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 			chargeIndicator = "true";
 		}
 
+		String reason = "";
+		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung"))) {
+			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
+		}
 		String reasonCode = "";
 		if ((allowance.getReasonCode() != null) && (profile == Profiles.getByName("XRechnung"))) {
 			// only in XRechnung profile
 			reasonCode = "<ram:ReasonCode>" + allowance.getReasonCode() + "</ram:ReasonCode>";
-		}
-		String reason = "";
-		if ((allowance.getReason() != null) && (profile == Profiles.getByName("Extended") || profile == Profiles.getByName("XRechnung"))) {
-			reason = "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
 		}
 		final String itemTotalAllowanceChargeStr = "<ram:SpecifiedTradeAllowanceCharge><ram:ChargeIndicator><udt:Indicator>" +
 			chargeIndicator + "</udt:Indicator></ram:ChargeIndicator>" + percentage +
@@ -389,14 +394,13 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 				+ "</ram:GuidelineSpecifiedDocumentContextParameter>"
 				+ "</rsm:ExchangedDocumentContext>"
 				+ "<rsm:ExchangedDocument>"
-				+ "<ram:ID>" + XMLTools.encodeXML(trans.getNumber()) + "</ram:ID>"
-				// + "<ram:Name>RECHNUNG</ram:Name>"
-				// + "<ram:TypeCode>380</ram:TypeCode>"
-				+ "<ram:TypeCode>" + typecode + "</ram:TypeCode>"
-				+ "<ram:IssueDateTime>"
-				+ DATE.udtFormat(trans.getIssueDate()) + "</ram:IssueDateTime>" // date
+				+ "<ram:ID>" + XMLTools.encodeXML(trans.getNumber()) + "</ram:ID>";
+				if (profile == Profiles.getByName("Extended") && trans.getDocumentName() != null) {
+					xml += "<ram:Name>" + XMLTools.encodeXML(trans.getDocumentName()) + "</ram:Name>";
+				}
+			xml += "<ram:TypeCode>" + typecode + "</ram:TypeCode>"
+				+ "<ram:IssueDateTime>" + DATE.udtFormat(trans.getIssueDate()) + "</ram:IssueDateTime>" // date
 				+ buildNotes(trans)
-
 				+ "</rsm:ExchangedDocument>"
 				+ "<rsm:SupplyChainTradeTransaction>";
 		int lineID = 0;
@@ -663,8 +667,8 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 		if ((trans.getCreditorReferenceID() != null) && (getProfile() != Profiles.getByName("Minimum"))) {
 			xml += "<ram:CreditorReferenceID>" + XMLTools.encodeXML(trans.getCreditorReferenceID()) + "</ram:CreditorReferenceID>";
 		}
-		if ((trans.getNumber() != null) && (getProfile() != Profiles.getByName("Minimum"))) {
-			xml += "<ram:PaymentReference>" + XMLTools.encodeXML(trans.getNumber()) + "</ram:PaymentReference>";
+		if ((trans.getPaymentReference() != null) && (getProfile() != Profiles.getByName("Minimum"))) {
+			xml += "<ram:PaymentReference>" + XMLTools.encodeXML(trans.getPaymentReference()) + "</ram:PaymentReference>";
 		}
 		xml += "<ram:InvoiceCurrencyCode>" + trans.getCurrency() + "</ram:InvoiceCurrencyCode>";
 		if (this.trans.getPayee() != null) {
@@ -738,7 +742,7 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 		}
 
 		if ((trans.getZFCharges() != null) && (trans.getZFCharges().length > 0)) {
-			if (profile == Profiles.getByName("XRechnung")) {
+			if ((profile == Profiles.getByName("XRechnung")) || (profile == Profiles.getByName("EN16931")) || (profile == Profiles.getByName("EXTENDED")))  {
 				for (IZUGFeRDAllowanceCharge charge : trans.getZFCharges()) {
 					xml += "<ram:SpecifiedTradeAllowanceCharge>" +
 						"<ram:ChargeIndicator>" +
@@ -788,11 +792,11 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 						"<udt:Indicator>false</udt:Indicator>" +
 						"</ram:ChargeIndicator>" +
 						"<ram:ActualAmount>" + currencyFormat(allowance.getTotalAmount(calc)) + "</ram:ActualAmount>";
-					if (allowance.getReasonCode() != null) {
-						xml += "<ram:ReasonCode>" + allowance.getReasonCode() + "</ram:ReasonCode>";
-					}
 					if (allowance.getReason() != null) {
 						xml += "<ram:Reason>" + XMLTools.encodeXML(allowance.getReason()) + "</ram:Reason>";
+					}
+					if (allowance.getReasonCode() != null) {
+						xml += "<ram:ReasonCode>" + allowance.getReasonCode() + "</ram:ReasonCode>";
 					}
 					xml += "<ram:CategoryTradeTax>" +
 						"<ram:TypeCode>VAT</ram:TypeCode>" +

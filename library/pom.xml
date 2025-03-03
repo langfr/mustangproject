@@ -3,12 +3,13 @@
     <parent>
         <groupId>org.mustangproject</groupId>
         <artifactId>core</artifactId>
-        <version>2.11.1-SNAPSHOT</version>
+        <version>2.15.3-SNAPSHOT</version>
     </parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.mustangproject</groupId>
 	<artifactId>library</artifactId>
+	<version>2.15.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Library to write, read and validate e-invoices (Factur-X, ZUGFeRD, Order-X, XRechnung/CII)</name>
 	<description>FOSS Java library to read, write and validate european electronic invoices and orders in the UN/CEFACT
@@ -55,19 +56,25 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.16</version>
+			<version>2.0.16</version><!-- org.slf4j.slf4j-api -->
+		</dependency>
+		<dependency>
+			<groupId>net.sf.offo</groupId>
+			<artifactId>fop-hyph</artifactId>
+			<version>2.0</version>
+			<scope>runtime</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE -->
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
-			<version>12.5</version>
+			<version>12.5</version><!-- net.sf.saxon.Saxon-HE -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.17.3</version>
+			<version>2.18.2</version><!-- com.fasterxml.jackson.core.jackson-databind -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
 		<dependency>
@@ -103,12 +110,12 @@
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>preflight</artifactId>
-			<version>3.0.3</version>
+			<version>3.0.4</version><!-- org.apache.pdfbox.preflight -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>3.0.3</version>
+			<version>3.0.4</version><!-- org.apache.pdfbox.pdfbox -->
 		</dependency>
 		<!-- DOM4j -->
 		<dependency>
@@ -133,13 +140,13 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.10.5</version>
+			<version>5.10.5</version><!-- org.junit.jupiter.junit-jupiter-api -->
 			<scope>test</scope>
 		 </dependency>
 		 <dependency>
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>
-			<version>5.10.5</version>
+			<version>5.10.5</version><!-- org.junit.jupiter.junit-vintage-engine -->
 			<scope>test</scope>
 		 </dependency>
 		<dependency>
@@ -157,7 +164,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.16</version>
+			<version>2.0.16</version><!-- org.slf4j.slf4j-simple -->
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

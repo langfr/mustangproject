@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.mustangproject</groupId>
         <artifactId>core</artifactId>
-        <version>2.11.1-SNAPSHOT</version>
+        <version>2.15.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mustangproject</groupId>
@@ -11,6 +11,7 @@
     <name>Library to validate e-invoices (ZUGFeRD, Factur-X and Xrechnung)</name>
 
     <packaging>jar</packaging>
+    <version>2.15.3-SNAPSHOT</version>
     <repositories>
         <repository>
             <!-- for jargs -->
@@ -36,7 +37,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>library</artifactId>
-            <version>${project.version}</version>
+            <version>2.15.3-SNAPSHOT</version>
         </dependency>
 		<dependency>
 			<groupId>org.dom4j</groupId>
@@ -52,12 +53,12 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.16.1</version>
+			<version>2.18.0</version><!-- commons-io.commons-io -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>3.0.3</version>
+			<version>3.0.4</version><!-- org.apache.pdfbox.pdfbox -->
 		</dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -65,13 +66,10 @@
             <version>2.1</version>
         </dependency>
 
-        <!-- Verapdf plugin <dependency> <groupId>org.verapdf</groupId> <artifactId>core</artifactId>
-              <version>1.6.2</version> </dependency> -->
-        <!-- embedded verapdf -->
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model</artifactId>
-            <version>1.26.1</version>
+            <version>1.26.5</version><!-- org.verapdf.validation-model -->
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.helger/ph-schematron -->
         <dependency>
@@ -94,19 +92,19 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.5</version>
+            <version>5.10.5</version><!-- org.junit.jupiter.junit-jupiter-api -->
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.10.5</version>
+            <version>5.10.5</version><!-- org.junit.jupiter.junit-vintage-engine -->
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.16</version>
+            <version>2.0.16</version><!-- org.slf4j.slf4j-simple -->
             <scope>test</scope>
         </dependency>
     </dependencies>

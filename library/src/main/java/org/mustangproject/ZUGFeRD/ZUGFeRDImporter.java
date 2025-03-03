@@ -86,6 +86,7 @@ public class ZUGFeRDImporter extends ZUGFeRDInvoiceImporter {
 			case "urn:factur-x.eu:1p0:minimum":
 				return "MINIMUM";
 			case "urn:ferd:CrossIndustryDocument:invoice:1p0:extended":
+			case "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended":
 			case "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended":
 				return "EXTENDED";
 			default:
@@ -310,16 +311,7 @@ public class ZUGFeRDImporter extends ZUGFeRDInvoiceImporter {
 	 * @return the referred document
 	 */
 	public String getReference() {
-		try {
-			if (getVersion() == 1) {
-				return extractString("//*[local-name() = 'ApplicableSupplyChainTradeAgreement']/*[local-name() = 'BuyerReference']");
-			} else {
-				return extractString("//*[local-name() = 'ApplicableHeaderTradeAgreement']/*[local-name() = 'BuyerReference']");
-			}
-		} catch (final Exception e) {
-			// Exception was already logged
-			return "";
-		}
+		return importedInvoice.getReferenceNumber();
 	}
 
 

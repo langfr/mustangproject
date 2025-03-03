@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mustangproject.*;
 import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
@@ -254,16 +255,18 @@ public class ZF2PushTest extends TestCase {
 			//	ze.setTransaction(new Invoice().setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date()).setSender(new TradeParty(orgname,"teststr", "55232","teststadt","DE")).setOwnTaxID("4711").setOwnVATID("DE0815").setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE")).setNumber(number)
 			//					.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)).addAllowance(new Allowance().setPercent(new BigDecimal(50)))));
 
-			ze.setTransaction(new Invoice().setDueDate(new Date()).setIssueDate(new Date())
+			Invoice i=new Invoice().setDueDate(new Date()).setIssueDate(new Date())
 				.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").addTaxID("4711").addVATID("DE0815"))
 				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE")
 					.setContact(new Contact("contact testname", "123456", "contact.testemail@example.org").setFax("0911623562")))
 				.setNumber(number)
+				.addCharge(new Charge(new BigDecimal(1)).setReasonCode("ABK").setReason("AReason").setTaxPercent(new BigDecimal(19)))
 				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)).addAllowance(new Allowance(new BigDecimal("0.1"))))
 				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)).addAllowance(new Allowance().setPercent(new BigDecimal(50))))
-				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(2.0)).addCharge(new Charge(new BigDecimal(1)).setReasonCode("ABK")))
-				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)).addCharge(new Charge(new BigDecimal(1))).addAllowance(new Allowance(new BigDecimal("1"))))
-			);
+				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(2.0)).addCharge(new Charge(new BigDecimal(1)).setReasonCode("ABK").setReason("AnotherReason")))
+				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)).addCharge(new Charge(new BigDecimal(1))).addAllowance(new Allowance(new BigDecimal("1"))));
+			ze.setTransaction(i);
+
 
 			String theXML = new String(ze.getProvider().getXML());
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
@@ -277,9 +280,10 @@ public class ZF2PushTest extends TestCase {
 
 		assertEquals("EUR", zi.getInvoiceCurrencyCode());
 		assertTrue(zi.getUTF8().contains("0911623562")); // fax number
+		assertTrue(zi.getUTF8().contains("ABK"));
 
 		// Reading ZUGFeRD
-		assertEquals("18.33", zi.getAmount());
+		assertEquals("19.52", zi.getAmount());
 		assertEquals(orgname, zi.getHolder());
 		assertEquals(number, zi.getForeignReference());
 		try {
@@ -477,8 +481,8 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)))
 				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)))
 				.addItem(new Item(new Product("Testprodukt", "", "C62", new BigDecimal(19)), amount, new BigDecimal(1.0)))
-				.addCharge(new Charge(new BigDecimal(0.5)).setTaxPercent(new BigDecimal(19)))
-				.addAllowance(new Allowance(new BigDecimal(0.2)).setTaxPercent(new BigDecimal(19)))
+				.addCharge(new Charge(new BigDecimal(0.5)).setTaxPercent(new BigDecimal(19)).setReasonCode("ABK"))
+				.addAllowance(new Allowance(new BigDecimal(0.2)).setTaxPercent(new BigDecimal(19)).setReasonCode("ABK"))
 			);
 			String theXML = new String(ze.getProvider().getXML());
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
@@ -529,7 +533,7 @@ public class ZF2PushTest extends TestCase {
 			try {
 				SchemedID gtin = new SchemedID("0160", "2001015001325");
 				SchemedID gln = new SchemedID("0088", "4304171000002");
-				ze.setTransaction(new Invoice().setCurrency("CHF").addNote("document level 1/2").addNote("document level 2/2").setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date())
+				ze.setTransaction(new Invoice().setCurrency("CHF").addNote("document level 1/2").addNote("document level 2/2").setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date()).setPaymentReference("Verwendungszweck").setDocumentName("Rechnung")
 					.setSellerOrderReferencedDocumentID("9384").setBuyerOrderReferencedDocumentID("28934")
 					.setDetailedDeliveryPeriod(new SimpleDateFormat("yyyyMMdd").parse(occurrenceFrom), new SimpleDateFormat("yyyyMMdd").parse(occurrenceTo))
 					.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").addTaxID(taxID).setEmail("sender@test.org").setID(orgID).addVATID("DE0815"))
@@ -581,6 +585,7 @@ public class ZF2PushTest extends TestCase {
 		assertTrue(zi.getUTF8().contains("++49555123456"));
 		assertTrue(zi.getUTF8().contains("Cash Discount")); // default description for cash discounts
 		assertThat(zi.getUTF8()).valueByXPath("//*[local-name()='ApplicableTradeTax']/*[local-name()='DueDateTypeCode']").asString().isEqualTo(EventTimeCodeTypeConstants.PAYMENT_DATE);
+		assertTrue(zi.getUTF8().contains("<ram:Name>Rechnung</ram:Name>"));
 
 		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(TARGET_PUSHEDGE);
 		try {
@@ -590,8 +595,13 @@ public class ZF2PushTest extends TestCase {
 			assertEquals(1, i.getInvoiceReferencedDocuments().size());
 			assertEquals("abcd1234", i.getInvoiceReferencedDocuments().get(0).getIssuerAssignedID());
 			assertEquals("4304171000002", i.getRecipient().getGlobalID());
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");
+			assertEquals(occurrenceFrom, sdf.format(i.getDetailedDeliveryPeriodFrom()));
+			assertEquals(occurrenceTo, sdf.format(i.getDetailedDeliveryPeriodTo()));
 			assertEquals("2001015001325", i.getZFItems()[0].getProduct().getGlobalID());
 			assertEquals(orgID, i.getSender().getID());
+			assertEquals("Verwendungszweck", i.getPaymentReference());
+			assertEquals("Rechnung", i.getDocumentName());
 
 		} catch (XPathExpressionException e) {
 			fail("XPathExpressionException should not be raised");
