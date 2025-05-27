@@ -111,7 +111,7 @@ public class PDFValidator extends Validator {
 			ItemDetails itemDetails = ItemDetails.fromValues(pdfFilename);
 			inputStream.mark(Integer.MAX_VALUE);
 			processorResult = processor.process(itemDetails, inputStream);
-			pdfReport = processorResult.getValidationResult().toString().replaceAll(
+			pdfReport = processorResult.getValidationResults().get(0).toString().replaceAll(
 				"<\\?xml version=\"1\\.0\" encoding=\"utf-8\"\\?>",
 				""
 			);
@@ -267,7 +267,8 @@ public class PDFValidator extends Validator {
 		final byte[] pdfMachineSignature = "pdfMachine from Broadgun Software".getBytes(StandardCharsets.UTF_8);
 		final byte[] ghostscriptSignature = "%%Invocation:".getBytes(StandardCharsets.UTF_8);
 		final byte[] cibpdfbrewerSignature = "CIB pdf brewer".getBytes(StandardCharsets.UTF_8);
-		final byte[] lexofficeSignature = "lexoffice".getBytes(StandardCharsets.UTF_8);
+		final byte[] lexofficeSignature = "lexoffice".getBytes(StandardCharsets.UTF_8);		
+		final byte[] s2IndustriesSignature = "s2industries.ZUGFeRD.PDF".getBytes(StandardCharsets.UTF_8); // https://github.com/stephanstapel/ZUGFeRD-csharp
 
 		if (ByteArraySearcher.contains(fileContents, symtraxSignature)) {
 			Signature = "Symtrax";
@@ -287,6 +288,8 @@ public class PDFValidator extends Validator {
 			Signature = "CIB pdf brewer";
 		} else if (ByteArraySearcher.contains(fileContents, lexofficeSignature)) {
 			Signature = "Lexware office";
+		} else if (ByteArraySearcher.contains(fileContents, s2IndustriesSignature)) {
+			Signature = "ZUGFeRD.PDF-csharp";
 		}
 
 		context.setSignature(Signature);
@@ -303,11 +306,11 @@ public class PDFValidator extends Validator {
 		//end
 
 		final long endTime = Calendar.getInstance().getTimeInMillis();
-		if (!processorResult.getValidationResult().isCompliant()) {
+		if (!processorResult.getValidationResults().get(0).isCompliant()) {
 			context.setInvalid();
 		}
 
-		PDFAFlavour pdfaFlavourFromValidationResult = processorResult.getValidationResult().getPDFAFlavour();
+		PDFAFlavour pdfaFlavourFromValidationResult = processorResult.getValidationResults().get(0).getPDFAFlavour();
 		if (Arrays.stream(PDF_A_3_FLAVOURS)
 			.noneMatch(pdfaFlavourFromValidationResult::equals)) {
 			context.addResultItem(

@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.16</version><!-- org.slf4j.slf4j-api -->
+			<version>2.0.17</version><!-- org.slf4j.slf4j-api -->
 		</dependency>
 		<dependency>
 			<groupId>net.sf.offo</groupId>
@@ -68,19 +68,19 @@
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
-			<version>12.5</version><!-- net.sf.saxon.Saxon-HE -->
+			<version>12.7</version><!-- net.sf.saxon.Saxon-HE -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.18.2</version><!-- com.fasterxml.jackson.core.jackson-databind -->
+			<version>2.19.0</version><!-- com.fasterxml.jackson.core.jackson-databind -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>fop</artifactId>
-			<version>2.10</version>
+			<version>2.11</version><!-- org.apache.xmlgraphics.fop -->
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>
@@ -98,7 +98,7 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>2.3.9</version><!-- org.glassfish.jaxb.jaxb-runtime -->
+			<version>2.4.0-b180830.0438</version><!-- org.glassfish.jaxb.jaxb-runtime -->
 		</dependency>
 
 		<dependency>
@@ -110,12 +110,12 @@
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>preflight</artifactId>
-			<version>3.0.4</version><!-- org.apache.pdfbox.preflight -->
+			<version>3.0.5</version><!-- org.apache.pdfbox.preflight -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>3.0.4</version><!-- org.apache.pdfbox.pdfbox -->
+			<version>3.0.5</version><!-- org.apache.pdfbox.pdfbox -->
 		</dependency>
 		<!-- DOM4j -->
 		<dependency>
@@ -152,19 +152,19 @@
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
-			<version>2.10.0</version>
+			<version>2.10.1</version><!-- org.xmlunit.xmlunit-core -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-assertj</artifactId>
-			<version>2.10.0</version>
+			<version>2.10.1</version><!-- org.xmlunit.xmlunit-assertj -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.16</version><!-- org.slf4j.slf4j-simple -->
+			<version>2.0.17</version><!-- org.slf4j.slf4j-simple -->
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

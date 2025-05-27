@@ -38,7 +38,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.5.16</version>
+            <version>1.5.18</version><!-- ch.qos.logback.logback-core -->
         </dependency>
         <dependency>
             <!-- This library is needed so that logback stderr output is sent to, well, stderr, otherwise it lands in stdout -->
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.16</version><!-- org.slf4j.slf4j-simple -->
+			<version>2.0.17</version><!-- org.slf4j.slf4j-simple -->
 		</dependency>
         <!-- end of logging -->
 
@@ -69,12 +69,12 @@
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
-            <version>2.10.0</version>
+            <version>2.10.1</version><!-- org.xmlunit.xmlunit-core -->
         </dependency>
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-assertj</artifactId>
-            <version>2.10.0</version>
+            <version>2.10.1</version><!-- org.xmlunit.xmlunit-assertj -->
         </dependency>
 
         <!-- /directory validation: -->

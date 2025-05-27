@@ -53,12 +53,12 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.18.0</version><!-- commons-io.commons-io -->
+			<version>2.19.0</version><!-- commons-io.commons-io -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>3.0.4</version><!-- org.apache.pdfbox.pdfbox -->
+			<version>3.0.5</version><!-- org.apache.pdfbox.pdfbox -->
 		</dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model</artifactId>
-            <version>1.26.5</version><!-- org.verapdf.validation-model -->
+            <version>1.28.1</version><!-- org.verapdf.validation-model -->
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.helger/ph-schematron -->
         <dependency>
@@ -80,13 +80,13 @@
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
-            <version>2.10.0</version>
+            <version>2.10.1</version><!-- org.xmlunit.xmlunit-core -->
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-assertj</artifactId>
-            <version>2.10.0</version>
+            <version>2.10.1</version><!-- org.xmlunit.xmlunit-assertj -->
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.16</version><!-- org.slf4j.slf4j-simple -->
+            <version>2.0.17</version><!-- org.slf4j.slf4j-simple -->
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -226,10 +226,10 @@
                         </goals>
 
                         <configuration>
-                            <outputDirectory>src/main/resources/xslt/ZF_232/</outputDirectory>
+                            <outputDirectory>src/main/resources/xslt/ZF_233/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${basedir}/src/main/resources/schematron/ZF_232/</directory>
+                                    <directory>${basedir}/src/main/resources/schematron/ZF_233/</directory>
                                     <includes>
                                         <include>**/*.xml</include>
                                     </includes>

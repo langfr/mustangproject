@@ -20,10 +20,8 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.apache.commons.codec.binary.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.mustangproject.*;
 
@@ -66,7 +64,7 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		}
 		assertFalse(hasExceptions);
 		// Reading ZUGFeRD
-		assertEquals("Bei Spiel GmbH", invoice.getOwnOrganisationName());
+		assertEquals("Bei Spiel GmbH", invoice.getSender().getName());
 		assertEquals(3, invoice.getZFItems().length);
 		assertEquals("400.0000", invoice.getZFItems()[1].getQuantity().toString());
 
@@ -124,7 +122,7 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		}
 		assertFalse(hasExceptions);
 		// Reading ZUGFeRD
-		assertEquals("Bei Spiel GmbH", invoice.getOwnOrganisationName());
+		assertEquals("Bei Spiel GmbH", invoice.getSender().getName());
 		assertEquals(3, invoice.getZFItems().length);
 		assertEquals(invoice.getZFItems()[0].getNotesWithSubjectCode().get(0).getContent(),"Something");
 		assertEquals(invoice.getZFItems()[0].getNotesWithSubjectCode().size(),1);
@@ -200,7 +198,7 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		}
 		assertFalse(hasExceptions);
 		// Reading ZUGFeRD
-		assertEquals("Bei Spiel GmbH", invoice.getOwnOrganisationName());
+		assertEquals("Bei Spiel GmbH", invoice.getSender().getName());
 		assertEquals(3, invoice.getZFItems().length);
 		assertEquals("400.0000", invoice.getZFItems()[1].getQuantity().toString());
 
@@ -431,7 +429,9 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 			CalculatedInvoice i = new CalculatedInvoice();
 			zii.extractInto(i);
 			assertEquals("TOSL108", i.getNumber());
-			assertEquals("729", i.getGrandTotal().toString());
+			assertEquals("1729", i.getGrandTotal().toString());
+			assertEquals("729", i.getDuePayable().toString());
+
 
 		} catch (IOException e) {
 			fail("IOException not expected");
@@ -498,6 +498,24 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 			assertTrue(importedDuePayable.compareTo(expectedDue) == 0);
 		}
 
+	}
+
+
+	@Test
+	public void testImportPrepaidUBL() throws XPathExpressionException, ParseException {
+		InputStream inputStream = this.getClass()
+			.getResourceAsStream("/ubl/XRECHNUNG_teilrechnung.ubl.xml");
+		ZUGFeRDInvoiceImporter importer = new ZUGFeRDInvoiceImporter();
+		importer.doIgnoreCalculationErrors();
+		importer.setInputStream(inputStream);
+
+		CalculatedInvoice invoice = new CalculatedInvoice();
+		importer.extractInto(invoice);
+
+		assertEquals(0, invoice.getGrandTotal().compareTo(new BigDecimal("529.87")));
+		assertEquals(0, invoice.getLineTotalAmount().compareTo(new BigDecimal("473")));
+		assertEquals(0, invoice.getTotalPrepaidAmount().compareTo(new BigDecimal("500")));
+		assertEquals(0, invoice.getDuePayable().compareTo(new BigDecimal("29.87")));
 	}
 
 
@@ -596,5 +614,23 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		Invoice invoice = zii.extractInvoice();
 		assertEquals(3, invoice.getZFItems().length);
 		assertEquals("BUYER_ACCOUNTING_REF", invoice.getZFItems()[0].getAccountingReference());
+	}
+
+	@Test
+	public void testImportExport() throws FileNotFoundException, XPathExpressionException, ParseException {
+		File inputFile = getResourceAsFile("cii/Factur-X_basic.xml");
+		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter();
+		zii.setInputStream(new FileInputStream(inputFile));
+
+		Invoice invoice = zii.extractInvoice();
+		assertTrue(invoice.isValid());
+
+		assertNull(invoice.getDeliveryAddress());
+		assertNull(invoice.getPayee());
+
+		assertNull(invoice.getBuyerOrderReferencedDocumentID());
+		assertNull(invoice.getSellerOrderReferencedDocumentID());
+		assertNull(invoice.getDespatchAdviceReferencedDocumentID());
+		assertNull(invoice.getInvoiceReferencedDocumentID());
 	}
 }
