@@ -74,7 +74,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.19.0</version><!-- com.fasterxml.jackson.core.jackson-databind -->
+			<version>2.19.1</version><!-- com.fasterxml.jackson.core.jackson-databind -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
 		<dependency>
@@ -140,25 +140,25 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.10.5</version><!-- org.junit.jupiter.junit-jupiter-api -->
+			<version>5.13.2</version><!-- org.junit.jupiter.junit-jupiter-api -->
 			<scope>test</scope>
 		 </dependency>
 		 <dependency>
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>
-			<version>5.10.5</version><!-- org.junit.jupiter.junit-vintage-engine -->
+			<version>5.13.2</version><!-- org.junit.jupiter.junit-vintage-engine -->
 			<scope>test</scope>
 		 </dependency>
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
-			<version>2.10.1</version><!-- org.xmlunit.xmlunit-core -->
+			<version>2.10.3</version><!-- org.xmlunit.xmlunit-core -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-assertj</artifactId>
-			<version>2.10.1</version><!-- org.xmlunit.xmlunit-assertj -->
+			<version>2.10.3</version><!-- org.xmlunit.xmlunit-assertj -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
