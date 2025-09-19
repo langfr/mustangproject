@@ -121,6 +121,7 @@ public class ZUGFeRDValidator {
 					// Avoid reading again from file
 					pdfv.setFilenameAndContents(contextFilename, content);
 
+					context.setHasPDF();
 					optionsRecognized = true;
 					finalStringResult.append("<pdf>");
 					try {
@@ -145,9 +146,9 @@ public class ZUGFeRDValidator {
 						DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 						//REDHAT
 						//https://www.blackhat.com/docs/us-15/materials/us-15-Wang-FileCry-The-New-Age-Of-XXE-java-wp.pdf
-						dbf.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-						dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-						dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+						dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+						// dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+						// dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 
 						//OWASP
 						//https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html

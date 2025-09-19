@@ -158,9 +158,9 @@ public class XMLValidator extends Validator {
 				final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 				//REDHAT
 				//https://www.blackhat.com/docs/us-15/materials/us-15-Wang-FileCry-The-New-Age-Of-XXE-java-wp.pdf
-				dbf.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-				dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-				dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+				dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+				// dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+				// dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 
 				//OWASP
 				//https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
@@ -376,6 +376,14 @@ public class XMLValidator extends Validator {
 							addUnsupportedProfileResultItem();
 						}
 					}
+				} else {
+					// no CII -> has to be UBL
+					if (context.hasPDF()) {
+						final ValidationResultItem vri = new ValidationResultItem(ESeverity.error, "Factur-X/ZUGFeRD and Order-X are always strictly CII only, no UBL allowed.").setSection(17)
+							.setPart(EPart.fx);
+						context.addResultItem(vri);
+
+					}
 				}
 
 				if (xsltFilename != null) {
@@ -538,12 +546,15 @@ public class XMLValidator extends Validator {
 						}
 
 						ESeverity severity;
+						Node failNode = currentFailNode.getAttributes().getNamedItem("flag");
+						String failVal = failNode == null ? null : failNode.getNodeValue();
 						if (defaultSeverity == ESeverity.notice) {
 							severity = defaultSeverity;
-						} else if (currentFailNode.getAttributes().getNamedItem("flag") != null
-							&& "warning".equals(currentFailNode.getAttributes().getNamedItem("flag").getNodeValue())) {
+						} else if ("warning".equals(failVal)) {
 							// the XR issues warnings with flag=warning
 							severity = ESeverity.warning;
+						} else if ("information".equals(failVal)) {
+							severity = ESeverity.notice;
 						} else {
 							severity = ESeverity.error;
 						}
