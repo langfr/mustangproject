@@ -162,7 +162,7 @@ public class ZF2PushTest extends TestCase {
 				.setNumber(number)
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(0)).setTaxExemptionReason("Kleinunternehmer gemäß §19 UStG").setTaxCategoryCode("E"), price, new BigDecimal(1.0)).addNote(theNote))
 			);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_ATTACHMENTSPDF);
 		} catch (IOException e) {
@@ -222,7 +222,7 @@ public class ZF2PushTest extends TestCase {
 				.setNumber(number)
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)))
 			);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			Invoice read = new Invoice();
 			ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(new ByteArrayInputStream(theXML.getBytes(StandardCharsets.UTF_8)));
 			zii.extractInto(read);
@@ -266,7 +266,7 @@ public class ZF2PushTest extends TestCase {
 			ze.setTransaction(i);
 
 
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_ITEMGROSS);
 		} catch (IOException e) {
@@ -332,7 +332,7 @@ public class ZF2PushTest extends TestCase {
 			ze.setTransaction(i);
 
 
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_ITEMCHARGESALLOWANCESPDF);
 		} catch (IOException e) {
@@ -387,7 +387,7 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)).setIntraCommunitySupply(), price, new BigDecimal(1.0)))
 			);
 
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_INTRACOMMUNITYSUPPLYPDF);
 		} catch (IOException e) {
@@ -439,7 +439,7 @@ public class ZF2PushTest extends TestCase {
 				.setNumber(number)
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(0)).setTaxExemptionReason("Kein Ausweis der Umsatzsteuer bei innergemeinschaftlichen Lieferungen").setTaxCategoryCode("K"), price, new BigDecimal(1.0)))
 			);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_INTRACOMMUNITYSUPPLYMANUALPDF);
 		} catch (IOException e) {
@@ -500,7 +500,7 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)).setReverseCharge(), price, new BigDecimal(1.0)))
 			);
 
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_REVERSECHARGEPDF);
 		} catch (IOException e) {
@@ -547,7 +547,7 @@ public class ZF2PushTest extends TestCase {
 				.addCharge(new Charge(new BigDecimal(0.5)).setTaxPercent(new BigDecimal(19)).setReasonCode("ABK"))
 				.addAllowance(new Allowance(new BigDecimal(0.2)).setTaxPercent(new BigDecimal(19)).setReasonCode("ABK"))
 			);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_CHARGESALLOWANCESPDF);
 		} catch (IOException e) {
@@ -604,6 +604,7 @@ public class ZF2PushTest extends TestCase {
 					.setContractReferencedDocument(contractID)
 					.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE").addGlobalID(gln).setEmail("recipient@test.org").addVATID("DE4711")
 						.setContact(new Contact("Franz Müller", "01779999999", "franz@mueller.de", "teststr. 12", "55232", "Entenhausen", "DE").setFax("++49555123456")).setAdditionalAddress("Hinterhaus 3"))
+					.setInvoicee( new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE") )
 					.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(16)).addGlobalID(gtin).setSellerAssignedID("4711"), price, new BigDecimal(1.0)).setId("a123").addBuyerOrderReferencedDocumentID("orderId").addBuyerOrderReferencedDocumentLineID("xxx").addReferencedLineID("xxx").addNote("item level 1/1").addAllowance(new Allowance(new BigDecimal(0.02)).setReason("item discount").setTaxPercent(new BigDecimal(16))).setDetailedDeliveryPeriod(sdf.parse("2020-01-13"), sdf.parse("2020-01-15")))
 					.addCharge(new Charge(new BigDecimal(0.5)).setReason("quick delivery charge").setTaxPercent(new BigDecimal(16)))
 					.addAllowance(new Allowance(new BigDecimal(0.2)).setReason("discount").setTaxPercent(new BigDecimal(16)))
@@ -615,7 +616,7 @@ public class ZF2PushTest extends TestCase {
 				e.printStackTrace();
 			}
 
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_PUSHEDGE);
 		} catch (IOException e) {
@@ -669,6 +670,7 @@ public class ZF2PushTest extends TestCase {
 
 			assertEquals("++49555123456",i.getRecipient().getContact().getFax());
 
+			assertNotNull(i.getInvoicee());
 		} catch (XPathExpressionException e) {
 			fail("XPathExpressionException should not be raised");
 		} catch (ParseException e) {
@@ -698,7 +700,7 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)).addAllowance(new Allowance(BigDecimal.ONE)), new BigDecimal(500.0), qty).addAllowance(new Allowance(new BigDecimal(300)).setTaxPercent(new BigDecimal(19))))
 				.addAllowance(new Allowance(new BigDecimal(600)).setTaxPercent(new BigDecimal(19)))
 			);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_ALLOWANCESPDF);
 		} catch (IOException e) {
@@ -744,7 +746,7 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0))).addCharge(new Charge().setPercent(new BigDecimal(50)).setTaxPercent(new BigDecimal(19)).setReasonCode("ABK"))
 						.addAllowance(new Allowance().setPercent(new BigDecimal(50)).setTaxPercent(new BigDecimal(19)).setReason("Mengenrabatt"))
 			);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_RELATIVECHARGESALLOWANCESPDF);
 		} catch (IOException e) {
@@ -794,7 +796,7 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, qty))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, qty)).setCorrection("0815");
 			ze.setTransaction(i);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_CORRECTIONPDF);
 		} catch (IOException e) {
@@ -845,7 +847,7 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, qty))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, qty)).setCreditNote();
 			ze.setTransaction(i);
-			String theXML = new String(ze.getProvider().getXML());
+			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
 			ze.export(TARGET_CREDITNOTEPDF);
 		} catch (IOException e) {
@@ -905,7 +907,7 @@ public class ZF2PushTest extends TestCase {
 			.setInvoiceReferencedDocumentID("");
 
 		zf2p.generateXML(i);
-		String theXML = new String(zf2p.getXML());
+		String theXML = new String(zf2p.getXML(), StandardCharsets.UTF_8);
 
 		assertFalse(theXML.contains("<ram:SellerOrderReferencedDocument"));
 		assertFalse(theXML.contains("<ram:BuyerOrderReferencedDocument"));
@@ -921,7 +923,7 @@ public class ZF2PushTest extends TestCase {
 			.setInvoiceReferencedDocumentID("     ");
 
 		zf2p.generateXML(i);
-		theXML = new String(zf2p.getXML());
+		theXML = new String(zf2p.getXML(), StandardCharsets.UTF_8);
 
 		assertFalse(theXML.contains("<ram:SellerOrderReferencedDocument"));
 		assertFalse(theXML.contains("<ram:BuyerOrderReferencedDocument"));

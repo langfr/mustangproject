@@ -172,7 +172,6 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 	 * @return item sum +- charges/allowances
 	 */
 	public BigDecimal getTaxBasis() {
-		BigDecimal debug_1=getTotal();
 		return getTotal().add(getChargesForPercent(null).setScale(2, RoundingMode.HALF_UP))
 			.subtract(getAllowancesForPercent(null).setScale(2, RoundingMode.HALF_UP))
 			.setScale(2, RoundingMode.HALF_UP);
@@ -195,7 +194,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 				percent = currentItem.getProduct().getVATPercent();
 			}
 			if (percent != null) {
-				LineCalculator lc = new LineCalculator(currentItem);
+				LineCalculator lc = currentItem.getCalculation();
 				VATAmount itemVATAmount = new VATAmount(lc.getItemTotalNetAmount(), lc.getItemTotalVATAmount(),
 					currentItem.getProduct().getTaxCategoryCode(), vatDueDateTypeCode);
 				String reasonText = currentItem.getProduct().getTaxExemptionReason();
@@ -265,7 +264,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 			}
 			if (percent != null)
 			{
-				final LineCalculator lc = new LineCalculator(currentItem);
+				final LineCalculator lc = currentItem.getCalculation();
 				final VATAmount itemVATAmount = new VATAmount(lc.getItemTotalNetAmount(), lc.getItemTotalVATAmount(),
 					currentItem.getProduct().getTaxCategoryCode(), vatDueDateTypeCode, percent);
 				final String reasonText = currentItem.getProduct().getTaxExemptionReason();

@@ -44,41 +44,30 @@
 		<github.global.server>github</github.global.server>
 		<additionalparam>-Xdoclint:none</additionalparam>
 		<!-- Skip error check for javadoc -->
-		<maven.compiler.source>8</maven.compiler.source>
-		<maven.compiler.target>8</maven.compiler.target>
-		<maven.deploy.skip>true
-		</maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
-
+        <maven.compiler.release>8</maven.compiler.release>
+		<maven.deploy.skip>true</maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
 	</properties>
 	<dependencies>
+        <!-- compile dependencies -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.17</version><!-- org.slf4j.slf4j-api -->
+			<version>${version.org.slf4j}</version>
 		</dependency>
-		<dependency>
-			<groupId>net.sf.offo</groupId>
-			<artifactId>fop-hyph</artifactId>
-			<version>2.0</version>
-			<scope>runtime</scope>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE -->
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
-			<version>12.8</version><!-- net.sf.saxon.Saxon-HE -->
+			<version>${version.net.sf.saxon}</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.19.2</version><!-- com.fasterxml.jackson.core.jackson-databind -->
+			<version>${version.com.fasterxml.jackson.core}</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>fop</artifactId>
-			<version>2.11</version><!-- org.apache.xmlgraphics.fop -->
+			<artifactId>fop-core</artifactId>
+			<version>${version.org.apache.xmlgraphics}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>
@@ -86,39 +75,25 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- JAXB -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.1</version>
+            <version>${version.javax.xml.bind}</version>
         </dependency>
-		<!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-			<version>2.4.0-b180830.0438</version><!-- org.glassfish.jaxb.jaxb-runtime -->
-		</dependency>
-		<dependency>
-            <groupId>org.eclipse.angus</groupId>
-            <artifactId>angus-activation</artifactId>
-            <version>2.0.2</version>
-        </dependency>
-		<!-- Apache PDFBox -->
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>preflight</artifactId>
-			<version>3.0.5</version><!-- org.apache.pdfbox.preflight -->
+			<version>${version.org.apache.pdfbox}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>3.0.5</version><!-- org.apache.pdfbox.pdfbox -->
+			<version>${version.org.apache.pdfbox}</version>
 		</dependency>
-		<!-- DOM4j -->
 		<dependency>
 			<groupId>org.dom4j</groupId>
 			<artifactId>dom4j</artifactId>
-			<version>2.1.5</version><!-- org.dom4j.dom4j: Starting with v2.2.0 Java 9 is required. -->
+			<version>${version.org.dom4j}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>*</groupId>
@@ -130,53 +105,53 @@
 		<dependency>
 			<groupId>com.helger</groupId>
 			<artifactId>en16931-cii2ubl</artifactId>
-			<version>1.4.10</version><!-- com.helger.en16931-cii2ubl: Starting with v2.0.0 Java 11 is required. -->
+			<version>${version.com.helger.en16931-cii2ubl}</version>
 		</dependency>
 
 		<!-- test dependencies -->
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
-			<version>2.0-rc1</version>
+			<version>${version.org.skyscreamer}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.13.4</version><!-- org.junit.jupiter.junit-jupiter-api -->
+			<version>${version.org.junit}</version>
 			<scope>test</scope>
 		 </dependency>
 		 <dependency>
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>
-			<version>5.13.4</version><!-- org.junit.jupiter.junit-vintage-engine -->
+			<version>${version.org.junit}</version>
 			<scope>test</scope>
 		 </dependency>
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
-			<version>2.10.3</version><!-- org.xmlunit.xmlunit-core -->
+			<version>${version.org.xmlunit}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-assertj</artifactId>
-			<version>2.10.3</version><!-- org.xmlunit.xmlunit-assertj -->
+			<version>${version.org.xmlunit}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.17</version><!-- org.slf4j.slf4j-simple -->
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>${version.org.glassfish.jaxb}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.3</version>
+				<version>${version.org.apache.maven.plugins.maven-surefire-plugin}</version>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
                     <argLine>-Duser.timezone=UTC</argLine>
@@ -185,16 +160,19 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>${version.org.apache.maven.plugins.maven-compiler-plugin}</version>
 				<configuration>
-					<source>8</source>
-					<target>8</target>
+				    <!-- http://stackoverflow.com/questions/574594/how-can-i-create-an-executable-jar-with-dependencies-using-maven
+				        mvn clean compile assembly:single -->
+				    <!-- or whatever version you use -->
+                    <source>8</source>
+                    <target>8</target>
 				</configuration>
 			</plugin>
 			<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>${version.org.apache.maven.plugins.maven-jar-plugin}</version>
         <configuration>
 					<excludes>
 						<exclude>**/logback.xml</exclude>
@@ -259,7 +237,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>${version.org.apache.maven.plugins.maven-source-plugin}</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -272,7 +250,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.5.3</version>
+                <version>${version.org.apache.maven.plugins.maven-shade-plugin}</version>
 				<configuration>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<createDependencyReducedPom>false</createDependencyReducedPom>
@@ -280,9 +258,19 @@
 						<filter>
 							<artifact>*:*</artifact>
 							<excludes>
-								<exclude>META-INF/*.SF</exclude>
-								<exclude>META-INF/*.DSA</exclude>
-								<exclude>META-INF/*.RSA</exclude>
+                                <exclude>LICENSE</exclude>
+                                <exclude>NOTICE</exclude>
+                                <exclude>META-INF/DEPENDENCIES</exclude>
+                                <exclude>META-INF/LICENSE</exclude>
+                                <exclude>META-INF/LICENSE.md</exclude>
+                                <exclude>META-INF/LICENSE.txt</exclude>
+                                <exclude>META-INF/NOTICE</exclude>
+                                <exclude>META-INF/NOTICE.md</exclude>
+                                <exclude>META-INF/NOTICE.txt</exclude>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
 							</excludes>
 						</filter>
 					</filters>
@@ -299,7 +287,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>templating-maven-plugin</artifactId>
-				<version>1.0.0</version>
+				<version>${version.org.codehaus.mojo}</version>
 				<executions>
 					<execution>
 						<id>filtering-java-templates</id>
@@ -314,7 +302,7 @@
 
 
 	<profiles>
-		<profile> <!-- enforce building binaries with Java 1.8 for Maven Central, otherwise using them e.g. as jar will throw a version exception-->
+		<profile>
 			<id>release-sign-artifacts</id>
 			<activation>
 				<property>
@@ -327,7 +315,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-toolchains-plugin</artifactId>
-						<version>3.1.0</version>
+						<version>${version.org.apache.maven.plugins.maven-toolchains-plugin}</version>
 						<executions>
 							<execution>
 								<goals>
@@ -338,7 +326,7 @@
 						<configuration>
 							<toolchains>
 								<jdk>
-									<version>8</version>
+                                    <version>8</version>
 									<vendor>adopt</vendor>
 								</jdk>
 							</toolchains>

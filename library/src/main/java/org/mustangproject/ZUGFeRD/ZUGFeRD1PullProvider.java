@@ -91,7 +91,7 @@ public class ZUGFeRD1PullProvider extends ZUGFeRD2PullProvider {
 		final StringWriter sw = new StringWriter();
 		Document document = null;
 		try {
-			document = DocumentHelper.parseText(new String(zugferdData));
+			document = DocumentHelper.parseText(new String(zugferdData, StandardCharsets.UTF_8));
 		} catch (final DocumentException e1) {
 			LOGGER.error ("Failed to parse ZUGFeRD data", e1);
 		}
@@ -344,7 +344,7 @@ public class ZUGFeRD1PullProvider extends ZUGFeRD2PullProvider {
 			}
 
 
-			final LineCalculator lc = new LineCalculator(currentItem);
+			final LineCalculator lc = currentItem.getCalculation();
 			xml += "<ram:IncludedSupplyChainTradeLineItem>" +
 					"<ram:AssociatedDocumentLineDocument>"
 					+ "<ram:LineID>" + lineID + "</ram:LineID>"

@@ -25,21 +25,20 @@
     </repositories>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.deploy.skip>false
-        </maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.deploy.skip>false</maven.deploy.skip><!-- do deploy to maven central, parent project does not and inherits -->
+        <maven.compiler.release>8</maven.compiler.release>
     </properties>
     <dependencies>
+	    <!-- compile dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>library</artifactId>
-            <version>2.19.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 		<dependency>
 			<groupId>org.dom4j</groupId>
 			<artifactId>dom4j</artifactId>
-			<version>2.1.5</version><!-- org.dom4j.dom4j: Starting with v2.2.0 Java 9 is required. -->
+			<version>${version.org.dom4j}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>*</groupId>
@@ -50,58 +49,48 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.20.0</version><!-- commons-io.commons-io -->
-		</dependency>
-		<dependency>
-			<groupId>org.apache.pdfbox</groupId>
-			<artifactId>pdfbox</artifactId>
-			<version>3.0.5</version><!-- org.apache.pdfbox.pdfbox -->
+			<version>${version.commons-io}</version>
 		</dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.1</version>
+            <version>${version.javax.xml.bind}</version>
         </dependency>
 
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model</artifactId>
-            <version>1.28.2</version><!-- org.verapdf.validation-model -->
+            <version>${version.org.verapdf}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.helger/ph-schematron -->
         <dependency>
             <groupId>com.helger.schematron</groupId>
             <artifactId>ph-schematron-xslt</artifactId>
-            <version>6.3.4</version><!-- com.helger.schematron.ph-schematron-xslt -->
+            <version>${version.com.helger.schematron}</version>
         </dependency>
+
+		<!-- test dependencies -->
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
-            <version>2.10.3</version><!-- org.xmlunit.xmlunit-core -->
+            <version>${version.org.xmlunit}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-assertj</artifactId>
-            <version>2.10.3</version><!-- org.xmlunit.xmlunit-assertj -->
+            <version>${version.org.xmlunit}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.13.4</version><!-- org.junit.jupiter.junit-jupiter-api -->
+            <version>${version.org.junit}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.13.4</version><!-- org.junit.jupiter.junit-vintage-engine -->
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.17</version><!-- org.slf4j.slf4j-simple -->
+            <version>${version.org.junit}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -114,7 +103,7 @@
                              error message :-( -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>${version.org.apache.maven.plugins.maven-release-plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -122,6 +111,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${version.org.apache.maven.plugins.maven-surefire-plugin}</version>
                 <configuration>
                     <runOrder>alphabetical</runOrder>
                     <argLine>-Duser.timezone=UTC</argLine>
@@ -131,7 +121,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>${version.org.apache.maven.plugins.maven-jar-plugin}</version>
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>
@@ -147,8 +137,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>${version.org.apache.maven.plugins.maven-compiler-plugin}</version>
                 <configuration>
+                    <!-- http://stackoverflow.com/questions/574594/how-can-i-create-an-executable-jar-with-dependencies-using-maven
+                             mvn clean compile assembly:single -->
+                    <!-- or whatever version you use -->
                     <source>8</source>
                     <target>8</target>
                 </configuration>
@@ -157,7 +150,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>${version.org.apache.maven.plugins.maven-shade-plugin}</version>
                 <configuration>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <minimizeJar>false</minimizeJar>
@@ -167,16 +160,18 @@
                             <excludes>
                                 <exclude>LICENSE</exclude>
                                 <exclude>NOTICE</exclude>
+                                <exclude>META-INF/DEPENDENCIES</exclude>
+                                <exclude>META-INF/LICENSE</exclude>
+                                <exclude>META-INF/LICENSE.md</exclude>
+                                <exclude>META-INF/LICENSE.txt</exclude>
+                                <exclude>META-INF/NOTICE</exclude>
+                                <exclude>META-INF/NOTICE.md</exclude>
+                                <exclude>META-INF/NOTICE.txt</exclude>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
                             </excludes>
-                        </filter>
-                        <filter>
-                            <artifact>log4j:log4j</artifact>
-                            <includes>
-                                <include>**</include>
-                            </includes>
                         </filter>
                         <filter>
                             <artifact>commons-logging:commons-logging</artifact>
@@ -207,8 +202,9 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>${version.org.apache.maven.plugins.maven-resources-plugin}</version>
                 <executions>
                     <execution>
                         <id>copy-zf-schematron-xml-dependencies</id>
@@ -252,9 +248,7 @@
         </developer>
     </developers>
     <profiles>
-        <profile> <!-- enforce building binaries with Java 1.8 for Maven Central, otherwise using them e.g. as jar will
-        throw a version exception, triggered automatically on mvn release:release (hopefully) and requires an according
-        ~/.m2/toolchains.xml file, @see doc/development_documentation.md -->
+        <profile>
             <id>release-sign-artifacts</id>
             <activation>
                 <property>
@@ -267,7 +261,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-toolchains-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>${version.org.apache.maven.plugins.maven-toolchains-plugin}</version>
                         <executions>
                             <execution>
                                 <goals>
@@ -298,7 +292,7 @@
                     <plugin>
                         <groupId>com.helger.maven</groupId>
                         <artifactId>ph-schematron-maven-plugin</artifactId>
-                        <version>8.0.0</version>
+                        <version>${version.com.helger.maven}</version>
                         <configuration>
                             <schematronDirectory>${basedir}/src/main/resources/schematron</schematronDirectory>
                             <xsltDirectory>${basedir}/src/main/resources/xslt</xsltDirectory>
