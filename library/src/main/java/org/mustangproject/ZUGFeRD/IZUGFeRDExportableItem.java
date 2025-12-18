@@ -157,11 +157,11 @@ public interface IZUGFeRDExportableItem extends IAbsoluteValueProvider{
 
 
 
-	/***
-	 * specifies the item level delivery period (there is also one on document level),
-	 * this will be included in a BillingSpecifiedPeriod element
-	 * @return the beginning of the delivery period
-	 */
+		/***
+		 * specifies the item level delivery period (there is also one on document level),
+		 * this will be included in a BillingSpecifiedPeriod element
+		 * @return the beginning of the delivery period
+		 */
 	default Date getDetailedDeliveryPeriodFrom() {
 		return null;
 	}
@@ -190,6 +190,36 @@ public interface IZUGFeRDExportableItem extends IAbsoluteValueProvider{
 	 */
 	default String getId()  {
 		return null;
+	}
+
+	/***
+	 * for sub invoice lines in ZUGFeRD Extended: the line ID of the parent line
+	 * @return the parent line ID or null if this is a top-level line
+	 */
+	default String getParentLineID() {
+		return null;
+	}
+
+	/***
+	 * for sub invoice lines in ZUGFeRD Extended: the status reason code
+	 * determines if a line is relevant for calculation
+	 * @return DETAIL, GROUP, INFORMATION or null for standard lines
+	 */
+	default String getLineStatusReasonCode() {
+		return null;
+	}
+
+	/***
+	 * checks if this line should be included in sum calculation.
+	 * GROUP and INFORMATION lines are not calculation-relevant,
+	 * only DETAIL lines (or lines without status code) are.
+	 * @return true if the line should be included in calculation
+	 */
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	default boolean isCalculationRelevant() {
+		String status = getLineStatusReasonCode();
+		// null means standard line (backwards compatible), DETAIL is explicitly relevant
+		return status == null || "DETAIL".equals(status);
 	}
 
 	/**

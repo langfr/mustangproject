@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.dom4j.Document;
@@ -536,9 +537,19 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 				if (currentItem.getProduct().getTaxExemptionReason() != null) {
 					xml += "<ram:ExemptionReason>" + XMLTools.encodeXML(currentItem.getProduct().getTaxExemptionReason()) + "</ram:ExemptionReason>";
 				}
+				if (currentItem.getProduct().getTaxExemptionReasonCode() != null) {
+					xml += "<ram:ExemptionReasonCode>" + XMLTools.encodeXML(currentItem.getProduct().getTaxExemptionReasonCode()) + "</ram:ExemptionReasonCode>";
+				}
 				xml += "<ram:CategoryCode>" + currentItem.getProduct().getTaxCategoryCode() + "</ram:CategoryCode>";
-				if (!currentItem.getProduct().getTaxCategoryCode().equals(TaxCategoryCodeTypeConstants.UNTAXEDSERVICE)) {
-					xml += "<ram:RateApplicablePercent>" + vatFormat(currentItem.getProduct().getVATPercent()) + "</ram:RateApplicablePercent>";
+				BigDecimal vatValue=BigDecimal.ZERO;
+				if (currentItem.getProduct().getTaxCategoryCode().equals(TaxCategoryCodeTypeConstants.ZEROTAXPRODUCTS)) {
+					vatValue=BigDecimal.ZERO;
+				} else {
+					vatValue=currentItem.getProduct().getVATPercent();
+				}
+
+				if ((!currentItem.getProduct().getTaxCategoryCode().equals(TaxCategoryCodeTypeConstants.UNTAXEDSERVICE)) ) {
+					xml += "<ram:RateApplicablePercent>" + vatFormat(vatValue) + "</ram:RateApplicablePercent>";
 				}
 				xml += "</ram:ApplicableTradeTax>";
 
@@ -630,6 +641,18 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 			}
 		}
 
+		if(trans.getTenderReferencedDocument() != null){
+			xml += "<ram:AdditionalReferencedDocument>"
+				+ "<ram:IssuerAssignedID>" + XMLTools.encodeXML(trans.getTenderReferencedDocument().getIssuerAssignedID()) + "</ram:IssuerAssignedID>"
+				+ "<ram:TypeCode>" + 50 + "</ram:TypeCode>";
+			if (trans.getTenderReferencedDocument().getFormattedIssueDateTime()!=null) {
+				final SimpleDateFormat dateFormat102 = new SimpleDateFormat("yyyyMMdd");
+				xml += "<ram:FormattedIssueDateTime><qdt:DateTimeString format=\"102\">"+XMLTools.encodeXML(dateFormat102.format(trans.getTenderReferencedDocument().getFormattedIssueDateTime()))+"</qdt:DateTimeString></ram:FormattedIssueDateTime>";
+			}
+
+
+			xml += "</ram:AdditionalReferencedDocument>";
+		}
 		if (trans.getSpecifiedProcuringProjectID() != null) {
 			xml += "<ram:SpecifiedProcuringProject>"
 				+ "<ram:ID>" + XMLTools.encodeXML(trans.getSpecifiedProcuringProjectID()) + "</ram:ID>";
@@ -677,7 +700,12 @@ public class ZUGFeRD2PullProvider implements IXMLProvider {
 		}
 		xml += "<ram:InvoiceCurrencyCode>" + trans.getCurrency() + "</ram:InvoiceCurrencyCode>";
 
-		if (this.trans.getInvoicee() != null) {
+		if (this.trans.getInvoicer() != null && getProfile() == Profiles.getByName("Extended")) {
+			xml += "<ram:InvoicerTradeParty>" +
+				getTradePartyAsXML(this.trans.getInvoicer(), false, false) +
+				"</ram:InvoicerTradeParty>";
+		}
+		if (this.trans.getInvoicee() != null && getProfile() == Profiles.getByName("Extended")) {
 			xml += "<ram:InvoiceeTradeParty>" +
 				getTradePartyAsXML(this.trans.getInvoicee(), false, false) +
 				"</ram:InvoiceeTradeParty>";

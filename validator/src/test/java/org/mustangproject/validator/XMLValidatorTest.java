@@ -300,7 +300,7 @@ public class XMLValidatorTest extends ResourceCase {
 			assertEquals("valid", content);
 			assertThat(s).valueByXPath("count(//warning)")
 				.asInt()
-				.isEqualTo(1);
+				.isEqualTo(4);
 
 		} catch (final IrrecoverableValidationError e) {
 			// ignore, will be in XML output anyway
@@ -370,6 +370,30 @@ public class XMLValidatorTest extends ResourceCase {
 		}
 		assertTrue(noExceptions);
 
+
+	}
+
+	public void testSubInvoiceLineHierarchy() {
+		final ValidationContext ctx = new ValidationContext(null);
+		final XMLValidator xv = new XMLValidator(ctx);
+		final XPathEngine xpath = new JAXPXPathEngine();
+
+		// test invalid hierarchy: GROUP sum does not match DETAIL children sum
+		// GROUP 01 has LineTotalAmount=999, but children sum to 1050 (600+450)
+		File tempFile = getResourceAsFile("invalidSubInvoiceLineHierarchy.xml");
+		try {
+			xv.setFilename(tempFile.getAbsolutePath());
+			xv.validate();
+
+			String s = "<validation>" + xv.getXMLResult() + "</validation>";
+			// hierarchy mismatch should produce at least one warning
+			assertThat(s).valueByXPath("count(//warning)")
+				.asInt()
+				.isGreaterThanOrEqualTo(1);
+
+		} catch (final IrrecoverableValidationError e) {
+			// ignore, will be in XML output anyway
+		}
 
 	}
 

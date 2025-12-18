@@ -38,7 +38,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mustangproject.FileAttachment;
 import org.mustangproject.IncludedNote;
 import org.mustangproject.ReferencedDocument;
-import org.mustangproject.TradeParty;
 import org.mustangproject.ZUGFeRD.model.DocumentCodeTypeConstants;
 
 /***
@@ -212,6 +211,15 @@ public interface IExportableTransaction {
 	 * @return the sender's identification
 	 */
 	default String getOwnForeignOrganisationID() {
+		return null;
+	}
+
+	/**
+	 * BT-17 tender or lot reference
+	 *
+	 * @return mandatory ID, optional Date
+	 */
+	default IReferencedDocument getTenderReferencedDocument() {
 		return null;
 	}
 
@@ -501,9 +509,18 @@ public interface IExportableTransaction {
 	}
 
 	/***
+	 * invoicer / invoice sender, if different from seller, ram:InvoicerTradeParty
+	 *
+	 * @return the IZUGFeRDExportableTradeParty invoice sender, if different from seller
+	 */
+	default IZUGFeRDExportableTradeParty getInvoicer() {
+		return null;
+	}
+
+	/***
 	 * invoicee / invoice receiver, if different from buyer, ram:InvoiceeTradeParty
 	 *
-	 * @return the IZUGFeRDExportableTradeParty invoicee receiver, if different from buyer
+	 * @return the IZUGFeRDExportableTradeParty invoice receiver, if different from buyer
 	 */
 	default IZUGFeRDExportableTradeParty getInvoicee() {
 		return null;

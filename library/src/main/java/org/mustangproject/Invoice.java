@@ -41,7 +41,7 @@ public class Invoice implements IExportableTransaction {
 
 	protected String documentName = null, documentCode = null, number = null, ownOrganisationFullPlaintextInfo = null, referenceNumber = null, shipToOrganisationID = null, shipToOrganisationName = null, shipToStreet = null, shipToZIP = null, shipToLocation = null, shipToCountry = null, buyerOrderReferencedDocumentID = null, buyerOrderReferencedDocumentIssueDateTime = null, ownForeignOrganisationID = null, ownOrganisationName = null, currency = null, paymentTermDescription = null;
 	protected Date issueDate = null, dueDate = null, deliveryDate = null;
-	protected TradeParty sender = null, recipient = null, deliveryAddress = null, payee = null, invoicee = null;
+	protected TradeParty sender = null, recipient = null, deliveryAddress = null, payee = null, invoicer = null, invoicee = null;
 	protected ArrayList<CashDiscount> cashDiscounts = null;
 	@JsonDeserialize(contentAs = Item.class)
 	protected ArrayList<IZUGFeRDExportableItem> ZFItems = null;
@@ -54,6 +54,7 @@ public class Invoice implements IExportableTransaction {
 	protected BigDecimal totalPrepaidAmount = null;
 	protected Date detailedDeliveryDateStart = null;
 	protected Date detailedDeliveryPeriodEnd = null;
+	protected IReferencedDocument tenderReference = null;
 
 	protected ArrayList<IZUGFeRDAllowanceCharge> Allowances = new ArrayList<>(),
 		Charges = new ArrayList<>(), LogisticsServiceCharges = new ArrayList<>();
@@ -135,14 +136,43 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	@Override
-	public IZUGFeRDCashDiscount[] getCashDiscounts() {
-		return cashDiscounts.toArray(new IZUGFeRDCashDiscount[0]);
+	public CashDiscount[] getCashDiscounts() {
+		return cashDiscounts.toArray(new CashDiscount[0]);
 	}
 
 	@Override
 	public String getNumber() {
 		return number;
 	}
+
+
+
+	@Override
+	/***
+	 * BT-17
+	 */
+	public IReferencedDocument getTenderReferencedDocument() {
+		return tenderReference;
+	}
+
+
+	/***
+	 * BT-17
+	 * @param dr
+	 * @return
+	 */
+	public Invoice setTenderReferencedDocument(ReferencedDocument dr) {
+		dr.setTypeCode("50");//50 is fixed for tender documents
+		tenderReference=dr;
+		return this;
+	}
+	
+	public Invoice setTenderReferencedDocument(String ID) {
+		ReferencedDocument dr=new ReferencedDocument(ID);
+		setTenderReferencedDocument(dr);
+		return this;
+	}
+
 
 	public Invoice setNumber(String number) {
 		this.number = number;
@@ -164,6 +194,12 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	public Invoice setCreditNote() {
+		documentCode = DocumentCodeTypeConstants.CREDITNOTE; // this value should somewhen be changed to Selfbilling
+		return this;
+	}
+
+	public Invoice setCreditNote(String number) {
+		setInvoiceReferencedDocumentID(number);
 		documentCode = DocumentCodeTypeConstants.CREDITNOTE;
 		return this;
 	}
@@ -719,6 +755,21 @@ public class Invoice implements IExportableTransaction {
 	 */
 	public Invoice setPayee(TradeParty payee) {
 		this.payee = payee;
+		return this;
+	}
+
+	@Override
+	public TradeParty getInvoicer() {
+		return this.invoicer;
+	}
+
+	/***
+	 * if the invoicer is not the seller, it can be specified here
+	 * @param invoicer the invoice issuing organisation
+	 * @return fluent setter
+	 */
+	public Invoice setInvoicer(TradeParty invoicer) {
+		this.invoicer = invoicer;
 		return this;
 	}
 
