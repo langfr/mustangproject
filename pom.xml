@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mustangproject</groupId>
     <artifactId>core</artifactId>
-    <version>2.21.0</version>
+    <version>2.22.0</version>
     <packaging>pom</packaging>
     <name>Mustang</name>
 
@@ -63,7 +63,7 @@
         <version.com.helger.maven>8.0.0</version.com.helger.maven>
         <version.org.sonatype.plugins>1.7.0</version.org.sonatype.plugins>
 
-        <version.ch.qos.logback>1.5.22</version.ch.qos.logback><!-- from 1.5.16 -->
+        <version.ch.qos.logback>1.5.24</version.ch.qos.logback><!-- from 1.5.16 -->
         <version.com.fasterxml.jackson.core>2.17.3</version.com.fasterxml.jackson.core><!-- from 2.17.1 -->
         <version.com.helger.en16931-cii2ubl>1.4.10</version.com.helger.en16931-cii2ubl><!-- from 2.3.0 --><!-- com.helger.en16931-cii2ubl: Starting with v2.0.0 Java 11 is required. -->
         <version.com.helger.schematron>6.3.4</version.com.helger.schematron><!-- from 8.0.0 -->

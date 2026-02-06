@@ -611,7 +611,12 @@ public class ZF2PushTest extends TestCase {
 					.setInvoicer( new TradeParty("Abweichender Rechnungssteller", "Teststr.12", "04711", "Entenhausen", "DE") )
 					.setInvoicee( new TradeParty("Abweichender Rechnungsempfänger", "Teststr.42", "00815", "Entenhausen", "DE") )
 					.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(16)).addGlobalID(gtin).setSellerAssignedID("4711"), price, new BigDecimal(1.0)).setId("a123").
-						addAdditionalReference(dr2).addBuyerOrderReferencedDocumentID("orderId").addBuyerOrderReferencedDocumentLineID("xxx").addReferencedLineID("xxx").addNote("item level 1/1").addAllowance(new Allowance(new BigDecimal(0.02)).setReason("item discount").setTaxPercent(new BigDecimal(16))).setDetailedDeliveryPeriod(sdf.parse("2020-01-13"), sdf.parse("2020-01-15")))
+						addAdditionalReference(dr2).addBuyerOrderReferencedDocumentID("orderId").addBuyerOrderReferencedDocumentLineID("xxx").addReferencedLineID("xxx")
+						.addNote("item level 1/1").addAllowance(new Allowance(new BigDecimal(0.02)).setReason("item discount").setTaxPercent(new BigDecimal(16))).setDetailedDeliveryPeriod(sdf.parse("2020-01-13"), sdf.parse("2020-01-15"))
+						.setDeliveryNoteReferencedDocumentID("deliverynote123")
+						.setDeliveryNoteReferencedDocumentLineID("deliverypos456")
+						.setDeliveryNoteReferencedDocumentDate(new SimpleDateFormat("dd.MM.yyyy").parse("14.01.2026"))
+					)
 					.addCharge(new Charge(new BigDecimal(0.5)).setReason("quick delivery charge").setTaxPercent(new BigDecimal(16)))
 					.addAllowance(new Allowance(new BigDecimal(0.2)).setReason("discount").setTaxPercent(new BigDecimal(16)))
 					.addCashDiscount(new CashDiscount(new BigDecimal(2), 14))
@@ -647,6 +652,13 @@ public class ZF2PushTest extends TestCase {
 		assertTrue(zi.getUTF8().contains(occurrenceTo));
 		assertTrue(zi.getUTF8().contains(contractID));
 		assertEquals(zi.importedInvoice.getZFItems()[0].getId(), "a123");
+		assertEquals(zi.importedInvoice.getZFItems()[0].getDeliveryNoteReferencedDocumentID(), "deliverynote123");
+		assertEquals(zi.importedInvoice.getZFItems()[0].getDeliveryNoteReferencedDocumentLineID(), "deliverypos456");
+		try {
+			assertEquals(zi.importedInvoice.getZFItems()[0].getDeliveryNoteReferencedDocumentDate(), new SimpleDateFormat("dd.MM.yyyy").parse("14.01.2026"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 		assertTrue(zi.getUTF8().contains("20200113")); // to contain item delivery periods
 		assertTrue(zi.getUTF8().contains("20200115")); // to contain item delivery periods
 
@@ -851,6 +863,8 @@ public class ZF2PushTest extends TestCase {
 				.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").addTaxID("4711").addVATID("DE0815").addBankDetails(new BankDetails("DE88200800000970375700", "COBADEFFXXX")))
 				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE").addVATID("DE0815"))
 				.setNumber(number).setDespatchAdviceReferencedDocumentID(despatchAdviceReferencedDocumentID)
+				.setDeliveryNoteReferencedDocumentID("0815")
+				.setDeliveryNoteReferencedDocumentDate(new SimpleDateFormat("dd.MM.yyyy").parse("01.04.2016"))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, qty))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, qty))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, qty)).setCreditNote();
@@ -860,6 +874,8 @@ public class ZF2PushTest extends TestCase {
 			ze.export(TARGET_CREDITNOTEPDF);
 		} catch (IOException e) {
 			fail("IOException should not be raised");
+		} catch (ParseException e) {
+			fail("ParseException should not be raised");
 		}
 
 		// now check the contents (like MustangReaderTest)
@@ -882,6 +898,8 @@ public class ZF2PushTest extends TestCase {
 			Invoice i = zii.extractInvoice();
 
 			assertEquals(despatchAdviceReferencedDocumentID, i.getDespatchAdviceReferencedDocumentID());
+			assertEquals("0815", i.getDeliveryNoteReferencedDocumentID());
+			assertEquals(new SimpleDateFormat("dd.MM.yyyy").parse("01.04.2016"), i.getDeliveryNoteReferencedDocumentDate());
 
 		} catch (XPathExpressionException e) {
 			fail("XPathExpressionException should not be raised");
@@ -912,6 +930,7 @@ public class ZF2PushTest extends TestCase {
 			.setBuyerOrderReferencedDocumentID("")
 			.setContractReferencedDocument("")
 			.setDespatchAdviceReferencedDocumentID("")
+			.setDeliveryNoteReferencedDocumentID("")
 			.setInvoiceReferencedDocumentID("");
 
 		zf2p.generateXML(i);
@@ -928,6 +947,7 @@ public class ZF2PushTest extends TestCase {
 			.setBuyerOrderReferencedDocumentID("  ")
 			.setContractReferencedDocument("   ")
 			.setDespatchAdviceReferencedDocumentID("    ")
+			.setDeliveryNoteReferencedDocumentID("    ")
 			.setInvoiceReferencedDocumentID("     ");
 
 		zf2p.generateXML(i);

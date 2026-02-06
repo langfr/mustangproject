@@ -311,9 +311,13 @@ public class XRTest extends TestCase {
 		zf2p.generateXML(i);
 		String theXML = new String(zf2p.getXML(), StandardCharsets.UTF_8);
 		// Untaxed services don't have the field RateApplicablePercent, since it would be always 0. An error is thrown on validation, if 0 is set.
-		assertThat(theXML).valueByXPath("count(//*[local-name()='RateApplicablePercent'])")
+		assertThat(theXML).valueByXPath("count(//*[local-name()='SpecifiedLineTradeSettlement']/*[local-name()='ApplicableTradeTax']/*[local-name()='RateApplicablePercent'])")
 			.asInt()
 			.isEqualTo(0);
+
+		assertThat(theXML).valueByXPath("count(//*[local-name()='ApplicableHeaderTradeSettlement']/*[local-name()='ApplicableTradeTax']/*[local-name()='RateApplicablePercent'])")
+			.asInt()
+			.isEqualTo(1);
 
 		//Exemption reason needs to be set if TaxCategoryCode == "O", reason should be at the product and in the ApplicableTradeTax
 		assertThat(theXML).valueByXPath("count(//*[local-name()='ExemptionReason'])")

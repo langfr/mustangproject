@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.mustangproject.IncludedNote;
 import org.mustangproject.Item;
+import org.mustangproject.TradeParty;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -43,7 +44,6 @@ public interface IZUGFeRDExportableItem extends IAbsoluteValueProvider{
 	 * item level discounts
 	 * @return array of the discounts on a single item
 	 */
-	@Deprecated
 	default IZUGFeRDAllowanceCharge[] getItemAllowances() {
 		if (getProduct()!=null) {
 			return getProduct().getAllowances();
@@ -55,7 +55,6 @@ public interface IZUGFeRDExportableItem extends IAbsoluteValueProvider{
 	 * item level price additions
 	 * @return array of the additional charges on the item
 	 */
-	@Deprecated
 	default IZUGFeRDAllowanceCharge[] getItemCharges() {
 		if (getProduct()!=null) {
 			return getProduct().getCharges();
@@ -102,6 +101,7 @@ public interface IZUGFeRDExportableItem extends IAbsoluteValueProvider{
 	BigDecimal getPrice();
 
 	@Override
+	@Deprecated
 	default BigDecimal getValue() {
 		return getPrice();
 	}
@@ -180,6 +180,7 @@ public interface IZUGFeRDExportableItem extends IAbsoluteValueProvider{
 	 *
 	 * @return the real item lecel SpecifiedTradeAllowanceCharges
 	 */
+	@Deprecated
 	default IZUGFeRDAllowanceCharge[] getItemTotalAllowances() {
 		return null;
 	}
@@ -237,4 +238,43 @@ public interface IZUGFeRDExportableItem extends IAbsoluteValueProvider{
 	}
 
     default LineCalculator getCalculation() {return new LineCalculator(this); };
+	/***
+	 * For line seller 
+	 * @return the seller
+	 */
+
+	default  TradeParty getLineSeller() { 
+		return null;
+	}
+
+	/**
+	 * get delivery note document ID (per Item - ZUGFeRD EXTENDED)
+	 * rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:DeliveryNoteReferencedDocument/IssuerAssignedID
+	 *
+	 * @return the ID of the delivery note document
+	 */
+	default String getDeliveryNoteReferencedDocumentID() {
+		return null;
+	}
+
+	/**
+	 * get delivery note document date (per Item - ZUGFeRD EXTENDED)
+	 * rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:DeliveryNoteReferencedDocument/FormattedIssueDateTime
+	 *
+	 * @return the date of the delivery note document
+	 */
+	default Date getDeliveryNoteReferencedDocumentDate() {
+		return null;
+	}
+
+	/**
+	 * get delivery note document LineID (per Item - ZUGFeRD EXTENDED)
+	 * rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:DeliveryNoteReferencedDocument/LineID
+	 *
+	 * @return the LineID of the delivery note document item
+	 */
+	default String getDeliveryNoteReferencedDocumentLineID() {
+		return null;
+	}
+
 }

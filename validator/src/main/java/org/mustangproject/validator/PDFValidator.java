@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -65,7 +66,7 @@ public class PDFValidator extends Validator {
 	private String Signature;
 
 	private String zfXML = null;
-	protected boolean autoload=true;
+	protected boolean autoload = true;
 
 	protected static boolean stringArrayContains(String[] arr, String targetValue) {
 		return Arrays.asList(arr).contains(targetValue);
@@ -133,8 +134,7 @@ public class PDFValidator extends Validator {
 		if (xmp == null || xmp.isEmpty()) {
 			context.addResultItem(new ValidationResultItem(ESeverity.error, "Invalid XMP Metadata not found")
 				.setSection(17).setPart(EPart.pdf));
-		}
-		else {
+		} else {
 			/*
 			 * checking for sth like <zf:ConformanceLevel>EXTENDED</zf:ConformanceLevel>
 			 * <zf:DocumentType>INVOICE</zf:DocumentType>
@@ -265,7 +265,11 @@ public class PDFValidator extends Validator {
 							.setSection(16).setPart(EPart.pdf));
 
 				}
-			} catch (final SAXException | IOException | ParserConfigurationException | XPathExpressionException e) {
+			} catch (final SAXException e) {
+				context.addResultItem(
+					new ValidationResultItem(ESeverity.error, "XMP Metadata: Could not parse XMP metadata (XML invalid)")
+						.setSection(28).setPart(EPart.pdf));
+			} catch (IOException | ParserConfigurationException | XPathExpressionException e) {
 				LOGGER.error(e.getMessage(), e);
 			}
 		}
@@ -280,7 +284,7 @@ public class PDFValidator extends Validator {
 		final byte[] pdfMachineSignature = "pdfMachine from Broadgun Software".getBytes(StandardCharsets.UTF_8);
 		final byte[] ghostscriptSignature = "%%Invocation:".getBytes(StandardCharsets.UTF_8);
 		final byte[] cibpdfbrewerSignature = "CIB pdf brewer".getBytes(StandardCharsets.UTF_8);
-		final byte[] lexofficeSignature = "lexoffice".getBytes(StandardCharsets.UTF_8);		
+		final byte[] lexofficeSignature = "lexoffice".getBytes(StandardCharsets.UTF_8);
 		final byte[] s2IndustriesSignature = "s2industries.ZUGFeRD.PDF".getBytes(StandardCharsets.UTF_8); // https://github.com/stephanstapel/ZUGFeRD-csharp
 		final byte[] factoorSharpSignature = "FactoorSharp".getBytes(StandardCharsets.UTF_8); // https://github.com/S2-Industries/FactoorSharp
 		final byte[] sevdeskSignature = "sevdesk".getBytes(StandardCharsets.UTF_8);
@@ -346,23 +350,23 @@ public class PDFValidator extends Validator {
 	@Override
 	public void setFilename(String filename) throws IrrecoverableValidationError {
 		this.pdfFilename = filename;
-		if(autoload) {
+		if (autoload) {
 			try {
-				fileContents=Files.readAllBytes(Paths.get(pdfFilename));
+				fileContents = Files.readAllBytes(Paths.get(pdfFilename));
 			} catch (IOException ex) {
 				throw new IrrecoverableValidationError("Could not read file");
 			}
 		}
 	}
 
-  public void setFileContents(byte[] fileContents) {
-    this.fileContents = fileContents;
-  }
+	public void setFileContents(byte[] fileContents) {
+		this.fileContents = fileContents;
+	}
 
-  public void setFilenameAndContents(String filename, byte[] fileContents) {
-    this.pdfFilename = filename;
-    this.fileContents = fileContents;
-  }
+	public void setFilenameAndContents(String filename, byte[] fileContents) {
+		this.pdfFilename = filename;
+		this.fileContents = fileContents;
+	}
 
 	public String getRawXML() {
 		return zfXML;

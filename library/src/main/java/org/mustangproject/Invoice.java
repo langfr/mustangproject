@@ -55,6 +55,7 @@ public class Invoice implements IExportableTransaction {
 	protected Date detailedDeliveryDateStart = null;
 	protected Date detailedDeliveryPeriodEnd = null;
 	protected IReferencedDocument tenderReference = null;
+	protected IReferencedDocument objectIdentifierReference = null;
 
 	protected ArrayList<IZUGFeRDAllowanceCharge> Allowances = new ArrayList<>(),
 		Charges = new ArrayList<>(), LogisticsServiceCharges = new ArrayList<>();
@@ -68,6 +69,8 @@ public class Invoice implements IExportableTransaction {
 	protected String specifiedProcuringProjectID = null;
 	protected String specifiedProcuringProjectName = null;
 	protected String despatchAdviceReferencedDocumentID = null;
+	protected String deliveryNoteReferencedDocumentID = null;
+	protected Date deliveryNoteReferencedDocumentDate = null;
 	protected String vatDueDateTypeCode = null;
 	protected String creditorReferenceID; // required when direct debit is used.
 	private BigDecimal roundingAmount=null;
@@ -170,6 +173,28 @@ public class Invoice implements IExportableTransaction {
 	public Invoice setTenderReferencedDocument(String ID) {
 		ReferencedDocument dr=new ReferencedDocument(ID);
 		setTenderReferencedDocument(dr);
+		return this;
+	}
+
+
+
+	/** BT-18 */
+	@Override
+	public IReferencedDocument getObjectIdentifierReferencedDocument() {
+		return objectIdentifierReference;
+	}
+
+
+	/** BT-18 */
+	public Invoice setObjectIdentifierReferencedDocument(ReferencedDocument dr) {
+		dr.setTypeCode("130");//50 is fixed for tender documents
+		objectIdentifierReference=dr;
+		return this;
+	}
+
+	public Invoice setObjectIdentifierReferencedDocument(String id) {
+		ReferencedDocument dr=new ReferencedDocument(id);
+		setObjectIdentifierReferencedDocument(dr);
 		return this;
 	}
 
@@ -1070,6 +1095,28 @@ public class Invoice implements IExportableTransaction {
 
 	public Invoice setDespatchAdviceReferencedDocumentID(String despatchAdviceReferencedDocumentID) {
 		this.despatchAdviceReferencedDocumentID = despatchAdviceReferencedDocumentID;
+		return this;
+	}
+
+	@Override
+	public String getDeliveryNoteReferencedDocumentID() {
+		return deliveryNoteReferencedDocumentID;
+	}
+
+
+	public Invoice setDeliveryNoteReferencedDocumentID(String deliveryNoteReferencedDocumentID) {
+		this.deliveryNoteReferencedDocumentID = deliveryNoteReferencedDocumentID;
+		return this;
+	}
+
+	@Override
+	public Date getDeliveryNoteReferencedDocumentDate() {
+		return deliveryNoteReferencedDocumentDate;
+	}
+
+
+	public Invoice setDeliveryNoteReferencedDocumentDate(Date deliveryNoteReferencedDocumentDate) {
+		this.deliveryNoteReferencedDocumentDate = deliveryNoteReferencedDocumentDate;
 		return this;
 	}
 

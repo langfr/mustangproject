@@ -38,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mustangproject.FileAttachment;
 import org.mustangproject.IncludedNote;
 import org.mustangproject.ReferencedDocument;
+import org.mustangproject.TradeParty;
 import org.mustangproject.ZUGFeRD.model.DocumentCodeTypeConstants;
 
 /***
@@ -220,6 +221,15 @@ public interface IExportableTransaction {
 	 * @return mandatory ID, optional Date
 	 */
 	default IReferencedDocument getTenderReferencedDocument() {
+		return null;
+	}
+
+	/**
+	 * BT-18 Invoiced Object Identifier
+	 *
+	 * @return mandatory ID, optional Date
+	 */
+	default IReferencedDocument getObjectIdentifierReferencedDocument() {
 		return null;
 	}
 
@@ -558,6 +568,26 @@ public interface IExportableTransaction {
 	}
 
 	default String getDespatchAdviceReferencedDocumentID() {
+		return null;
+	}
+
+	/**
+	 * get delivery note document ID
+	 * ram:ApplicableHeaderTradeDelivery/ram:DeliveryNoteReferencedDocument/IssuerAssignedID
+	 *
+	 * @return the ID of the delivery note document
+	 */
+	default String getDeliveryNoteReferencedDocumentID() {
+		return null;
+	}
+
+	/**
+	 * get delivery note document date
+	 * ram:ApplicableHeaderTradeDelivery/ram:DeliveryNoteReferencedDocument/FormattedIssueDateTime
+	 *
+	 * @return the date of the delivery note document
+	 */
+	default Date getDeliveryNoteReferencedDocumentDate() {
 		return null;
 	}
 
