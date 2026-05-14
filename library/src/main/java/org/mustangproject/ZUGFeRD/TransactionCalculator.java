@@ -330,7 +330,6 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 		return vatAmounts;
 	}
 
-
 	public void mergeAdding(VATAmount vatAmount, VATAmount toAdd) {
 		vatAmount.setBasis(vatAmount.getBasis().add(toAdd.getBasis()));
 		vatAmount.setCalculated(vatAmount.getCalculated().add(toAdd.getCalculated()));

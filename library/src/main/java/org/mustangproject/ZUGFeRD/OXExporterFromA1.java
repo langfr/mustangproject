@@ -33,31 +33,13 @@ public class OXExporterFromA1 extends OXExporterFromA3 {
 	protected boolean ignorePDFAErrors = false;
 
 	@Override
-	public OXExporterFromA1 ignorePDFAErrors() {
+  public OXExporterFromA1 ignorePDFAErrors() {
 		this.ignorePDFAErrors = true;
 		return this;
 	}
 
 	private static boolean isValidA1(DataSource dataSource) throws IOException {
 		return getPDFAParserValidationResult(PreflightParserHelper.createPreflightParser(dataSource));
-	}
-	/***
-	 * internal helper function: get namespace for order-x
-	 * @param ver the order-x version
-	 * @return the URN of the namespace
-	 */
-	@Override
-	public String getNamespaceForVersion(int ver) {
-		return "urn:factur-x:pdfa:CrossIndustryDocument:1p0#";
-	}
-	/***
-	 * internal helper: returns the namespace prefix for the given order-x version number
-	 * @param ver the ox version
-	 * @return the namespace prefix as string, without colon
-	 */
-	@Override
-	public String getPrefixForVersion(int ver) {
-		return "fx";
 	}
 
 	private static boolean getPDFAParserValidationResult(PreflightParser parser) throws IOException {
@@ -91,16 +73,16 @@ public class OXExporterFromA1 extends OXExporterFromA3 {
 
 
 	@Override
-	public OXExporterFromA1 setProfile(Profile p) {
+  public OXExporterFromA1 setProfile(Profile p) {
 		return (OXExporterFromA1)super.setProfile(p);
 	}
 	@Override
-	public OXExporterFromA1 setProfile(String profileName) {
+  public OXExporterFromA1 setProfile(String profileName) {
 		return (OXExporterFromA1)super.setProfile(profileName);
 	}
 
 	@Override
-	public boolean ensurePDFIsValid(final DataSource dataSource) throws IOException {
+  public boolean ensurePDFIsValid(final DataSource dataSource) throws IOException {
 		if (!ignorePDFAErrors && !isValidA1(dataSource)) {
 			throw new IOException("File is not a valid PDF/A input file");
 		}
@@ -113,40 +95,40 @@ public class OXExporterFromA1 extends OXExporterFromA3 {
 	}
 
 	@Override
-	public OXExporterFromA1 load(String pdfFilename) throws IOException {
+  public OXExporterFromA1 load(String pdfFilename) throws IOException {
 		return (OXExporterFromA1) super.load(pdfFilename);
 	}
 	@Override
-	public OXExporterFromA1 load(byte[] pdfBinary) throws IOException {
+  public OXExporterFromA1 load(byte[] pdfBinary) throws IOException {
 		return (OXExporterFromA1) super.load(pdfBinary);
 	}
 	@Override
-	public OXExporterFromA1 load(InputStream pdfSource) throws IOException{
+  public OXExporterFromA1 load(InputStream pdfSource) throws IOException{
 		return (OXExporterFromA1) super.load(pdfSource);
 	}
 	@Override
-	public OXExporterFromA1 setCreator(String creator) {
+  public OXExporterFromA1 setCreator(String creator) {
 		return (OXExporterFromA1) super.setCreator(creator);
 	}
 	@Override
-	public OXExporterFromA1 setConformanceLevel(PDFAConformanceLevel newLevel) {
+  public OXExporterFromA1 setConformanceLevel(PDFAConformanceLevel newLevel) {
 		return (OXExporterFromA1) super.setConformanceLevel(newLevel);
 	}
 	@Override
-	public OXExporterFromA1 setProducer(String producer){
+  public OXExporterFromA1 setProducer(String producer){
 		return (OXExporterFromA1) super.setProducer(producer);
 	}
 	@Override
-	public OXExporterFromA1 setZUGFeRDVersion(int version){
+  public OXExporterFromA1 setZUGFeRDVersion(int version){
 		return (OXExporterFromA1) super.setZUGFeRDVersion(version);
 	}
 	@Override
-	public OXExporterFromA1 setXML(byte[] zugferdData) throws IOException{
+  public OXExporterFromA1 setXML(byte[] zugferdData) throws IOException{
 		return (OXExporterFromA1) super.setXML(zugferdData);
 	}
 
 	@Override
-	public OXExporterFromA1 disableAutoClose(boolean disableAutoClose){
+  public OXExporterFromA1 disableAutoClose(boolean disableAutoClose){
 		return (OXExporterFromA1) super.disableAutoClose(disableAutoClose);
 	}
 	public OXExporterFromA1 convertOnly() {

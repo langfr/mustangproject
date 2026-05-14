@@ -17,6 +17,8 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.mustangproject.XMLTools;
+
 
 /***
  * Uses a XSLT transformation to upgrade
@@ -32,8 +34,7 @@ public class XMLUpgrader {
 	private Templates mXsltTemplate = null;
 
 	public XMLUpgrader() {
-		mFactory = new net.sf.saxon.TransformerFactoryImpl();
-		//fact = TransformerFactory.newInstance();
+		mFactory = XMLTools.getTransformerFactory();
 		mFactory.setURIResolver(new ClasspathResourceURIResolver());
 	}
 
@@ -43,7 +44,6 @@ public class XMLUpgrader {
 	 * @return String the updated XML
 	 * @throws FileNotFoundException if the source could not be found
 	 * @throws TransformerException if the source could not be transformed
-	 * @throws UnsupportedEncodingException if the source was not utf8
 	 */
 	public String migrateFromV1ToV2(String xmlFilename) throws FileNotFoundException, TransformerException, UnsupportedEncodingException {
 		/**
