@@ -30,8 +30,7 @@ package org.mustangproject.ZUGFeRD;
  * */
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date; 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -144,11 +143,13 @@ public interface IExportableTransaction {
 		return null;
 	}
 
-	default IZUGFeRDAllowanceCharge[] getZFLogisticsServiceCharges() {
+	default IZUGFeRDLogisticsServiceCharge[] getZFLogisticsServiceCharges() {
 		return null;
 	}
 
-	default IZUGFeRDCashDiscount[] getCashDiscounts() {	return null; }
+	default IZUGFeRDCashDiscount[] getCashDiscounts() {
+		return null;
+	}
 
 	/***
 	 * @return the invoice line items with the positions
@@ -234,6 +235,15 @@ public interface IExportableTransaction {
 	 * @return mandatory ID, optional Date
 	 */
 	default IReferencedDocument getObjectIdentifierReferencedDocument() {
+		return null;
+	}
+
+	/**
+	 * Related Documents
+	 *
+	 * @return mandatory ID, optional Date
+	 */
+	default IReferencedDocument getRelatedReferencedDocument() {
 		return null;
 	}
 
@@ -361,7 +371,7 @@ public interface IExportableTransaction {
 	}
 
 	/**
-	 * get the rounding amount 
+	 * get the rounding amount
    * (only to be usef for NL whose currency requires a rounding to 5ct)
 	 *
 	 * @return the Bigdecimal
@@ -373,7 +383,7 @@ public interface IExportableTransaction {
 	/**
 	 * get BuyerReference (BT-10) an identifier assigned by the buyer and used
 	 * for internal routing. Used for the Leitweg-ID.
-	 * 
+	 *
 	 * @return the BuyerReference of this document
 	 */
 	default String getReferenceNumber() {
@@ -463,8 +473,7 @@ public interface IExportableTransaction {
 	}
 
 	/**
-	 * get the ID of the preceding invoice, which is e.g. to be corrected if this is
-	 * a correction
+	 * get the ID of the preceding invoice, which is e.g. to be corrected if this is a correction
 	 *
 	 * @return the ID of the document
 	 */
@@ -477,12 +486,12 @@ public interface IExportableTransaction {
 	default Date getInvoiceReferencedIssueDate() {
 		return null;
 	}
-	
+
 	/**
 	 * Getter for BG-3
 	 * @return list of documents
 	 */
-	default ArrayList<ReferencedDocument> getInvoiceReferencedDocuments() {
+	default List<ReferencedDocument> getInvoiceReferencedDocuments() {
 		return null;
 	}
 
@@ -492,7 +501,7 @@ public interface IExportableTransaction {
 	 *
 	 * @return the IssueDateTime in format CCYY-MM-DDTHH:MM:SS
 	 */
-	default String getBuyerOrderReferencedDocumentIssueDateTime() {
+	default Date getBuyerOrderReferencedDocumentIssueDateTime() {
 		return null;
 	}
 

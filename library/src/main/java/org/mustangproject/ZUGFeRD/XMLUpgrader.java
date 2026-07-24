@@ -30,8 +30,8 @@ public class XMLUpgrader {
 
 	static final ClassLoader CLASS_LOADER = XMLUpgrader.class.getClassLoader();
 	private static final String RESOURCE_PATH = "";
-	private TransformerFactory mFactory = null;
-	private Templates mXsltTemplate = null;
+	private TransformerFactory mFactory;
+	private Templates mXsltTemplate;
 
 	public XMLUpgrader() {
 		mFactory = XMLTools.getTransformerFactory();
@@ -44,6 +44,7 @@ public class XMLUpgrader {
 	 * @return String the updated XML
 	 * @throws FileNotFoundException if the source could not be found
 	 * @throws TransformerException if the source could not be transformed
+	 * @throws UnsupportedEncodingException
 	 */
 	public String migrateFromV1ToV2(String xmlFilename) throws FileNotFoundException, TransformerException, UnsupportedEncodingException {
 		/**

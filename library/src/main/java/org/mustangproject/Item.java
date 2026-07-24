@@ -1,19 +1,21 @@
 package org.mustangproject;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.mustangproject.ZUGFeRD.*;
-import org.mustangproject.util.NodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import org.mustangproject.ZUGFeRD.IReferencedDocument;
+import org.mustangproject.ZUGFeRD.IZUGFeRDAllowanceCharge;
+import org.mustangproject.ZUGFeRD.IZUGFeRDExportableItem;
+import org.mustangproject.util.BigDecimalUtils;
+import org.mustangproject.util.NodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /***
  * describes any invoice line
@@ -28,25 +30,25 @@ public class Item implements IZUGFeRDExportableItem {
 	protected BigDecimal grossPrice;
 	protected BigDecimal lineTotalAmount;
 	protected BigDecimal basisQuantity = BigDecimal.ONE;
-	protected Date detailedDeliveryPeriodFrom = null;
-	protected Date detailedDeliveryPeriodTo = null;
+	protected Date detailedDeliveryPeriodFrom;
+	protected Date detailedDeliveryPeriodTo;
 	protected String id;
-	protected String buyerOrderReferencedDocumentLineID = null;
-	protected String buyerOrderReferencedDocumentID = null;
+	protected String buyerOrderReferencedDocumentLineID;
+	protected String buyerOrderReferencedDocumentID;
 	protected Product product;
-	protected ArrayList<String> notes = null;
-	protected ArrayList<ReferencedDocument> referencedDocuments = null;
-	protected ArrayList<ReferencedDocument> additionalReference = null;
-	protected ArrayList<IZUGFeRDAllowanceCharge> Allowances = new ArrayList<>();
-	protected ArrayList<IZUGFeRDAllowanceCharge> Charges = new ArrayList<>();
-	protected List<IncludedNote> includedNotes = null;
+	protected ArrayList<String> notes;
+	protected ArrayList<ReferencedDocument> referencedDocuments;
+	protected ArrayList<ReferencedDocument> additionalReference;
+	protected ArrayList<IZUGFeRDAllowanceCharge> allowances = new ArrayList<>();
+	protected ArrayList<IZUGFeRDAllowanceCharge> charges = new ArrayList<>();
+	protected List<IncludedNote> includedNotes;
 	protected String accountingReference;
-	protected String parentLineID = null;
-	protected String lineStatusReasonCode = null;
+	protected String parentLineID;
+	protected String lineStatusReasonCode;
  	protected TradeParty lineSeller;
-	protected String deliveryNoteReferencedDocumentID = null;
-	protected Date deliveryNoteReferencedDocumentDate = null;
-	protected String deliveryNoteReferencedDocumentLineID = null;
+	protected String deliveryNoteReferencedDocumentID;
+	protected Date deliveryNoteReferencedDocumentDate;
+	protected String deliveryNoteReferencedDocumentLineID;
 	//protected HashMap<String, String> attributes = new HashMap<>();
 
 	/***
@@ -106,6 +108,55 @@ public class Item implements IZUGFeRDExportableItem {
 			// PriceAmount with currencyID and  BaseQuantity with unitCode
 			icnm.getAsBigDecimal("PriceAmount").ifPresent(this::setPrice);
 			icnm.getAsBigDecimal("BaseQuantity").ifPresent(this::setBasisQuantity);
+
+			// ubl equivalent of CII's GrossPriceProductTradePrice/AppliedTradeAllowanceCharge:
+			// a per-unit price allowance/charge nested under cac:Price
+			icnm.getAsNodeMap("AllowanceCharge").ifPresent(priceAtacNodes -> {
+				String chargeIndicator = priceAtacNodes.getAsStringOrNull("ChargeIndicator");
+				String percentString = priceAtacNodes.getAsStringOrNull("MultiplierFactorNumeric");
+				String basisAmountString = priceAtacNodes.getAsStringOrNull("BaseAmount");
+				String reason = priceAtacNodes.getAsStringOrNull("AllowanceChargeReason");
+				String reasonCode = priceAtacNodes.getAsStringOrNull("AllowanceChargeReasonCode");
+				if ((chargeIndicator != null) && priceAtacNodes.getAsBigDecimal("Amount").isPresent()) {
+					BigDecimal actual = priceAtacNodes.getAsBigDecimal("Amount").get();
+					if (chargeIndicator.equalsIgnoreCase("true")) {
+						Charge izac = new Charge();
+						izac.setTotalAmount(actual);
+						if (percentString != null) {
+							izac.setPercent(new BigDecimal(percentString));
+						}
+						if (basisAmountString != null) {
+							izac.setBasisAmount(new BigDecimal(basisAmountString));
+						}
+						if (reason != null) {
+							izac.setReason(reason);
+						}
+						if (reasonCode != null) {
+							izac.setReasonCode(reasonCode);
+						}
+						product.addCharge(izac);
+						setPrice(getPrice().subtract(actual)); // the gross price affects the net price, which is read,
+						// so if we do not ignore charges|allowances we have to re-compensate the net price
+					} else {
+						Allowance izac = new Allowance();
+						izac.setTotalAmount(actual);
+						if (percentString != null) {
+							izac.setPercent(new BigDecimal(percentString));
+						}
+						if (basisAmountString != null) {
+							izac.setBasisAmount(new BigDecimal(basisAmountString));
+						}
+						if (reason != null) {
+							izac.setReason(reason);
+						}
+						if (reasonCode != null) {
+							izac.setReasonCode(reasonCode);
+						}
+						product.addAllowance(izac);
+						setPrice(getPrice().add(actual));
+					}
+				}
+			});
 		});
 
 		itemMap.getNode(new String[]{"InvoicedQuantity", "CreditedQuantity"}).ifPresent(icn -> {
@@ -122,7 +173,7 @@ public class Item implements IZUGFeRDExportableItem {
 		itemMap.getAsNodeMap("OrderLineReference")
 			// ubl
 			.flatMap(bordNodes -> bordNodes.getAsString("LineID"))
-			.ifPresent(this::addReferencedLineID);
+			.ifPresent(this::addBuyerOrderReferencedDocumentLineID);
 
 		itemMap.getAsString("ID")
 			.ifPresent(this::setId);
@@ -133,7 +184,7 @@ public class Item implements IZUGFeRDExportableItem {
 		itemMap.getAsString("AccountingCost")
 			.ifPresent(this::setAccountingReference);
 
-		if (product==null) { // CII
+		if (product == null) { // CII
 			if (itemMap.getNode("SpecifiedTradeProduct").isPresent()) {
 				product = new Product(itemMap.getNode("SpecifiedTradeProduct").get());
 			} else {
@@ -145,7 +196,7 @@ public class Item implements IZUGFeRDExportableItem {
 		itemMap.getAsNodeMap("SpecifiedLineTradeAgreement", "SpecifiedSupplyChainTradeAgreement").ifPresent(icnm -> {
 			icnm.getAsNodeMap("BuyerOrderReferencedDocument")
 				.flatMap(bordNodes -> bordNodes.getAsString("LineID"))
-				.ifPresent(this::addReferencedLineID);
+				.ifPresent(this::addBuyerOrderReferencedDocumentLineID);
 
 			icnm.getAsNodeMap("BuyerOrderReferencedDocument")
 				.flatMap(bordNodes -> bordNodes.getAsString("IssuerAssignedID"))
@@ -155,12 +206,12 @@ public class Item implements IZUGFeRDExportableItem {
 				npptpNodes.getAsBigDecimal("ChargeAmount").ifPresent(this::setPrice);
 				npptpNodes.getAsBigDecimal("BasisQuantity").ifPresent(this::setBasisQuantity);
 			});
-			icnm.getAsNodeMap("GrossPriceProductTradePrice").ifPresent(gpptpNodes -> {
+			icnm.getAsNodeMap("GrossPriceProductTradePrice").ifPresent(gpptpNodes ->
 				gpptpNodes.getAsNodeMap("AppliedTradeAllowanceCharge").ifPresent(gpptpAtacNodes -> {
 
 						/** mustang attributes differences between net and gross price to the product */
 						String chargeIndicator = gpptpAtacNodes.getAsStringOrNull("ChargeIndicator");
-						if ((chargeIndicator != null)&&(gpptpAtacNodes.getAsBigDecimal("ActualAmount").isPresent())) {
+						if (chargeIndicator != null && gpptpAtacNodes.getAsBigDecimal("ActualAmount").isPresent()) {
 							BigDecimal actual = gpptpAtacNodes.getAsBigDecimal("ActualAmount").get();
 							if (chargeIndicator.equals("true")) {
 								product.addCharge(new Charge(actual));
@@ -172,8 +223,8 @@ public class Item implements IZUGFeRDExportableItem {
 							}
 
 						}
-					});
-				});
+					})
+				);
 			icnm.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).
 				forEach(this::addReferencedDocument);
 		});
@@ -191,7 +242,7 @@ public class Item implements IZUGFeRDExportableItem {
 				}
 			});
 
-		itemMap.getAsNodeMap("SpecifiedLineTradeDelivery").ifPresent(icnm -> {
+		itemMap.getAsNodeMap("SpecifiedLineTradeDelivery").ifPresent(icnm ->
 			icnm.getAsNodeMap("DeliveryNoteReferencedDocument").ifPresent(dn -> {
 				dn.getAsString("IssuerAssignedID")
 					.ifPresent(this::setDeliveryNoteReferencedDocumentID);
@@ -204,8 +255,8 @@ public class Item implements IZUGFeRDExportableItem {
 					.map(XMLTools::getNodeValue)
 					.map(XMLTools::tryDate)
 					.ifPresent(this::setDeliveryNoteReferencedDocumentDate);
-			});
-		});
+			})
+		);
 
 		itemMap.getAsNodeMap("SpecifiedLineTradeSettlement", "SpecifiedSupplyChainTradeSettlement").ifPresent(icnm -> {
 			icnm.getAsNodeMap("ApplicableTradeTax")
@@ -221,13 +272,14 @@ public class Item implements IZUGFeRDExportableItem {
 				.flatMap(cnm -> cnm.getAsString("ExemptionReasonCode"))
 				.ifPresent(product::setTaxExemptionReasonCode);
 
-			icnm.getAllNodes("SpecifiedTradeAllowanceCharge").map(NodeMap::new).forEach(stac -> {
+			icnm.getAllNodes("SpecifiedTradeAllowanceCharge").map(NodeMap::new).forEach(stac ->
 				stac.getAsNodeMap("ChargeIndicator").ifPresent(ci -> {
 					String isChargeString = ci.getAsString("Indicator").get();
 					String percentString = stac.getAsStringOrNull("CalculationPercent");
 					String amountString = stac.getAsStringOrNull("ActualAmount");
 					String basisAmountString = stac.getAsStringOrNull("BasisAmount");
 					String reason = stac.getAsStringOrNull("Reason");
+					String reasonCode = stac.getAsStringOrNull("ReasonCode");
 					Charge izac = new Charge();
 					if (isChargeString.equalsIgnoreCase("false")) {
 						izac = new Allowance();
@@ -246,20 +298,26 @@ public class Item implements IZUGFeRDExportableItem {
 					if (reason != null) {
 						izac.setReason(reason);
 					}
+					if (reasonCode != null) {
+						izac.setReasonCode(reasonCode);
+					}
 
 					if (isChargeString.equalsIgnoreCase("false")) {
 						addAllowance(izac);
 					} else {
 						addCharge(izac);
 					}
-				});
-
-			});
+				})
+			);
 			if (recalcPrice && !BigDecimal.ZERO.equals(quantity)) {
 				icnm.getAsNodeMap("SpecifiedTradeSettlementLineMonetarySummation")
 					.flatMap(cnm -> cnm.getAsBigDecimal("LineTotalAmount"))
-					.ifPresent(lineTotal -> setPrice(lineTotal.divide(quantity, 4, RoundingMode.HALF_UP)));
+					// minScale = 2 fits most currencies in practice. Possible improvement could be to determine the scale by the invoices currency dynamically
+					.ifPresent(lineTotal -> setPrice(BigDecimalUtils.divideReversible(lineTotal, quantity, 2)));
 			}
+			icnm.getAsNodeMap("SpecifiedTradeSettlementLineMonetarySummation")
+				.flatMap(cnm -> cnm.getAsBigDecimal("LineTotalAmount"))
+				.ifPresent(lineTotal -> setLineTotalAmount(lineTotal.setScale(2)));
 
 			icnm.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).forEach(this::addAdditionalReference);
 
@@ -280,6 +338,7 @@ public class Item implements IZUGFeRDExportableItem {
 			String percentString = stac.getAsStringOrNull("MultiplierFactorNumeric");
 			String amountString = stac.getAsStringOrNull("Amount");
 			String reason = stac.getAsStringOrNull("AllowanceChargeReason");
+			String reasonCode = stac.getAsStringOrNull("AllowanceChargeReasonCode");
 			Charge izac = new Charge();
 			if (isChargeString.equalsIgnoreCase("false")) {
 				izac = new Allowance();
@@ -295,6 +354,9 @@ public class Item implements IZUGFeRDExportableItem {
 			if (reason != null) {
 				izac.setReason(reason);
 			}
+			if (reasonCode != null) {
+				izac.setReasonCode(reasonCode);
+			}
 
 			if (isChargeString.equalsIgnoreCase("false")) {
 				addAllowance(izac);
@@ -305,7 +367,7 @@ public class Item implements IZUGFeRDExportableItem {
 		});
 
 		itemMap.getAsNodeMap("AssociatedDocumentLineDocument").ifPresent(adld -> {
-			List<IncludedNote> includedNotes = new ArrayList<>();
+			List<IncludedNote> in = new ArrayList<>();
 			adld.getAllNodes("IncludedNote").forEach(item -> {
 				String subjectCode = "";
 				String content = null;
@@ -323,16 +385,16 @@ public class Item implements IZUGFeRDExportableItem {
 				boolean foundCode = false;
 				for (SubjectCode code : SubjectCode.values()) {
 					if (code.toString().equals(subjectCode)) {
-						includedNotes.add(new IncludedNote(content, code));
+						in.add(new IncludedNote(content, code));
 						foundCode = true;
 						break;
 					}
 				}
 				if (!foundCode) {
-					includedNotes.add(new IncludedNote(content, null));
+					in.add(new IncludedNote(content, null));
 				}
 			});
-			addNotes(includedNotes);
+			addNotes(in);
 		});
 	}
 
@@ -373,11 +435,6 @@ public class Item implements IZUGFeRDExportableItem {
 		return this;
 	}
 
-	@Deprecated
-	public Item addReferencedLineID(String s) {
-		return addBuyerOrderReferencedDocumentLineID(s);
-	}
-
 	@Override
 	public String getBuyerOrderReferencedDocumentID() {
 		return buyerOrderReferencedDocumentID;
@@ -386,20 +443,6 @@ public class Item implements IZUGFeRDExportableItem {
 	public Item addBuyerOrderReferencedDocumentID(String s) {
 		buyerOrderReferencedDocumentID = s;
 		return this;
-	}
-
-	@JsonIgnore
-	@Override
-	public IZUGFeRDAllowanceCharge[] getAllowances() { // in JSON is already returned as itemAllowances (and only read from there)
-		IZUGFeRDAllowanceCharge[] izac = new IZUGFeRDAllowanceCharge[Allowances.size()];
-		return Allowances.toArray(izac);
-	}
-
-	@JsonIgnore
-	@Override
-	public IZUGFeRDAllowanceCharge[] getCharges() { // in JSON is already returned as itemAllowances (and only read from there)
-		IZUGFeRDAllowanceCharge[] izac = new IZUGFeRDAllowanceCharge[Charges.size()];
-		return Charges.toArray(izac);
 	}
 
 	/***
@@ -411,6 +454,7 @@ public class Item implements IZUGFeRDExportableItem {
 		return buyerOrderReferencedDocumentLineID;
 	}
 
+	@Override
 	public BigDecimal getLineTotalAmount() {
 		return lineTotalAmount;
 	}
@@ -461,6 +505,7 @@ public class Item implements IZUGFeRDExportableItem {
 		return this;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -504,38 +549,40 @@ public class Item implements IZUGFeRDExportableItem {
 
 	@Override
 	public IZUGFeRDAllowanceCharge[] getItemAllowances() {
-		if (Allowances.isEmpty()) {
+		if (allowances.isEmpty()) {
 			return null;
-		} else
-			return Allowances.toArray(new IZUGFeRDAllowanceCharge[0]);
-	}
-
-	/***
-	 * jackson convenience method
-	 */
-	public void setItemAllowances(ArrayList<Allowance> theAllowances) {
-		if (theAllowances != null) {
-			Allowances.clear();
-			Allowances.addAll(theAllowances);
+		} else {
+			return allowances.toArray(new IZUGFeRDAllowanceCharge[0]);
 		}
 	}
 
 	/***
 	 * jackson convenience method
 	 */
-	public void setItemCharges(ArrayList<Charge> theCharges) {
+	public void setItemAllowances(List<Allowance> theAllowances) {
+		if (theAllowances != null) {
+			allowances.clear();
+			allowances.addAll(theAllowances);
+		}
+	}
+
+	/***
+	 * jackson convenience method
+	 */
+	public void setItemCharges(List<Charge> theCharges) {
 		if (theCharges != null) {
-			Charges.clear();
-			Charges.addAll(theCharges);
+			charges.clear();
+			charges.addAll(theCharges);
 		}
 	}
 
 	@Override
 	public IZUGFeRDAllowanceCharge[] getItemCharges() {
-		if (Charges.isEmpty()) {
+		if (charges.isEmpty()) {
 			return null;
-		} else
-			return Charges.toArray(new IZUGFeRDAllowanceCharge[0]);
+		} else {
+			return charges.toArray(new IZUGFeRDAllowanceCharge[0]);
+		}
 	}
 
 
@@ -560,7 +607,7 @@ public class Item implements IZUGFeRDExportableItem {
 	 * @return fluent setter
 	 */
 	public Item addCharge(IZUGFeRDAllowanceCharge izac) {
-		Charges.add(izac);
+		charges.add(izac);
 		return this;
 	}
 
@@ -572,7 +619,7 @@ public class Item implements IZUGFeRDExportableItem {
 	 */
 	public Item addAllowance(IZUGFeRDAllowanceCharge izac) {
 
-		Allowances.add(izac);
+		allowances.add(izac);
 		return this;
 	}
 
@@ -586,10 +633,6 @@ public class Item implements IZUGFeRDExportableItem {
 			notes = new ArrayList<>();
 		}
 		notes.add(text);
-
-		addNote(IncludedNote.unspecifiedNote(text));
-
-
 		return this;
 	}
 
@@ -604,8 +647,6 @@ public class Item implements IZUGFeRDExportableItem {
 			includedNotes = new ArrayList<>();
 		}
 		includedNotes.add(theNote);
-
-
 		return this;
 	}
 
@@ -751,7 +792,7 @@ public class Item implements IZUGFeRDExportableItem {
 	}
 
 	/***
-	 * For line seller 
+	 * For line seller
 	 * @param seller The line seller
 	 * @return fluent setter
 	 */

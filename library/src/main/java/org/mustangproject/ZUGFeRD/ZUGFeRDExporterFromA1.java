@@ -68,11 +68,11 @@ public class ZUGFeRDExporterFromA1 extends ZUGFeRDExporterFromA3 {
 
 	@Override
 	public ZUGFeRDExporterFromA1 setProfile(Profile p) {
-		return (ZUGFeRDExporterFromA1)super.setProfile(p);
+		return (ZUGFeRDExporterFromA1) super.setProfile(p);
 	}
 	@Override
 	public ZUGFeRDExporterFromA1 setProfile(String profileName) {
-		return (ZUGFeRDExporterFromA1)super.setProfile(profileName);
+		return (ZUGFeRDExporterFromA1) super.setProfile(profileName);
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class ZUGFeRDExporterFromA1 extends ZUGFeRDExporterFromA3 {
 		return (ZUGFeRDExporterFromA1) super.load(pdfBinary);
 	}
 	@Override
-	public ZUGFeRDExporterFromA1 load(InputStream pdfSource) throws IOException{
+	public ZUGFeRDExporterFromA1 load(InputStream pdfSource) throws IOException {
 		return (ZUGFeRDExporterFromA1) super.load(pdfSource);
 	}
 	@Override
@@ -105,24 +105,24 @@ public class ZUGFeRDExporterFromA1 extends ZUGFeRDExporterFromA3 {
 		return (ZUGFeRDExporterFromA1) super.setConformanceLevel(newLevel);
 	}
 	@Override
-	public ZUGFeRDExporterFromA1 setProducer(String producer){
+	public ZUGFeRDExporterFromA1 setProducer(String producer) {
 		return (ZUGFeRDExporterFromA1) super.setProducer(producer);
 	}
 	@Override
-	public ZUGFeRDExporterFromA1 setZUGFeRDVersion(EStandard est, int version){
+	public ZUGFeRDExporterFromA1 setZUGFeRDVersion(EStandard est, int version) {
 		return (ZUGFeRDExporterFromA1) super.setZUGFeRDVersion(est, version);
 	}
 	@Override
-	public ZUGFeRDExporterFromA1 setZUGFeRDVersion(int version){
+	public ZUGFeRDExporterFromA1 setZUGFeRDVersion(int version) {
 		return (ZUGFeRDExporterFromA1) super.setZUGFeRDVersion(version);
 	}
 	@Override
-	public ZUGFeRDExporterFromA1 setXML(byte[] zugferdData) throws IOException{
+	public ZUGFeRDExporterFromA1 setXML(byte[] zugferdData) throws IOException {
 		return (ZUGFeRDExporterFromA1) super.setXML(zugferdData);
 	}
 
 	@Override
-	public ZUGFeRDExporterFromA1 disableAutoClose(boolean disableAutoClose){
+	public ZUGFeRDExporterFromA1 disableAutoClose(boolean disableAutoClose) {
 		return (ZUGFeRDExporterFromA1) super.disableAutoClose(disableAutoClose);
 	}
 	public ZUGFeRDExporterFromA1 convertOnly() {

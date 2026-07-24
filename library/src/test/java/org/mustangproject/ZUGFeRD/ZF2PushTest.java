@@ -22,7 +22,6 @@
 package org.mustangproject.ZUGFeRD;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -30,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mustangproject.*;
@@ -50,21 +48,21 @@ import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ZF2PushTest extends TestCase {
-	final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20201121_508.pdf";
-	final String TARGET_ALLOWANCESPDF = "./target/testout-ZF2PushAllowances.pdf";
-	final String TARGET_CREDITNOTEPDF = "./target/testout-ZF2PushCreditNote.pdf";
-	final String TARGET_CORRECTIONPDF = "./target/testout-ZF2PushCorrection.pdf";
-	final String TARGET_ITEMGROSS = "./target/testout-ZF2PushGross.pdf";
-	final String TARGET_ITEMCHARGESALLOWANCESPDF = "./target/testout-ZF2PushItemChargesAllowances.pdf";
-	final String TARGET_CHARGESALLOWANCESPDF = "./target/testout-ZF2PushChargesAllowances.pdf";
-	final String TARGET_RELATIVECHARGESALLOWANCESPDF = "./target/testout-ZF2PushRelativeChargesAllowances.pdf";
-	final String TARGET_ATTACHMENTSPDF = "./target/testout-ZF2PushAttachments.pdf";
-	final String TARGET_BANKPDF = "./target/testout-ZF2PushBank.pdf";
-	final String TARGET_PUSHEDGE = "./target/testout-ZF2PushEdge.pdf";
-	final String TARGET_INTRACOMMUNITYSUPPLYMANUALPDF = "./target/testout-ZF2PushIntraCommunitySupplyManual.pdf";
-	final String TARGET_INTRACOMMUNITYSUPPLYPDF = "./target/testout-ZF2PushIntraCommunitySupply.pdf";
-	final String TARGET_REVERSECHARGEPDF = "./target/testout-ZF2PushReverseCharge.pdf";
-	final String TARGET_ALLOWANCES_TAXES = "./target/testout-ZF2PushAllowancesTaxes.pdf";
+	private static final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20201121_508.pdf";
+	private static final String TARGET_ALLOWANCESPDF = "./target/testout-ZF2PushAllowances.pdf";
+	private static final String TARGET_CREDITNOTEPDF = "./target/testout-ZF2PushCreditNote.pdf";
+	private static final String TARGET_CORRECTIONPDF = "./target/testout-ZF2PushCorrection.pdf";
+	private static final String TARGET_ITEMGROSS = "./target/testout-ZF2PushGross.pdf";
+	private static final String TARGET_ITEMCHARGESALLOWANCESPDF = "./target/testout-ZF2PushItemChargesAllowances.pdf";
+	private static final String TARGET_CHARGESALLOWANCESPDF = "./target/testout-ZF2PushChargesAllowances.pdf";
+	private static final String TARGET_RELATIVECHARGESALLOWANCESPDF = "./target/testout-ZF2PushRelativeChargesAllowances.pdf";
+	private static final String TARGET_ATTACHMENTSPDF = "./target/testout-ZF2PushAttachments.pdf";
+	private static final String TARGET_BANKPDF = "./target/testout-ZF2PushBank.pdf";
+	private static final String TARGET_PUSHEDGE = "./target/testout-ZF2PushEdge.pdf";
+	private static final String TARGET_INTRACOMMUNITYSUPPLYMANUALPDF = "./target/testout-ZF2PushIntraCommunitySupplyManual.pdf";
+	private static final String TARGET_INTRACOMMUNITYSUPPLYPDF = "./target/testout-ZF2PushIntraCommunitySupply.pdf";
+	private static final String TARGET_REVERSECHARGEPDF = "./target/testout-ZF2PushReverseCharge.pdf";
+	private static final String TARGET_ALLOWANCES_TAXES = "./target/testout-ZF2PushAllowancesTaxes.pdf";
 
 	public void testPushExport() {
 		/***
@@ -77,11 +75,9 @@ public class ZF2PushTest extends TestCase {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
-			InputStream SOURCE_PDF = this.getClass()
-				.getResourceAsStream("/MustangGnuaccountingBeispielRE-20201121_508blanko.pdf");
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
+			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20201121_508blanko.pdf");
 
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors();
 			ze.load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2);
@@ -106,9 +102,7 @@ public class ZF2PushTest extends TestCase {
 		Invoice i = new Invoice();
 		try {
 			zii.extractInto(i);
-		} catch (XPathExpressionException e) {
-			throw new RuntimeException(e);
-		} catch (ParseException e) {
+		} catch (ParseException | XPathExpressionException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -146,10 +140,8 @@ public class ZF2PushTest extends TestCase {
 		String taxID = "9990815";
 		String theNote = "oh lala";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors();
 			ze.load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2);
@@ -174,9 +166,7 @@ public class ZF2PushTest extends TestCase {
 		Invoice i = null;
 		try {
 			i = zii.extractInvoice();
-		} catch (XPathExpressionException e) {
-			throw new RuntimeException(e);
-		} catch (ParseException e) {
+		} catch (ParseException | XPathExpressionException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -209,10 +199,8 @@ public class ZF2PushTest extends TestCase {
 		String priceStr = "1.00";
 		String taxID = "9990815";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2);
 
@@ -234,12 +222,8 @@ public class ZF2PushTest extends TestCase {
 
 			assertEquals(IBAN, read.getSender().getBankDetails().get(0).getIBAN());
 			ze.export(TARGET_BANKPDF);
-		} catch (IOException e) {
+		} catch (IOException | ParseException | XPathExpressionException e) {
 			fail("IOException should not be raised");
-		} catch (XPathExpressionException e) {
-			fail("XPathException should not be raised");
-		} catch (ParseException e) {
-			fail("ParseException should not be raised");
 		}
 	}
 	public void testGross() {
@@ -248,13 +232,10 @@ public class ZF2PushTest extends TestCase {
 		String number = "123";
 		String priceStr = "3.00";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProfile(Profiles.getByName("Extended"));
-
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile("extended");
 			//	ze.setTransaction(new Invoice().setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date()).setSender(new TradeParty(orgname,"teststr", "55232","teststadt","DE")).setOwnTaxID("4711").setOwnVATID("DE0815").setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE")).setNumber(number)
 			//					.addItem(new Item(new Product("Testprodukt", "", "H84", new BigDecimal(19)), amount, new BigDecimal(1.0)).addAllowance(new Allowance().setPercent(new BigDecimal(50)))));
@@ -265,7 +246,6 @@ public class ZF2PushTest extends TestCase {
 				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE")
 					.setContact(new Contact("contact testname", "123456", "contact.testemail@example.org").setFax("0911623562")))
 				.setNumber(number)
-
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)).addAllowance(new Allowance(new BigDecimal("0.1"))), price, qty));
 			ze.setTransaction(i);
 
@@ -294,7 +274,7 @@ public class ZF2PushTest extends TestCase {
 
 			ObjectMapper mapper = new ObjectMapper();
 
-			String jsonArray = mapper.writeValueAsString(ci);
+			mapper.writeValueAsString(ci);
 
 			// Reading ZUGFeRD
 			assertEquals(new BigDecimal("34.51"), ci.getDuePayable());
@@ -312,13 +292,13 @@ public class ZF2PushTest extends TestCase {
 		String number = "123";
 		String priceStr = "3.00";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
-			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
+		Charge charge = new Charge(new BigDecimal(1)).setReasonCode("ABK").setReason("AReason");
+		charge.setTaxRateApplicablePercent(new BigDecimal(19));
 
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
+			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProfile(Profiles.getByName("Extended"));
-
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile("extended");
 			//	ze.setTransaction(new Invoice().setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date()).setSender(new TradeParty(orgname,"teststr", "55232","teststadt","DE")).setOwnTaxID("4711").setOwnVATID("DE0815").setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE")).setNumber(number)
 			//					.addItem(new Item(new Product("Testprodukt", "", "H84", new BigDecimal(19)), amount, new BigDecimal(1.0)).addAllowance(new Allowance().setPercent(new BigDecimal(50)))));
@@ -328,7 +308,7 @@ public class ZF2PushTest extends TestCase {
 				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE")
 					.setContact(new Contact("contact testname", "123456", "contact.testemail@example.org").setFax("0911623562")))
 				.setNumber(number)
-				.addCharge(new Charge(new BigDecimal(1)).setReasonCode("ABK").setReason("AReason").setTaxPercent(new BigDecimal(19)))
+				.addCharge(charge)
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)).addAllowance(new Allowance(new BigDecimal("0.1")).setReasonCode("95")))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)).addAllowance(new Allowance().setPercent(new BigDecimal(50)).setReason("In love with salesperson")))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(2.0)).addCharge(new Charge(new BigDecimal(1)).setReasonCode("ABK").setReason("AnotherReason")))
@@ -362,6 +342,100 @@ public class ZF2PushTest extends TestCase {
 
 
 	/***
+	 * BT-137 (BasisAmount) and BT-138 (CalculationPercent) must be serialized at line level
+	 * for the EN16931 and XRechnung profiles, using the caller-supplied values, and must appear
+	 * before ActualAmount.
+	 */
+	public void testItemAllowanceChargePercentBasisExport() {
+		Invoice invoice = new Invoice().setNumber("1").setIssueDate(new Date()).setDueDate(new Date())
+			.setSender(new TradeParty("Seller", "Street", "12345", "City", "DE").addVATID("DE123456789"))
+			.setRecipient(new TradeParty("Buyer", "Street", "12345", "City", "DE").setVATID("DE123456789"))
+			.addItem(new Item(new Product("Item", "", "C62", new BigDecimal("19")), new BigDecimal("80.00"), new BigDecimal("5"))
+				.addAllowance(new Allowance(new BigDecimal("40.00"))
+					.setPercent(new BigDecimal("10.00"))
+					.setBasisAmount(new BigDecimal("400.00"))
+					.setReasonCode("95").setReason("Volume discount"))
+				.addCharge(new Charge(new BigDecimal("20.00"))
+					.setPercent(new BigDecimal("5.00"))
+					.setBasisAmount(new BigDecimal("400.00"))
+					.setReasonCode("ABK").setReason("Handling")));
+
+		for (String profileName : new String[]{"EN16931", "XRechnung"}) {
+			ZUGFeRD2PullProvider pp = new ZUGFeRD2PullProvider();
+			pp.setProfile(Profiles.getByName(profileName));
+			pp.generateXML(invoice);
+			String theXML = new String(pp.getXML(), StandardCharsets.UTF_8);
+
+			assertTrue(profileName + ": missing line-level allowance CalculationPercent",
+				theXML.contains("<ram:CalculationPercent>10.00</ram:CalculationPercent>"));
+			assertTrue(profileName + ": missing line-level charge CalculationPercent",
+				theXML.contains("<ram:CalculationPercent>5.00</ram:CalculationPercent>"));
+			assertTrue(profileName + ": BasisAmount must use the caller-supplied value, not a derivation",
+				theXML.contains("<ram:BasisAmount>400.00</ram:BasisAmount>"));
+
+			int percentIdx = theXML.indexOf("<ram:CalculationPercent>10.00");
+			int basisIdx = theXML.indexOf("<ram:BasisAmount>400.00", percentIdx);
+			int actualIdx = theXML.indexOf("<ram:ActualAmount>40.00", percentIdx);
+			assertTrue(profileName + ": CalculationPercent/BasisAmount must precede ActualAmount",
+				percentIdx >= 0 && basisIdx > percentIdx && actualIdx > basisIdx);
+		}
+	}
+
+
+	/***
+	 * A line-level allowance without percent/basis must not emit empty CalculationPercent/BasisAmount.
+	 */
+	public void testItemAllowanceWithoutPercentBasisExport() {
+		Invoice invoice = new Invoice().setNumber("1").setIssueDate(new Date()).setDueDate(new Date())
+			.setSender(new TradeParty("Seller", "Street", "12345", "City", "DE").addVATID("DE123456789"))
+			.setRecipient(new TradeParty("Buyer", "Street", "12345", "City", "DE"))
+			.addItem(new Item(new Product("Item", "", "C62", new BigDecimal("19")), new BigDecimal("80.00"), new BigDecimal("5"))
+				.addAllowance(new Allowance(new BigDecimal("40.00")).setReasonCode("95").setReason("Volume discount")));
+
+		ZUGFeRD2PullProvider pp = new ZUGFeRD2PullProvider();
+		pp.setProfile(Profiles.getByName("EN16931"));
+		pp.generateXML(invoice);
+		String theXML = new String(pp.getXML(), StandardCharsets.UTF_8);
+
+		int start = theXML.indexOf("<ram:SpecifiedTradeAllowanceCharge>");
+		int end = theXML.indexOf("</ram:SpecifiedTradeAllowanceCharge>", start);
+		String allowanceCharge = theXML.substring(start, end);
+		assertTrue(allowanceCharge.contains("<ram:ActualAmount>40.00</ram:ActualAmount>"));
+		assertFalse("no CalculationPercent expected when percent is unset",
+			allowanceCharge.contains("<ram:CalculationPercent>"));
+		assertFalse("no BasisAmount expected in the item allowance when basis is unset",
+			allowanceCharge.contains("<ram:BasisAmount>"));
+	}
+
+
+	/***
+	 * When a line-level allowance has a percent but no explicit basis, BasisAmount (BT-137) is
+	 * derived from the line subtotal (price/basisQuantity * quantity) for the EN16931 profile.
+	 */
+	public void testItemAllowancePercentOnlyDerivesBasisExport() {
+		Invoice invoice = new Invoice().setNumber("1").setIssueDate(new Date()).setDueDate(new Date())
+			.setSender(new TradeParty("Seller", "Street", "12345", "City", "DE").addVATID("DE123456789"))
+			.setRecipient(new TradeParty("Buyer", "Street", "12345", "City", "DE"))
+			.addItem(new Item(new Product("Item", "", "C62", new BigDecimal("19")), new BigDecimal("80.00"), new BigDecimal("5"))
+				.addAllowance(new Allowance(new BigDecimal("40.00"))
+					.setPercent(new BigDecimal("10.00"))
+					.setReasonCode("95").setReason("Volume discount")));
+
+		ZUGFeRD2PullProvider pp = new ZUGFeRD2PullProvider();
+		pp.setProfile(Profiles.getByName("EN16931"));
+		pp.generateXML(invoice);
+		String theXML = new String(pp.getXML(), StandardCharsets.UTF_8);
+
+		int start = theXML.indexOf("<ram:SpecifiedTradeAllowanceCharge>");
+		int end = theXML.indexOf("</ram:SpecifiedTradeAllowanceCharge>", start);
+		String allowanceCharge = theXML.substring(start, end);
+		assertTrue(allowanceCharge.contains("<ram:CalculationPercent>10.00</ram:CalculationPercent>"));
+		// basis not supplied by the caller -> derived from 80.00 * 5
+		assertTrue(allowanceCharge.contains("<ram:BasisAmount>400.00</ram:BasisAmount>"));
+	}
+
+
+	/***
 	 * you can activate intra community suppliy on item level
 	 */
 	public void testIntraCommunitySupplyItemExport() {
@@ -370,10 +444,8 @@ public class ZF2PushTest extends TestCase {
 		String number = "123";
 		String priceStr = "3.00";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile("extended");
 			//	ze.setTransaction(new Invoice().setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date()).setSender(new TradeParty(orgname,"teststr", "55232","teststadt","DE")).setOwnTaxID("4711").setOwnVATID("DE0815").setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE")).setNumber(number)
@@ -427,10 +499,8 @@ public class ZF2PushTest extends TestCase {
 
 		String taxID = "9990815";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors();
 			ze.load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2);
@@ -450,12 +520,9 @@ public class ZF2PushTest extends TestCase {
 			fail("IOException should not be raised");
 		}
 		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(TARGET_INTRACOMMUNITYSUPPLYMANUALPDF);
-		Invoice i = null;
 		try {
-			i = zii.extractInvoice();
-		} catch (XPathExpressionException e) {
-			throw new RuntimeException(e);
-		} catch (ParseException e) {
+			zii.extractInvoice();
+		} catch (ParseException | XPathExpressionException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -483,10 +550,8 @@ public class ZF2PushTest extends TestCase {
 		String number = "123";
 		String priceStr = "3.00";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile("extended");
 
@@ -534,22 +599,26 @@ public class ZF2PushTest extends TestCase {
 		String number = "123";
 		String priceStr = "3.00";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
-			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
 
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
+		Charge charge = new Charge(new BigDecimal(0.5)).setReasonCode("ABK");
+		charge.setTaxRateApplicablePercent(new BigDecimal(19));
+
+		Charge allowance = new Allowance(new BigDecimal(0.2)).setReasonCode("95");
+		allowance.setTaxRateApplicablePercent(new BigDecimal(19));
+
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
+			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile(Profiles.getByName("en16931"));
-
 			ze.setTransaction(new Invoice().setCurrency("CHF").setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date())
 				.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").addTaxID("4711").addVATID("DE0815"))
-				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE"))
+				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE").addVATID("DE08154711"))
 				.setNumber(number)
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)))
-				.addCharge(new Charge(new BigDecimal(0.5)).setTaxPercent(new BigDecimal(19)).setReasonCode("ABK"))
-				.addAllowance(new Allowance(new BigDecimal(0.2)).setTaxPercent(new BigDecimal(19)).setReasonCode("95"))
+				.addCharge(charge)
+				.addAllowance(allowance)
 			);
 			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
@@ -588,12 +657,19 @@ public class ZF2PushTest extends TestCase {
 		String priceStr = "1.00";
 		String taxID = "9990815";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+
+		Charge charge = new Charge(new BigDecimal(0.5)).setReason("quick delivery charge");
+		charge.setTaxRateApplicablePercent(new BigDecimal(16));
+
+		Charge allowance = new Allowance(new BigDecimal(0.2)).setReason("discount");
+		allowance.setTaxRateApplicablePercent(new BigDecimal(16));
+
+		Charge itemAllowance = new Allowance(new BigDecimal(0.02)).setReason("item discount");
+		itemAllowance.setTaxRateApplicablePercent(new BigDecimal(16));
+
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
-
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile(Profiles.getByName("extended"));
 
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -614,16 +690,17 @@ public class ZF2PushTest extends TestCase {
 						.setContact(new Contact("Franz Müller", "01779999999", "franz@mueller.de", "teststr. 12", "55232", "Entenhausen", "DE").setFax("++49555123456")).setAdditionalAddress("Hinterhaus 3"))
 					.setInvoicer( new TradeParty("Abweichender Rechnungssteller", "Teststr.12", "04711", "Entenhausen", "DE") )
 					.setInvoicee( new TradeParty("Abweichender Rechnungsempfänger", "Teststr.42", "00815", "Entenhausen", "DE") )
-					.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(16)).addGlobalID(gtin).setSellerAssignedID("4711"), price, new BigDecimal(1.0)).setId("a123").
-						addAdditionalReference(dr2).addBuyerOrderReferencedDocumentID("orderId").addBuyerOrderReferencedDocumentLineID("xxx").addReferencedLineID("xxx")
-						.addNote("item level 1/1").addAllowance(new Allowance(new BigDecimal(0.02)).setReason("item discount").setTaxPercent(new BigDecimal(16))).setDetailedDeliveryPeriod(sdf.parse("2020-01-13"), sdf.parse("2020-01-15"))
+					.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(16)).addGlobalID(gtin).setSellerAssignedID("4711"), price, new BigDecimal(1.0)).setId("a123")
+						.addAdditionalReference(dr2).addBuyerOrderReferencedDocumentID("orderId").addBuyerOrderReferencedDocumentLineID("xxx")
+						.addNote("item level 1/1")
+						.addAllowance(itemAllowance).setDetailedDeliveryPeriod(sdf.parse("2020-01-13"), sdf.parse("2020-01-15"))
 						.setDeliveryNoteReferencedDocumentID("deliverynote123")
 						.setDeliveryNoteReferencedDocumentLineID("deliverypos456")
 						.setDeliveryNoteReferencedDocumentDate(new SimpleDateFormat("dd.MM.yyyy").parse("14.01.2026"))
 						.setAccountingReference("#11111#2222#xxxx#")
 					)
-					.addCharge(new Charge(new BigDecimal(0.5)).setReason("quick delivery charge").setTaxPercent(new BigDecimal(16)))
-					.addAllowance(new Allowance(new BigDecimal(0.2)).setReason("discount").setTaxPercent(new BigDecimal(16)))
+					.addCharge(charge)
+					.addAllowance(allowance)
 					.addCashDiscount(new CashDiscount(new BigDecimal(2), 14))
 					.setTenderReferencedDocument(dr1)
 					.setDeliveryDate(sdf.parse("2020-11-02")).setNumber(number).setVATDueDateTypeCode(EventTimeCodeTypeConstants.PAYMENT_DATE)
@@ -717,23 +794,30 @@ public class ZF2PushTest extends TestCase {
 		String orgname = "Test company";
 		String number = "123";
 		BigDecimal qty = new BigDecimal("20");
-		try {
+
+		Charge allowance = new Allowance(new BigDecimal(600));
+		allowance.setTaxRateApplicablePercent(new BigDecimal(19));
+
+		Item item = new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)).addAllowance(new Allowance(BigDecimal.ONE)), new BigDecimal(500.0), qty);
+		Charge itemAllowance = new Allowance(new BigDecimal(300));
+		allowance.setTaxRateApplicablePercent(new BigDecimal(19));
+		item.addAllowance(itemAllowance);
+
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
-
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile(Profiles.getByName("en16931"));
-
 			ze.setTransaction(new Invoice().setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date())
 				.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").addTaxID("4711").addVATID("DE0815"))
 				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE"))
 				.setNumber(number)
-				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)).addAllowance(new Allowance(BigDecimal.ONE)), new BigDecimal(500.0), qty).addAllowance(new Allowance(new BigDecimal(300)).setTaxPercent(new BigDecimal(19))))
-				.addAllowance(new Allowance(new BigDecimal(600)).setTaxPercent(new BigDecimal(19)))
+				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)).addAllowance(new Allowance(BigDecimal.ONE)), new BigDecimal(500.0), qty).addAllowance(new Allowance(new BigDecimal(300))).setTax(new BigDecimal(19)))
+				.addAllowance(allowance)
+				.addLogisticServiceCharge(new LogisticsServiceCharge().setAppliedAmount(BigDecimal.valueOf(25)))
 			);
 			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
+			assertFalse(theXML.contains("<ram:SpecifiedLogisticsServiceCharge"));
 			ze.export(TARGET_ALLOWANCESPDF);
 		} catch (IOException e) {
 			fail("IOException should not be raised");
@@ -761,14 +845,19 @@ public class ZF2PushTest extends TestCase {
 		String number = "123";
 		String priceStr = "3.00";
 		BigDecimal price = new BigDecimal(priceStr);
-		try {
+
+		Charge charge = new Charge().setPercent(new BigDecimal(50)).setBasisAmount(price).setReasonCode("ABK").setReason("Verschiedenes");
+		charge.setTaxRateApplicablePercent(new BigDecimal(19));
+
+		Charge allowance = new Allowance().setPercent(new BigDecimal(50)).setReasonCode("95").setReason("Mengenrabatt");
+		allowance.setTaxRateApplicablePercent(new BigDecimal(19));
+
+		LogisticsServiceCharge logisticsServiceCharge = new LogisticsServiceCharge().setDescription("Frachtkosten").setAppliedAmount(BigDecimal.valueOf(25));
+		logisticsServiceCharge.setTaxRateApplicablePercent(new BigDecimal(19));
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
-
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile(Profiles.getByName("extended"));
-
 			ze.setTransaction(new Invoice().setCurrency("CHF").setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date())
 				.setSender(new TradeParty(orgname, "teststr", "55232", "teststadt", "DE").addTaxID("4711").addVATID("DE0815"))
 				.setRecipient(new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE"))
@@ -776,8 +865,9 @@ public class ZF2PushTest extends TestCase {
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)))
 				.addItem(new Item(new Product("Testprodukt", "", "H87", new BigDecimal(19)), price, new BigDecimal(1.0)))
-						.addCharge(new Charge().setPercent(new BigDecimal(50)).setBasisAmount(price).setTaxPercent(new BigDecimal(19)).setReasonCode("ABK").setReason("Verschiedenes"))
-						.addAllowance(new Allowance().setPercent(new BigDecimal(50)).setTaxPercent(new BigDecimal(19)).setReasonCode("95").setReason("Mengenrabatt"))
+						.addCharge(charge)
+						.addAllowance(allowance)
+						.addLogisticServiceCharge(logisticsServiceCharge)
 			);
 			String theXML = new String(ze.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:CrossIndustryInvoice"));
@@ -790,7 +880,7 @@ public class ZF2PushTest extends TestCase {
 		ZUGFeRDImporter zi = new ZUGFeRDImporter(TARGET_RELATIVECHARGESALLOWANCESPDF);
 
 		assertEquals("CHF", zi.getInvoiceCurrencyCode());
-		assertEquals("10.71", zi.getAmount());
+		assertEquals("40.46", zi.getAmount());
 		assertEquals(orgname, zi.getHolder());
 		assertEquals(number, zi.getForeignReference());
 		try {
@@ -813,11 +903,8 @@ public class ZF2PushTest extends TestCase {
 		String priceStr = "1.00";
 		BigDecimal price = new BigDecimal(priceStr);
 		BigDecimal qty = new BigDecimal(-1.0);
-		try {
-			InputStream SOURCE_PDF = this.getClass()
-				.getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
+			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2);
 			// no due date, since we are not expecting money
@@ -866,10 +953,8 @@ public class ZF2PushTest extends TestCase {
 		String priceStr = "1.00";
 		BigDecimal price = new BigDecimal(priceStr);
 		BigDecimal qty = new BigDecimal(1.0);
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2);
 			Invoice i = new Invoice().setIssueDate(new Date()).setDueDate(new Date()).setDetailedDeliveryPeriod(new Date(), new Date()).setDeliveryDate(new Date())
@@ -979,8 +1064,6 @@ public class ZF2PushTest extends TestCase {
 	public void testExemptionReasonNotWrittenToLineLevelForEN16931Profile() {
 		String orgname = "Test company";
 		String number = "123";
-		BigDecimal price = new BigDecimal(1.0);
-		BigDecimal qty = new BigDecimal(1.0);
 		final String exemptionReason = "Kleinunternehmer gemäß §19 UStG";
 		final String exemptionReasonCode = "VATEX-EU-I";
 
@@ -1032,34 +1115,30 @@ public class ZF2PushTest extends TestCase {
 
 		Allowance allowance1 = new Allowance(new BigDecimal("10.00"));
 		allowance1.setReason("Discount");
-		allowance1.setCategoryCode(TaxCategoryCodeTypeConstants.INTRACOMMUNITY);
-		allowance1.setTaxPercent(BigDecimal.ZERO);
+		allowance1.setTaxCategoryCode(TaxCategoryCodeTypeConstants.INTRACOMMUNITY);
+		allowance1.setTaxRateApplicablePercent(BigDecimal.ZERO);
 		allowance1.setTaxExemptionReasonCode("VATEX-EU-IC");
 		allowance1.setTaxExemptionReason(invoice.getZFItems()[0].getProduct().getTaxExemptionReason());
 		invoice.addAllowance(allowance1);
 
 		Allowance allowance2 = new Allowance(new BigDecimal("5.00"));
 		allowance2.setReason("another discount");
-		allowance2.setCategoryCode(TaxCategoryCodeTypeConstants.INTRACOMMUNITY);
-		allowance2.setTaxPercent(BigDecimal.ZERO);
+		allowance2.setTaxCategoryCode(TaxCategoryCodeTypeConstants.INTRACOMMUNITY);
+		allowance2.setTaxRateApplicablePercent(BigDecimal.ZERO);
 		allowance2.setTaxExemptionReasonCode("VATEX-EU-IC");
 		allowance2.setTaxExemptionReason(invoice.getZFItems()[0].getProduct().getTaxExemptionReason());
 		invoice.addAllowance(allowance2);
 
-		try {
+		try (ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
 			ze.ignorePDFAErrors().load(SOURCE_PDF);
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).setProfile(Profiles.getByName("extended"));
-
 			ze.setTransaction(invoice);
 			ze.export(TARGET_ALLOWANCES_TAXES);
 
 			ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(TARGET_ALLOWANCES_TAXES);
 			try {
-				Invoice i = zii.extractInvoice();
-
-
+				zii.extractInvoice();
 			} catch (XPathExpressionException e) {
 				fail("XPathExpressionException should not be raised");
 			} catch (ParseException e) {
