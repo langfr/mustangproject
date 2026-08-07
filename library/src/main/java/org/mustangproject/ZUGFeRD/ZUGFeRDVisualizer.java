@@ -346,6 +346,7 @@ public class ZUGFeRDVisualizer {
 		return byteHolder.get();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void toPDFfromFOP(String fopInput, Supplier<OutputStream> outputStreamDelegate, Consumer<OutputStream> consumerDelegate) {
 
 		DefaultConfigurationBuilder cfgBuilder = new DefaultConfigurationBuilder();

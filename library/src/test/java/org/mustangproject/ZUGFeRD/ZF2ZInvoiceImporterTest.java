@@ -27,11 +27,7 @@ import org.mustangproject.*;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.xml.xpath.XPathExpressionException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -178,10 +174,10 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 			hasExceptions = true;
 		}
 		assertFalse(hasExceptions);
-		SimpleDateFormat sdf=new SimpleDateFormat("YYYY-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
 		// Reading ZUGFeRD
 		assertEquals("4711", invoice.getZFItems()[0].getProduct().getSellerAssignedID());
-		assertEquals("9384", invoice.getSellerOrderReferencedDocumentID());
+		assertEquals("9384", invoice.getSellerOrderReferencedDocument().getIssuerAssignedID());
 		assertEquals("90-kl-98798-C", invoice.getTenderReferencedDocument().getIssuerAssignedID());
 
 		IReferencedDocument[] rd=invoice.getZFItems()[0].getAdditionalReferences();
@@ -194,11 +190,30 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		assertEquals("2025-10-12", sdf.format(invoice.getTenderReferencedDocument().getFormattedIssueDateTime()));
 		assertEquals("sender@test.org", invoice.getSender().getEmail());
 		assertEquals("recipient@test.org", invoice.getRecipient().getEmail());
-		assertEquals("28934", invoice.getBuyerOrderReferencedDocumentID());
+		assertEquals("28934", invoice.getBuyerOrderReferencedDocument().getIssuerAssignedID());
+	}
 
 
+	public void testPDFA4Import() {
+		File PDFA4inputFile = getResourceAsFile("EXTENDED_Fremdwaehrung_wdis_fx-pdfa4.pdf");
 
+		boolean hasExceptions = false;
+		CalculatedInvoice invoice = new CalculatedInvoice();
+		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+		try {
 
+			FileInputStream FIS=new FileInputStream(PDFA4inputFile);
+			ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(FIS);
+			zii.extractInto(invoice);
+			assertEquals("2025-12-14", sdf.format(invoice.getDueDate()));
+		} catch (XPathExpressionException | ParseException | FileNotFoundException e) {
+			hasExceptions = true;
+		}
+		assertFalse(hasExceptions);
+		// Reading ZUGFeRD
+		assertEquals("CO-123/V2A", invoice.getZFItems()[0].getProduct().getSellerAssignedID());
+		assertEquals("2025-12-01", sdf.format(invoice.getIssueDate()));
+		assertEquals(new BigDecimal("521.91"), invoice.getDuePayable());
 	}
 
 
@@ -214,7 +229,7 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 			hasExceptions = true;
 		}
 		assertFalse(hasExceptions);
-		SimpleDateFormat sdf=new SimpleDateFormat("YYYY-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
 		// Reading ZUGFeRD
 		assertEquals("90-kl-98798-C", invoice.getTenderReferencedDocument().getIssuerAssignedID());
 		assertNotNull(invoice.getTenderReferencedDocument().getFormattedIssueDateTime());
@@ -248,6 +263,11 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		assertEquals("90-kl-98798-C1", invoice.getZFItems()[0].getAdditionalReferences()[0].getIssuerAssignedID());
 		assertEquals("AAG", invoice.getZFItems()[0].getAdditionalReferences()[0].getReferenceTypeCode());
 
+		assertNotNull(invoice.getInvoiceReferencedDocuments());
+		assertEquals(1, invoice.getInvoiceReferencedDocuments().size());
+		assertEquals("abc123", invoice.getInvoiceReferencedDocuments().get(0).getIssuerAssignedID());
+		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+		assertEquals("2018-10-04", sdf.format(invoice.getInvoiceReferencedDocuments().get(0).getFormattedIssueDateTime()));
 	}
 
 	public void testZF1Import() {
@@ -470,7 +490,9 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 			ObjectMapper mapper = new ObjectMapper();
 
 			String jsonArray = mapper.writeValueAsString(i);
-			JSONAssert.assertEquals("{\"documentCode\":\"380\",\"number\":\"471102\",\"currency\":\"EUR\",\"paymentTermDescription\":\"Der Betrag in Höhe von EUR 529,87 wird am 20.03.2018 von Ihrem Konto per SEPA-Lastschrift eingezogen.\\n          \",\"issueDate\":1520121600000,\"deliveryDate\":1520121600000,\"sender\":{\"name\":\"Lieferant GmbH\",\"zip\":\"80333\",\"street\":\"Lieferantenstraße 20\",\"location\":\"München\",\"country\":\"DE\",\"taxID\":\"201/113/40209\",\"vatID\":\"DE123456789\",\"debitDetails\":[{\"mandate\":\"REF A-123\",\"paymentMeansCode\":\"59\",\"paymentMeansInformation\":\"SEPA direct debit\",\"iban\":\"DE21860000000086001055\"}],\"vatid\":\"DE123456789\"},\"recipient\":{\"name\":\"Kunden AG Mitte\",\"zip\":\"69876\",\"street\":\"Kundenstraße 15\",\"location\":\"Frankfurt\",\"country\":\"DE\",\"bankDetails\":[{\"paymentMeansCode\":\"58\",\"paymentMeansInformation\":\"SEPA credit transfer\",\"iban\":\"DE21860000000086001055\"}]},\"totalPrepaidAmount\":0.00,\"creditorReferenceID\":\"DE98ZZZ09999999999\",\"zfitems\":[{\"price\":9.9000,\"quantity\":20.0000,\"basisQuantity\":1.0000,\"id\":\"1\",\"product\":{\"unit\":\"H87\",\"name\":\"Trennblätter A4\",\"taxCategoryCode\":\"S\",\"vatpercent\":19.00},\"value\":9.9000},{\"price\":5.5000,\"quantity\":50.0000,\"basisQuantity\":1.0000,\"id\":\"2\",\"product\":{\"unit\":\"H87\",\"name\":\"Joghurt Banane\",\"taxCategoryCode\":\"S\",\"vatpercent\":7.00},\"value\":5.5000}],\"tradeSettlement\":[{\"mandate\":\"REF A-123\",\"paymentMeansCode\":\"59\",\"paymentMeansInformation\":\"SEPA direct debit\",\"iban\":\"DE21860000000086001055\"}]}",jsonArray,false);
+			JSONAssert.assertEquals("{\"documentCode\":\"380\",\"number\":\"471102\",\"currency\":\"EUR\",\"paymentTermDescription\":\"Der Betrag in Höhe von EUR 529,87 wird am 20.03.2018 von Ihrem Konto per SEPA-Lastschrift eingezogen."
+					+ "\",\"issueDate\":1520121600000,\"deliveryDate\":1520121600000,\"sender\":{\"name\":\"Lieferant GmbH\",\"zip\":\"80333\",\"street\":\"Lieferantenstraße 20\",\"location\":\"München\",\"country\":\"DE\",\"taxID\":\"201/113/40209\",\"vatID\":\"DE123456789\",\"debitDetails\":[{\"mandate\":\"REF A-123\",\"paymentMeansCode\":\"59\",\"paymentMeansInformation\":\"SEPA direct debit\",\"iban\":\"DE21860000000086001055\"}],\"vatid\":\"DE123456789\"},\"recipient\":{\"name\":\"Kunden AG Mitte\",\"zip\":\"69876\",\"street\":\"Kundenstraße 15\",\"location\":\"Frankfurt\",\"country\":\"DE\",\"bankDetails\":[{\"paymentMeansCode\":\"58\",\"paymentMeansInformation\":\"SEPA credit transfer\",\"iban\":\"DE21860000000086001055\"}]},\"totalPrepaidAmount\":0.00,\"creditorReferenceID\":\"DE98ZZZ09999999999\",\"zfitems\":[{\"price\":9.9000,\"quantity\":20.0000,\"basisQuantity\":1.0000,\"id\":\"1\",\"product\":{\"unit\":\"H87\",\"name\":\"Trennblätter A4\",\"taxCategoryCode\":\"S\",\"vatpercent\":19.00},\"value\":9.9000},{\"price\":5.5000,\"quantity\":50.0000,\"basisQuantity\":1.0000,\"id\":\"2\",\"product\":{\"unit\":\"H87\",\"name\":\"Joghurt Banane\",\"taxCategoryCode\":\"S\",\"vatpercent\":7.00},\"value\":5.5000}],\"tradeSettlement\":[{\"mandate\":\"REF A-123\",\"paymentMeansCode\":\"59\",\"paymentMeansInformation\":\"SEPA direct debit\",\"iban\":\"DE21860000000086001055\"}]}",
+					jsonArray,false);
 
 		} catch (IOException e) {
 			fail("IOException not expected");
@@ -899,12 +921,12 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		assertNull(invoice.getDeliveryAddress());
 		assertNull(invoice.getPayee());
 
-		assertNull(invoice.getBuyerOrderReferencedDocumentID());
-		assertNull(invoice.getSellerOrderReferencedDocumentID());
-		assertNull(invoice.getDespatchAdviceReferencedDocumentID());
-		assertNull(invoice.getInvoiceReferencedDocumentID());
-		assertNull(invoice.getDeliveryNoteReferencedDocumentID());
-		assertNull(invoice.getDeliveryNoteReferencedDocumentDate());
+		assertNull(invoice.getBuyerOrderReferencedDocument());
+		assertNull(invoice.getSellerOrderReferencedDocument());
+		assertNull(invoice.getDespatchAdviceReferencedDocument());
+		assertNull(invoice.getInvoiceReferencedDocuments());
+		assertNull(invoice.getDeliveryNoteReferencedDocument());
+		assertNull(invoice.getDeliveryNoteReferencedDocument());
 	}
 
 	@Test
@@ -942,6 +964,32 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		TransactionCalculator tc = new TransactionCalculator(invoice);
 		assertEquals(new BigDecimal("1500.00"), tc.getTotal().setScale(2));
 		assertEquals(new BigDecimal("1785.00"), tc.getGrandTotal().setScale(2));
+	}
+
+	@Test
+	public void testIssue275GroupLineTotalsWithOnlyDueDateTypeCode() throws FileNotFoundException, XPathExpressionException, ParseException {
+		// Regression for Factur-X issue 275: these GROUP lines have no price or
+		// quantity, so their imported LineTotalAmount must drive the calculation.
+		// Before the fix, getCalculation() assigned null and threw an NPE.
+		File inputFile = getResourceAsFile("cii/UC11_F202600022_EXTENDED_FX_CII_BT-X-589Only_on_GROUP_Line.xml");
+		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter();
+		zii.setInputStream(new FileInputStream(inputFile));
+
+		Invoice invoice = zii.extractInvoice();
+
+		Item firstGroup = findItemById(invoice, "1");
+		assertNotNull(firstGroup);
+		assertEquals("GROUP", firstGroup.getLineStatusReasonCode());
+		LineCalculator firstCalculation = firstGroup.getCalculation();
+		assertEquals(new BigDecimal("90.95"), firstGroup.getLineTotalAmount());
+		assertEquals(new BigDecimal("90.95"), firstCalculation.getItemTotalNetAmount());
+
+		Item secondGroup = findItemById(invoice, "5");
+		assertNotNull(secondGroup);
+		assertEquals("GROUP", secondGroup.getLineStatusReasonCode());
+		LineCalculator secondCalculation = secondGroup.getCalculation();
+		assertEquals(new BigDecimal("121.95"), secondGroup.getLineTotalAmount());
+		assertEquals(new BigDecimal("121.95"), secondCalculation.getItemTotalNetAmount());
 	}
 
 	@Test
@@ -1053,5 +1101,45 @@ public class ZF2ZInvoiceImporterTest extends ResourceCase {
 		zf2p.generateXML(invoice);
 		String theXML = new String(zf2p.getXML(), StandardCharsets.UTF_8);
 		assertTrue(theXML.contains("Associated document note for test"));
+	}
+
+	@Test
+	public void testContractReferencedDocument() throws XPathExpressionException, ParseException, FileNotFoundException {
+		File inputFile = getResourceAsFile("testContractReferencedDocument.xml");
+		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter();
+		zii.doIgnoreCalculationErrors();
+		zii.setInputStream(new FileInputStream(inputFile));
+
+		Invoice invoice = zii.extractInvoice();
+		assertNotNull(invoice.getZFItems()[0].getSellerOrderReferencedDocument());
+		assertNotNull(invoice.getZFItems()[0].getBuyerOrderReferencedDocument());
+		assertNotNull(invoice.getZFItems()[0].getContractReferencedDocument());
+
+		ZUGFeRD2PullProvider zf2p = new ZUGFeRD2PullProvider();
+		zf2p.setProfile(Profiles.getByName("EN16931"));
+		zf2p.generateXML(invoice);
+		String theXML = new String(zf2p.getXML(), StandardCharsets.UTF_8);
+
+		assertTrue(theXML.contains("issuer-assigned-id_PPg9iTcig5UG0978"));
+		assertTrue(theXML.contains("Verkäufer"));
+		assertTrue(theXML.contains("Käufer"));
+		assertTrue(theXML.contains("Vertrag"));
+	}
+
+	@Test
+	public void testInvoiceContract() throws XPathExpressionException, ParseException, FileNotFoundException {
+		File inputFile = getResourceAsFile("test_invoice_contract.xml");
+		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter();
+		zii.doIgnoreCalculationErrors();
+		zii.setInputStream(new FileInputStream(inputFile));
+
+		Invoice invoice = zii.extractInvoice();
+
+		ZUGFeRD2PullProvider zf2p = new ZUGFeRD2PullProvider();
+		zf2p.setProfile(Profiles.getByName("XRechnung"));
+		zf2p.generateXML(invoice);
+		String theXML = new String(zf2p.getXML(), StandardCharsets.UTF_8);
+
+		assertTrue(theXML.contains("GB98354"));
 	}
 }

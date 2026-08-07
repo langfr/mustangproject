@@ -95,7 +95,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 		BigDecimal res = BigDecimal.ZERO;
 		if (charges != null) {
 			for (IZUGFeRDAllowanceCharge currentCharge : charges) {
-				if ((percent == null) || (currentCharge.getTaxRateApplicablePercent().compareTo(percent) == 0)) {
+				if (percent == null || currentCharge.getTaxRateApplicablePercent().compareTo(percent) == 0) {
 					res = res.add(currentCharge.getTotalAmount(this));
 				}
 			}
@@ -107,7 +107,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 		BigDecimal res = BigDecimal.ZERO;
 		if (charges != null) {
 			for (IZUGFeRDLogisticsServiceCharge currentCharge : charges) {
-				if ((percent == null) || (currentCharge.getTaxRateApplicablePercent().compareTo(percent) == 0)) {
+				if (percent == null || currentCharge.getTaxRateApplicablePercent().compareTo(percent) == 0) {
 					res = res.add(currentCharge.getAppliedAmount());
 				}
 			}
@@ -136,7 +136,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 			return "";
 		}
 		return Arrays.stream(charges)
-			.filter(currentCharge -> (percent == null || currentCharge.getTaxRateApplicablePercent().compareTo(percent) == 0))
+			.filter(currentCharge -> percent == null || currentCharge.getTaxRateApplicablePercent().compareTo(percent) == 0)
 			.map(IZUGFeRDAllowanceCharge::getReason)
 			.filter(Objects::nonNull)
 			.collect(Collectors.joining(" "));
@@ -393,7 +393,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 		vatAmount.setCalculated(vatAmount.getCalculated().add(toAdd.getCalculated()));
 		if (isNotBlank(toAdd.getVatExemptionReasonText())) {
 			vatAmount.setVatExemptionReasonText(toAdd.getVatExemptionReasonText());
-			Optional.ofNullable(vatAmount.getVatExemptionReasonText()).filter(reasonText -> !reasonText.equals(toAdd.getVatExemptionReasonText())).ifPresent(
+				Optional.ofNullable(vatAmount.getVatExemptionReasonText()).filter(reasonText -> !reasonText.equals(toAdd.getVatExemptionReasonText())).ifPresent(
 				text -> vatAmount.setVatExemptionReasonText(String.join(", ", text, toAdd.getVatExemptionReasonText())));
 		}
 	}

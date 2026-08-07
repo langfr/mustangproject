@@ -113,7 +113,7 @@ public interface IExportableTransaction {
 		return null;
 	}
 
-	default String getContractReferencedDocument() {
+	default IReferencedDocument getContractReferencedDocument() {
 		return null;
 	}
 
@@ -162,17 +162,6 @@ public interface IExportableTransaction {
 	 * @return the recipient of the invoice
 	 */
 	IZUGFeRDExportableTradeParty getRecipient();
-
-	/**
-	 * the creditors payment informations
-	 *
-	 * @deprecated use getTradeSettlement
-	 * @return an array of IZUGFeRDTradeSettlementPayment
-	 */
-	@Deprecated
-	default IZUGFeRDTradeSettlementPayment[] getTradeSettlementPayment() {
-		return null;
-	}
 
 	/**
 	 * the payment information for any payment means
@@ -458,7 +447,7 @@ public interface IExportableTransaction {
 	 *
 	 * @return the ID of the document
 	 */
-	default String getSellerOrderReferencedDocumentID() {
+	default IReferencedDocument getSellerOrderReferencedDocument() {
 		return null;
 	}
 
@@ -468,13 +457,21 @@ public interface IExportableTransaction {
 	 *
 	 * @return the ID of the document
 	 */
-	default String getBuyerOrderReferencedDocumentID() {
+	default IReferencedDocument getBuyerOrderReferencedDocument() {
+		return null;
+	}
+
+	default IReferencedDocument getDespatchAdviceReferencedDocument() {
+		return null;
+	}
+
+	default IReferencedDocument getDeliveryNoteReferencedDocument() {
 		return null;
 	}
 
 	/**
 	 * get the ID of the preceding invoice, which is e.g. to be corrected if this is a correction
-	 *
+	 * @deprecated use getInvoiceReferencedDocument.getIssuerAssignedID
 	 * @return the ID of the document
 	 */
 	@Deprecated
@@ -482,6 +479,10 @@ public interface IExportableTransaction {
 		return null;
 	}
 
+	/**
+	 * @deprecated use getInvoiceReferencedDocument.getFormattedIssueDateTime
+	 * @return
+	 */
 	@Deprecated
 	default Date getInvoiceReferencedIssueDate() {
 		return null;
@@ -498,9 +499,10 @@ public interface IExportableTransaction {
 	/**
 	 * get the issue timestamp of the BuyerOrderReferencedDocument, which sits in
 	 * the ApplicableSupplyChainTradeAgreement
-	 *
+	 * @deprecated use getBuyerOrderReferencedDocument.getFormattedIssueDateTime
 	 * @return the IssueDateTime in format CCYY-MM-DDTHH:MM:SS
 	 */
+	@Deprecated
 	default Date getBuyerOrderReferencedDocumentIssueDateTime() {
 		return null;
 	}
@@ -593,6 +595,11 @@ public interface IExportableTransaction {
 		return null;
 	}
 
+	/**
+	 * @deprecated use
+	 * @return getDespatchAdviceReferencedDocument.getIssuerAssignedID
+	 */
+	@Deprecated
 	default String getDespatchAdviceReferencedDocumentID() {
 		return null;
 	}
@@ -600,9 +607,10 @@ public interface IExportableTransaction {
 	/**
 	 * get delivery note document ID
 	 * ram:ApplicableHeaderTradeDelivery/ram:DeliveryNoteReferencedDocument/IssuerAssignedID
-	 *
+	 * @deprecated getDeliveryNoteReferencedDocument.getIssuerAssignedID
 	 * @return the ID of the delivery note document
 	 */
+	@Deprecated
 	default String getDeliveryNoteReferencedDocumentID() {
 		return null;
 	}
@@ -610,9 +618,10 @@ public interface IExportableTransaction {
 	/**
 	 * get delivery note document date
 	 * ram:ApplicableHeaderTradeDelivery/ram:DeliveryNoteReferencedDocument/FormattedIssueDateTime
-	 *
+	 * @deprecated use getDeliveryNoteReferenced.getFormattedIssueDateTime
 	 * @return the date of the delivery note document
 	 */
+	@Deprecated
 	default Date getDeliveryNoteReferencedDocumentDate() {
 		return null;
 	}

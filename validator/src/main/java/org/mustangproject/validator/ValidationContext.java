@@ -6,9 +6,18 @@ import java.util.Vector;
 
 import org.slf4j.Logger;
 
+/***
+ * the error list, and some recognized metadata, of a file in validation
+ */
 public class ValidationContext {
 	protected Vector<ValidationResultItem> results;
+	/***
+	 * XML added manually to the XML result
+	 */
 	protected String customXML = "";
+	/***
+	 * the slf4j log file object
+	 */
 	protected Logger logger;
 
 	private String format = "CII"; // CII or UBL
@@ -35,15 +44,13 @@ public class ValidationContext {
 	public void addResultItem(ValidationResultItem vr) throws IrrecoverableValidationError {
 		results.add(vr);
 
-		if ((vr.getSeverity() == ESeverity.fatal) || (vr.getSeverity() == ESeverity.exception)
-				|| (vr.getSeverity() == ESeverity.error)) {
+		if (vr.getSeverity() == ESeverity.fatal || vr.getSeverity() == ESeverity.exception || vr.getSeverity() == ESeverity.error) {
 			isValid = false;
-
 		}
 		if (logger != null) {
-			if ((vr.getSeverity() == ESeverity.fatal) || (vr.getSeverity() == ESeverity.exception)) {
+			if (vr.getSeverity() == ESeverity.fatal || vr.getSeverity() == ESeverity.exception) {
 				logger.error("Fatal Error {}: {}", vr.getSection(), vr.getMessage());
-			} else if ((vr.getSeverity() == ESeverity.error)) {
+			} else if (vr.getSeverity() == ESeverity.error) {
 				logger.error("Error {}: {}", vr.getSection(), vr.getMessage());
 			} else if (vr.getSeverity() == ESeverity.warning) {
 				logger.warn("Warning {}: {}", vr.getSection(), vr.getMessage());
@@ -52,7 +59,7 @@ public class ValidationContext {
 			}
 		}
 
-		if ((vr.getSeverity() == ESeverity.fatal) || (vr.getSeverity() == ESeverity.exception)) {
+		if (vr.getSeverity() == ESeverity.fatal || vr.getSeverity() == ESeverity.exception) {
 			throw new IrrecoverableValidationError(vr.getMessage());
 		}
 
@@ -89,6 +96,10 @@ public class ValidationContext {
 		return this;
 	}
 
+	/***
+	 * 1st gen is ZUGFeRD 1, 2nd gen is ZUGFeRD 2 and Factur-X 1
+	 * @return numeric string
+	 */
 	public String getGeneration() {
 		return generation;
 	}
@@ -111,6 +122,10 @@ public class ValidationContext {
 		clearCustomXML();
 	}
 
+	/***
+	 * get the final result
+	 * @return the XML of the result
+	 */
 	public String getXMLResult() {
 		StringBuilder res = new StringBuilder(getCustomXML());
 		if (results != null && !results.isEmpty()) {

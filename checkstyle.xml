@@ -22,12 +22,14 @@
 		<module name="IllegalImport"/>
 		<module name="RedundantImport"/>
 		<module name="UnusedImports"/>
+
 		<!-- 
 			Block Checks: https://checkstyle.sourceforge.io/checks/blocks/index.html
 		-->
 		<module name="LeftCurly"/>
 		<module name="NeedBraces"/>
 		<module name="RightCurly"/>
+
 		<!--
 			Coding Checks https://checkstyle.sourceforge.io/checks/coding/index.html
 		 -->
@@ -45,11 +47,21 @@
 		<module name="UnusedLocalVariable"/>
 
 		<!--
+			Javadoc Checks: https://checkstyle.sourceforge.io/checks/javadoc/index.html
+		-->
+		<!-- 476 Checkstyle violations. -->
+		<module name="JavadocStyle">
+            <property name="scope" value="public"/>
+            <property name="checkFirstSentence" value="false"/>
+        </module>
+
+		<!--
 			Whitespace Checks: https://checkstyle.sourceforge.io/checks/whitespace/index.html
 		 -->
 		<module name="SingleSpaceSeparator"/>
 		<module name="WhitespaceAfter"/>
 		<module name="WhitespaceAround"/>
+
 		<!--
 			Design Checks: https://checkstyle.sourceforge.io/checks/design/index.html
 		-->

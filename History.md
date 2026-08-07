@@ -1,3 +1,114 @@
+
+2.25.0
+=======
+2026-08-04
+
+- #1216 ZUGFeRD 2.5.2 and Factur-X 1.09.2
+- #1213 VeraPDF Vulnerabilities CVE-2026-54078 and CVE-2026-54079 
+- #1207 itemTotalNetAmount is null Exception when validating invoices
+- #925  Emit line-level CalculationPercent (BT-138) and BasisAmount (BT-137) for the EN16931 and XRechnung profiles, using the caller-supplied Allowance/Charge basis amount.
+- #1171 Removed deprecated methods Item::getAllowances() Item::getCharges() and their last usage in ZUGFeRD2PullProvider.
+- #228  Support LogisticsServiceCharges (Zuschläge für Versand & Verpackung)
+- #1174 Fix UBL AllowanceCharge import, add missing percent/basisAmount aliases, dropped per-unit-price allowances
+- #1163 Make doRecalculateItemPricesFromLineTotals() use more than the fixed scale of 4.
+- #1162 Skip the elements "Information" and "PayeeSpecifiedCreditorFinancialInstitution" for basic profiles.
+- #1134 Fix: Trade party universal communication id not imported when scheme is not "email address" (EM) but "electronic address" (0225).
+- #1150 Remove [D].[M].[Y] after Rechnungsdatum in HTML visualization
+- #996  Omit ExemptionReason written to line item level for profile EN16931, some validators raise a warning or even an error
+- #1097 Invoice importer: LegalOrganization id not imported (wrong node name 'GlobalID' instead of 'ID' used)
+- #1151 'BR-FXEXT-IC-08rev' in ZF 2.5 requires VAT exemption reason text and code for allowances and charges
+- #1145 Document-level allowance with VAT category O emits RateApplicablePercent (violates BR-O-06)
+- add disableArithmeticCheck() / --no-arithmetic-check option to skip the arithmetic recalculation pass during validation
+- #1167 Upgrade com.fasterxml.jackson.core to 2.22.1 from 2.17.3
+- #1186 Read Item LineTotalAmount from SpecifiedTradeSettlementLineMonetarySummation
+- #976 / #797 InvoiceImport: read ContractReferencedDocument/IssuerAssignedID into Invoice.contractReferencedDocument
+- #987 Show only the matching BIC per IBAN in invoice visualization
+- #982 Support TypeCodes 130 and 916 for AdditionalReferencedDocuments
+- #1202 Support IndividualTradeProductInstance with BatchID and SupplierAssignedSerialID for EXTENDED Profile
+- #1205 Refactoring of Invoice's DocumentReferences.
+- #1208 Prevent NPE when generating XML invoice without issue date.
+- #1211 Change to UBL 2.4 and add commandline option for profile and customization ID.
+- #1212 Remove deprecated method IExportableTransaction::getTradeSettlementPayment.
+- #1215 Removed duplicate code in ZUGFeRD2PullProvider, which lead to a duplicate DirectDebitMandateID.
+- #956 Import all SpecifiedTradePaymentTerms blocks, not just the last one.
+
+
+2.24.0
+=======
+2026-06-11
+
+- #1143 LineID may not be written empty in DeliveryNoteReferencedDocument
+- #1141 ZUGFeRD 2.5/Factur-X 1.09
+- #1127'Fix possible StringIndexOutOfBoundsException when extracting XMP.'
+- #1133 incorrect warning in Subinvoiceline calculation
+- Add Tax ExemptionReasonCode on document level.
+
+
+2.23.1
+=======
+2026-05-13
+
+- #1108 Regression Issue caused by empty XMP (introduced by #1076)
+- #1120 ZUGFeRDImporter fails to extract Version if XML namespace is not exactly <rsm:CrossIndustryInvoice>
+(some of the following changes were already part of 2.23.0)
+- #1043 Fix percentage-based allowance/charge calculations
+- #1093 #814 upgrade CEN EN16931 Schematron from v1.3.12 to v1.3.15
+- #1102 Add BasisAmount to CashDiscount.
+- #1109 Feature fix xml description
+- #1110 Avoid NPE by checking zi.getXMP() is not null.
+- #1116 dont emit empty node for definedTradeContact
+- #1118 Support <ram:UltimateShipToTradeParty/>
+- #1119 Support <ram:DeliveryTypeCode/>
+
+2.23.0 "Bonne Journées de la Facture Électronique"
+=======
+2026-04-23
+
+improved subitem support, support french validation
+
+- #993 Cash discount not parsed
+- #1029 Added a breaking change notice regarding the removal of hardcoded values in #729
+- #1037 Compress attachments
+- #1038 Header allowances are aggregated incorrectly for non-XRechnung profiles
+- #1044 Correct version of org.apache.pdfbox:fontbox from 3.0.3 to 3.0.6.
+- #1046 Add configurable BT-23 business process ID for CII export
+- #1049 Prevent exceptions in validation
+- #1050 Add validator information to PDF report (name and version)
+- #1052 Remove parsing OriginatorDocumentReference.ID as date
+- #1055 Correct order of ApplicableTradeTax sub-elements.
+- #1061 Add ability to mark an Invoice as a test invoice.
+- #1072 Correct XPath-expressions for GrandTotal and TaxBasisTotalAmount.
+- #1073 add hierarchical invoice positions in CII XML export for EXTENDED profile
+- #1075 Vulnerability in dependency PDFBox version 3.0.6
+- #1076 XMP error during validation based on mustang version 2.22. (XMP Metadata: Could not parse XMP metadata (XML invalid))
+- #1082 Centralize and secure DocumentBuilder creation.
+- #1083 PDF Visualizations in English and French
+- #1084 Fix xml description
+- #1089 Add France schematron ruleset
+- reduce possible exceptions in metrics action 
+- added Extended-CTC-FR profile to selection for command line
+
+2.22.0
+=======
+2026-02-04
+
+- #990 Fix empty ValidationResult when XMP metadata contains invalid XML characters
+- #859 SpecifiedTradePaymentTerms doppelt in der XML ab Version 2.16.5
+- #992 fix typo
+- #253/#994 add DeliveryNoteReferencedDocument for import and export
+- #999 Write RateApplicablePercent on head also for tax free
+- #997 CategoryCode O Need VAT rate in header breakdown (BT-119) but MUST omit line VAT rate (BT-152)
+- #1000 Support ItemSellerTradeParty at line level (Factur-X / ZUGFeRD EXTENDED) for French municipalities subcontracting services to other municipalities
+- #1011 calculatedinvoice needs to contain VATtotal
+- #1003 IncludedNote SubjectCode PMD AAB
+- #998 ZUGFeRDInvoiceImporter does not properly handle UBL CreditNote documents
+- #1006 Duplicate Notes and Missing BIC Parsing in ZUGFeRDInvoiceImporter
+- #1010 add DeliveryNoteReferencedDocument per Item
+- #1017 Concurrency problems in ZUGFeRDDateFormat
+- #536 Add Field for "Invoiced Object Identifier" (BT-18) in Invoice.java to Align with XRechnung Requirements
+- deprecate itemTotalAllowances instead of itemAllowances over itemCharges
+- corrected import of UBL rounding amount
+
 2.21.0
 =======
 2025-12-18

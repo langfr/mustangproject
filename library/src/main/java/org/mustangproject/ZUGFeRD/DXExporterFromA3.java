@@ -42,7 +42,6 @@ import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
-import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
@@ -56,7 +55,6 @@ import org.apache.xmpbox.schema.AdobePDFSchema;
 import org.apache.xmpbox.schema.DublinCoreSchema;
 import org.apache.xmpbox.schema.PDFAIdentificationSchema;
 import org.apache.xmpbox.schema.XMPBasicSchema;
-import org.apache.xmpbox.type.ArrayProperty;
 import org.apache.xmpbox.type.BadFieldValueException;
 import org.apache.xmpbox.xml.DomXmpParser;
 import org.apache.xmpbox.xml.XmpParsingException;
@@ -64,13 +62,15 @@ import org.apache.xmpbox.xml.XmpSerializer;
 import org.mustangproject.EStandard;
 import org.mustangproject.FileAttachment;
 import static org.mustangproject.util.StringUtils.isBlank;
-import static org.mustangproject.util.StringUtils.isNotBlank;
 
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
 public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 
+	/***
+	 * if the PDF may internally be compressed
+	 */
 	protected boolean compressionEnabled;
 
 	/**
@@ -193,9 +193,8 @@ public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 		if (!documentPrepared) {
 			prepareDocument();
 		}
-		if ((!fileAttached) && (attachZUGFeRDHeaders)) {
-			throw new IOException(
-					"File must be attached (usually with setTransaction) before perfoming this operation");
+		if (!fileAttached && attachZUGFeRDHeaders) {
+			throw new IOException("File must be attached (usually with setTransaction) before perfoming this operation");
 		}
 		doc.save(ZUGFeRDfilename);
 		if (!disableAutoClose) {
@@ -221,9 +220,8 @@ public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 		if (!documentPrepared) {
 			prepareDocument();
 		}
-		if ((!fileAttached) && (attachZUGFeRDHeaders)) {
-			throw new IOException(
-					"File must be attached (usually with setTransaction) before perfoming this operation");
+		if (!fileAttached && attachZUGFeRDHeaders) {
+			throw new IOException("File must be attached (usually with setTransaction) before perfoming this operation");
 		}
 		doc.save(output);
 		if (!disableAutoClose) {
@@ -312,7 +310,7 @@ public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 
 		// AF entry (Array) in catalog with the FileSpec
 		COSBase AFEntry = doc.getDocumentCatalog().getCOSObject().getItem("AF");
-		if ((AFEntry == null)) {
+		if (AFEntry == null) {
 			COSArray cosArray = new COSArray();
 			cosArray.add(fs);
 			doc.getDocumentCatalog().getCOSObject().setItem("AF", cosArray);
@@ -320,7 +318,7 @@ public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 			COSArray cosArray = (COSArray) AFEntry;
 			cosArray.add(fs);
 			doc.getDocumentCatalog().getCOSObject().setItem("AF", cosArray);
-		} else if ((AFEntry instanceof COSObject) &&
+		} else if (AFEntry instanceof COSObject &&
 				((COSObject) AFEntry).getObject() instanceof COSArray) {
 			COSArray cosArray = (COSArray) ((COSObject) AFEntry).getObject();
 			cosArray.add(fs);
@@ -499,7 +497,7 @@ public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 	@Override
 	protected XMPMetadata getXmpMetadata() throws IOException {
 		PDMetadata meta = doc.getDocumentCatalog().getMetadata();
-		if ((meta != null) && (meta.getLength() > 0)) {
+		if (meta != null && meta.getLength() > 0) {
 			try {
 				DomXmpParser xmpParser = new DomXmpParser();
 				return xmpParser.parse(meta.toByteArray());
@@ -576,33 +574,6 @@ public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 	}
 
 	@Override
-	protected void writeDublinCoreSchema(XMPMetadata xmp) {
-		DublinCoreSchema dc = getDublinCoreSchema(xmp);
-		if (dc.getFormat() == null) {
-			dc.setFormat("application/pdf");
-		}
-		if ((overwrite || dc.getCreators() == null || dc.getCreators().isEmpty()) && creator != null) {
-			dc.addCreator(creator);
-		}
-		if ((overwrite || dc.getDates() == null || dc.getDates().isEmpty()) && creator != null) {
-			dc.addDate(Calendar.getInstance());
-		}
-
-		ArrayProperty titleProperty = dc.getTitleProperty();
-		if (titleProperty != null) {
-			if (overwrite && isNotBlank(title)) {
-				dc.removeProperty(titleProperty);
-				dc.setTitle(title);
-			} else if (titleProperty.getElementsAsString().stream().anyMatch("Untitled"::equalsIgnoreCase)) {
-				// remove unfitting ghostscript default
-				dc.removeProperty(titleProperty);
-			}
-		} else if (isNotBlank(title)) {
-			dc.setTitle(title);
-		}
-	}
-
-	@Override
 	protected DublinCoreSchema getDublinCoreSchema(XMPMetadata xmp) {
 		DublinCoreSchema dc = xmp.getDublinCoreSchema();
 		if (dc != null) {
@@ -637,34 +608,6 @@ public class DXExporterFromA3 extends ZUGFeRDExporterFromA3 {
 			}
 		}
 		return xmp.createAndAddXMPBasicSchema();
-	}
-
-	// TODO this method does the same as the inherited one - deletion possible
-	@Override
-	protected void writeDocumentInformation() {
-		String fullProducer = producer + " (via mustangproject.org " + Version.VERSION + ")";
-		PDDocumentInformation info = doc.getDocumentInformation();
-		if (overwrite || info.getCreationDate() == null) {
-			info.setCreationDate(Calendar.getInstance());
-		}
-		if (overwrite || info.getModificationDate() == null) {
-			info.setModificationDate(Calendar.getInstance());
-		}
-		if (overwrite || (isBlank(info.getAuthor()) && isNotBlank(author))) {
-			info.setAuthor(author);
-		}
-		if (overwrite || (isBlank(info.getProducer()) && isNotBlank(fullProducer))) {
-			info.setProducer(fullProducer);
-		}
-		if (overwrite || (isBlank(info.getCreator()) && isNotBlank(creator))) {
-			info.setCreator(creator);
-		}
-		if (overwrite || (isBlank(info.getTitle()) && isNotBlank(title))) {
-			info.setTitle(title);
-		}
-		if (overwrite || (isBlank(info.getSubject()) && isNotBlank(subject))) {
-			info.setSubject(subject);
-		}
 	}
 
 	/**

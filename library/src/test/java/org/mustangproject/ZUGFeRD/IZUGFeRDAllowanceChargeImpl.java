@@ -44,6 +44,7 @@ public class IZUGFeRDAllowanceChargeImpl implements IZUGFeRDAllowanceCharge, IZU
 		return reasonCode;
 	}
 
+	@Deprecated
 	@Override
 	public BigDecimal getTaxPercent() {
 		return taxPercent;

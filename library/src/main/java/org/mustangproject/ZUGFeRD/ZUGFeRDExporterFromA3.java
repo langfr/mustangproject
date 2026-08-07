@@ -106,22 +106,6 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	 */
 	protected String creatorTool = "mustangproject";
 
-	/**
-	 * @deprecated author is never set yet
-	 */
-	@Deprecated
-	protected String author;
-	/**
-	 * @deprecated title is never set yet
-	 */
-	@Deprecated
-	protected String title;
-	/**
-	 * @deprecated subject is never set yet
-	 */
-	@Deprecated
-	protected String subject;
-
 	protected PDDocument doc;
 
 	protected int zfVersion = defaultZUGFeRDVersion;
@@ -156,6 +140,10 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 
 	}
 
+	/***
+	 * request to ignore slight PDF/A errors on writing
+	 * @return fluent setter
+	 */
 	public ZUGFeRDExporterFromA3 ignorePDFAErrors() {
 		this.ignorePDFAErrors = true;
 		return this;
@@ -184,6 +172,11 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		return xmlProvider;
 	}
 
+	/***
+	 * set the profile from a proper Enum
+	 * @param p the profile
+	 * @return fluent setter
+	 */
 	public ZUGFeRDExporterFromA3 setProfile(Profile p) {
 		this.profile = p;
 		if (xmlProvider != null) {
@@ -192,6 +185,11 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		return this;
 	}
 
+	/***
+	 * set the profile from a string, if it can be recognized
+	 * @param profilename
+	 * @return fluent setter
+	 */
 	public ZUGFeRDExporterFromA3 setProfile(String profilename) {
 		this.profile = Profiles.getByName(profilename);
 
@@ -201,6 +199,12 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		return this;
 	}
 
+	/***
+	 * adds an additional file to be attached to the PDF
+	 * @param name file name
+	 * @param content file content
+	 * @return fluent setter
+	 */
 	public ZUGFeRDExporterFromA3 addAdditionalFile(String name, byte[] content) {
 		fileAttachments.add(new FileAttachment(name, "text/xml", "Supplement", content).setDescription("ZUGFeRD extension/additional data"));
 		return this;
@@ -324,9 +328,8 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		if (!documentPrepared) {
 			prepareDocument();
 		}
-		if ((!fileAttached) && (attachZUGFeRDHeaders)) {
-			throw new IOException(
-				"File must be attached (usually with setTransaction) before perfoming this operation");
+		if (!fileAttached && attachZUGFeRDHeaders) {
+			throw new IOException("File must be attached (usually with setTransaction) before perfoming this operation");
 		}
 		doc.save(ZUGFeRDfilename, CompressParameters.NO_COMPRESSION);
 		if (!disableAutoClose) {
@@ -352,9 +355,8 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		if (!documentPrepared) {
 			prepareDocument();
 		}
-		if ((!fileAttached) && (attachZUGFeRDHeaders)) {
-			throw new IOException(
-				"File must be attached (usually with setTransaction) before perfoming this operation");
+		if (!fileAttached && attachZUGFeRDHeaders) {
+			throw new IOException("File must be attached (usually with setTransaction) before perfoming this operation");
 		}
 		doc.save(output, CompressParameters.NO_COMPRESSION);
 		if (!disableAutoClose) {
@@ -442,7 +444,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 
 		// AF entry (Array) in catalog with the FileSpec
 		COSBase AFEntry = doc.getDocumentCatalog().getCOSObject().getItem("AF");
-		if ((AFEntry == null)) {
+		if (AFEntry == null) {
 			COSArray cosArray = new COSArray();
 			cosArray.add(fs);
 			doc.getDocumentCatalog().getCOSObject().setItem("AF", cosArray);
@@ -450,7 +452,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 			COSArray cosArray = (COSArray) AFEntry;
 			cosArray.add(fs);
 			doc.getDocumentCatalog().getCOSObject().setItem("AF", cosArray);
-		} else if ((AFEntry instanceof COSObject) &&
+		} else if (AFEntry instanceof COSObject &&
 			((COSObject) AFEntry).getObject() instanceof COSArray) {
 			COSArray cosArray = (COSArray) ((COSObject) AFEntry).getObject();
 			cosArray.add(fs);
@@ -554,8 +556,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		String metaDataVersion = null; // default will be used
 
 		// The XRechnung version may be settable from outside.
-		if ((this.xRechnungVersion != null) && (this.profile != null) &&
-			this.profile.getName().equalsIgnoreCase(Profiles.getByName("XRECHNUNG").getName())) {
+		if (this.xRechnungVersion != null && this.profile != null && this.profile == Profiles.getByName("XRECHNUNG")) {
 			metaDataVersion = this.xRechnungVersion;
 		}
 
@@ -680,9 +681,8 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		// ZUGFeRD 2.1.1 Technical Supplement | Part A | 2.2.2. Data Relationship
 		// See documentation ZUGFeRD211_EN/Documentation/ZUGFeRD-2.1.1 - Specification_TA_Part-A.pdf
 		// https://www.ferd-net.de/standards/zugferd-2.1.1/index.html
-		if ((this.profile != null) && (zfVersion >= 2)) {
-			if (this.profile.getName().equalsIgnoreCase(Profiles.getByName("MINIMUM").getName()) ||
-				this.profile.getName().equalsIgnoreCase(Profiles.getByName("BASICWL").getName())) {
+		if (this.profile != null && zfVersion >= 2) {
+			if (this.profile == Profiles.getByName("MINIMUM") || this.profile == Profiles.getByName("BASICWL")) {
 				relationship = "Data";
 			}
 		}
@@ -707,7 +707,7 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 	protected XMPMetadata getXmpMetadata()
 		throws IOException {
 		PDMetadata meta = doc.getDocumentCatalog().getMetadata();
-		if ((meta != null) && (meta.getLength() > 0)) {
+		if (meta != null && meta.getLength() > 0) {
 			try {
 				DomXmpParser xmpParser = new DomXmpParser();
 				xmpParser.setStrictParsing(false);
@@ -798,15 +798,10 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 
 		ArrayProperty titleProperty = dc.getTitleProperty();
 		if (titleProperty != null) {
-			if (overwrite && isNotBlank(title)) {
-				dc.removeProperty(titleProperty);
-				dc.setTitle(title);
-			} else if (titleProperty.getElementsAsString().stream().anyMatch("Untitled"::equalsIgnoreCase)) {
+			if (titleProperty.getElementsAsString().stream().anyMatch("Untitled"::equalsIgnoreCase)) {
 				// remove unfitting ghostscript default
 				dc.removeProperty(titleProperty);
 			}
-		} else if (isNotBlank(title)) {
-			dc.setTitle(title);
 		}
 	}
 
@@ -853,20 +848,11 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 		if (overwrite || info.getModificationDate() == null) {
 			info.setModificationDate(Calendar.getInstance());
 		}
-		if (overwrite || (isBlank(info.getAuthor()) && isNotBlank(author))) {
-			info.setAuthor(author);
-		}
-		if (overwrite || (isBlank(info.getProducer()) && isNotBlank(fullProducer))) {
+		if (overwrite || isBlank(info.getProducer()) && isNotBlank(fullProducer)) {
 			info.setProducer(fullProducer);
 		}
-		if (overwrite || (isBlank(info.getCreator()) && isNotBlank(creator))) {
+		if (overwrite || isBlank(info.getCreator()) && isNotBlank(creator)) {
 			info.setCreator(creator);
-		}
-		if (overwrite || (isBlank(info.getTitle()) && isNotBlank(title))) {
-			info.setTitle(title);
-		}
-		if (overwrite || (isBlank(info.getSubject()) && isNotBlank(subject))) {
-			info.setSubject(subject);
 		}
 	}
 
@@ -937,11 +923,11 @@ public class ZUGFeRDExporterFromA3 extends XRExporter implements IZUGFeRDExporte
 
 	public ZUGFeRDExporterFromA3 setZUGFeRDVersion(EStandard est, int version) {
 		this.zfVersion = version;
-		if ((version < 1) || (version > 2)) {
+		if (version < 1 || version > 2) {
 			throw new IllegalArgumentException("Version not supported");
 		}
 		int generation = version;
-		if ((est == EStandard.FACTUR_X) && (version == 1)) {
+		if (est == EStandard.FACTUR_X && version == 1) {
 			generation = 2;
 		}
 		if (generation == 1) {
