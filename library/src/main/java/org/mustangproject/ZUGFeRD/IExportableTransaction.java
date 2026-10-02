@@ -312,12 +312,39 @@ public interface IExportableTransaction {
 	Date getDeliveryDate();
 
 	/**
+	 * get Value added tax point date
+	 * Umsatzsteuer-Leistungsdatum (auch Datum der Steuerfälligkeit)
+	 *
+	 * @return the tax date
+	 */
+	default Date getTaxPointDate() {
+		return null;
+	}
+
+	/**
 	 * get main invoice currency used on the invoice
 	 *
 	 * @return three character currency of this invoice
 	 */
 	default String getCurrency() {
 		return "EUR";
+	}
+
+	/**
+	 * BT-6, used when the VAT accounting currency code differs from the Invoice currency code
+	 *
+	 * @return three character currency code for the deviating VAT currency
+	 */
+	default String getTaxCurrency() {
+		return null;
+	}
+
+	default BigDecimal getTaxConversionRate() {
+		return null;
+	}
+
+	default Date getTaxConversionRateDateTime() {
+		return null;
 	}
 
 	/**
@@ -547,6 +574,17 @@ public interface IExportableTransaction {
 	}
 
 	/***
+	 * seller's tax representative (BG-11), used when the seller invoices under the
+	 * VAT ID of a fiscal representative in another member state,
+	 * ram:SellerTaxRepresentativeTradeParty (only supported for zf2)
+	 *
+	 * @return the IZUGFeRDExportableTradeParty tax representative of the seller, or null if none
+	 */
+	default IZUGFeRDExportableTradeParty getTaxRepresentative() {
+		return null;
+	}
+
+	/***
 	 * invoicer / invoice sender, if different from seller, ram:InvoicerTradeParty
 	 *
 	 * @return the IZUGFeRDExportableTradeParty invoice sender, if different from seller
@@ -664,8 +702,7 @@ public interface IExportableTransaction {
 
 	/**
 	 * BT-23 Business process identifier
-	 * /rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext/
-	 *   ram:BusinessProcessSpecifiedDocumentContextParameter/ram:ID
+	 * /rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext/ram:BusinessProcessSpecifiedDocumentContextParameter/ram:ID
 	 *
 	 * @return business process ID (e.g. "B1" or a URN) or null if not provided
 	 */
@@ -673,4 +710,12 @@ public interface IExportableTransaction {
 		return null;
 	}
 
+	/**
+	 * BT-19 Buyer accounting reference
+	 * /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ReceivableSpecifiedTradeAccountingAccount/ram:ID
+	 * @return buyer accounting reference or null if not provided
+	 */
+	default String getAccountingReference() {
+  		return null;
+	}
 }

@@ -19,13 +19,13 @@ final class ByteArrayDataSource implements DataSource {
 	private String type;
 	private String name;
 
-	ByteArrayDataSource (final InputStream is) throws IOException {
-		data = new ByteArrayOutputStream ();
-		IOUtils.copy (is, data);
-		IOUtils.closeQuietly (is);
+	ByteArrayDataSource(final InputStream is) throws IOException {
+		data = new ByteArrayOutputStream();
+		IOUtils.copy(is, data);
+		IOUtils.closeQuietly(is);
 	}
 
-	public String getContentType () {
+	public String getContentType() {
 		return this.type;
 	}
 
@@ -33,7 +33,7 @@ final class ByteArrayDataSource implements DataSource {
 	 * @param type
 	 *				the type to set
 	 */
-	public void setType (final String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -41,45 +41,45 @@ final class ByteArrayDataSource implements DataSource {
 	 * @param name
 	 *				the name to set
 	 */
-	public void setName (final String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
-	public InputStream getInputStream () throws IOException {
-		return new ByteArrayInputStream (data.toByteArray ());
+	public InputStream getInputStream() throws IOException {
+		return new ByteArrayInputStream(data.toByteArray());
 	}
 
-	public String getName () {
+	public String getName() {
 		return this.name;
 	}
 
-	public OutputStream getOutputStream () throws IOException {
-		this.data = new ByteArrayOutputStream ();
+	public OutputStream getOutputStream() throws IOException {
+		this.data = new ByteArrayOutputStream();
 		return data;
 	}
 }
 
 // Try to create an API similar to the 2.x one
 final class PreflightParserHelper {
-	private static File createTmpFile (final InputStream input) throws IOException {
+	private PreflightParserHelper() {
+		// to avoid instantiation
+	}
+
+	private static File createTmpFile(final InputStream input) throws IOException {
 		FileOutputStream fos = null;
 		try {
-			final File tmpFile = File.createTempFile ("mustang-pdf", ".pdf");
-			tmpFile.deleteOnExit ();
-			fos = new FileOutputStream (tmpFile);
-			IOUtils.copy (input, fos);
+			final File tmpFile = File.createTempFile("mustang-pdf", ".pdf");
+			tmpFile.deleteOnExit();
+			fos = new FileOutputStream(tmpFile);
+			IOUtils.copy(input, fos);
 			return tmpFile;
 		} finally {
-			IOUtils.closeQuietly (input);
-			IOUtils.closeQuietly (fos);
+			IOUtils.closeQuietly(input);
+			IOUtils.closeQuietly(fos);
 		}
 	}
 
-	public static PreflightParser createPreflightParser (final DataSource dataSource) throws IOException {
-		return new PreflightParser (createTmpFile (dataSource.getInputStream ()));
+	public static PreflightParser createPreflightParser(final DataSource dataSource) throws IOException {
+		return new PreflightParser(createTmpFile(dataSource.getInputStream()));
 	}
-}
-
-final class PDFBoxUpdateMitigation {
-	// Dummy for the name only
 }

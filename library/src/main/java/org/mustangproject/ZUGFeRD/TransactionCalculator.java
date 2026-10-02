@@ -55,7 +55,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 	public BigDecimal getGrandTotal() {
 
 		BigDecimal basis = getTaxBasis();
-		return getVATPercentAmountMap().values().stream().map(VATAmount::getCalculated)
+		return getVATAmountList().stream().map(VATAmount::getCalculated)
 			.map(p -> p.setScale(2, RoundingMode.HALF_UP)).reduce(BigDecimal.ZERO, BigDecimal::add).add(basis);
 	}
 
@@ -75,18 +75,19 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 
 
 	/**
-	 * Returns information about every tax that is involved in the current transaction.
+	 * Returns information about every tax that is involved in the current transaction,
+	 * one entry per VAT category code and rate (BG-23).
 	 *
 	 * @return transaction taxes.
 	 */
 	public Set<VATAmount> getTaxDetails() {
-		return getVATPercentAmountMap().entrySet().stream()
-			.map(entry ->
+		return getVATAmountList().stream()
+			.map(vatAmount ->
 				new VATAmount(
-					entry.getValue().getBasis(),
-					entry.getValue().getCalculated(),
-					entry.getValue().getCategoryCode()
-				).setApplicablePercent(entry.getKey())
+					vatAmount.getBasis(),
+					vatAmount.getCalculated(),
+					vatAmount.getCategoryCode()
+				).setApplicablePercent(vatAmount.getApplicablePercent())
 			)
 			.collect(Collectors.toSet());
 	}
@@ -312,8 +313,7 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 				percent = ZERO;
 			}
 			final LineCalculator lc = currentItem.getCalculation();
-			final VATAmount itemVATAmount = new VATAmount(lc.getItemTotalNetAmount(), lc.getItemTotalVATAmount(),
-				currentItem.getProduct().getTaxCategoryCode(), vatDueDateTypeCode, percent);
+			final VATAmount itemVATAmount = new VATAmount(lc.getItemTotalNetAmount(), lc.getItemTotalVATAmount(), currentItem.getProduct().getTaxCategoryCode(), vatDueDateTypeCode, percent);
 			final String reasonText = currentItem.getProduct().getTaxExemptionReason();
 			if (reasonText != null) {
 				itemVATAmount.setVatExemptionReasonText(reasonText);
@@ -338,8 +338,15 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 					final String vatCategoryCode = currentCharge.getTaxCategoryCode() != null ? currentCharge.getTaxCategoryCode() : "S";
 					final Optional<VATAmount> currentChargeVatAmount = this.getCurrentVatAmount(vatAmounts, vatCategoryCode, taxPercent);
 					final BigDecimal chargeBasis = currentCharge.getTotalAmount(this);
-					final VATAmount chargeVatAmount = new VATAmount(chargeBasis, chargeBasis.multiply(taxPercent.divide(new BigDecimal(100))), vatCategoryCode,
-						vatDueDateTypeCode, taxPercent);
+					final VATAmount chargeVatAmount = new VATAmount(chargeBasis, chargeBasis.multiply(taxPercent.divide(new BigDecimal(100))), vatCategoryCode, vatDueDateTypeCode, taxPercent);
+					final String reasonText = currentCharge.getTaxExemptionReason();
+					if (reasonText != null) {
+						chargeVatAmount.setVatExemptionReasonText(reasonText);
+					}
+					final String reasonCode = currentCharge.getTaxExemptionReasonCode();
+					if (reasonCode != null) {
+						chargeVatAmount.setVatExemptionReasonCode(reasonCode);
+					}
 					if (!currentChargeVatAmount.isPresent()) {
 						vatAmounts.add(chargeVatAmount);
 					} else {
@@ -356,10 +363,15 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 					final String vatCategoryCode = currentAllowance.getTaxCategoryCode() != null ? currentAllowance.getTaxCategoryCode() : "S";
 					final Optional<VATAmount> currentAllowanceVatAmount = this.getCurrentVatAmount(vatAmounts, vatCategoryCode, taxPercent);
 					final BigDecimal allowanceNegativeBasis = currentAllowance.getTotalAmount(this).multiply(BigDecimal.valueOf(-1));
-					final VATAmount allowanceVATAmount = new VATAmount(allowanceNegativeBasis,
-						allowanceNegativeBasis.multiply(taxPercent.divide(new BigDecimal(100))),
-						currentAllowance.getTaxCategoryCode() != null ? currentAllowance.getTaxCategoryCode() : "S",
-						vatDueDateTypeCode, taxPercent);
+					final VATAmount allowanceVATAmount = new VATAmount(allowanceNegativeBasis, allowanceNegativeBasis.multiply(taxPercent.divide(new BigDecimal(100))), currentAllowance.getTaxCategoryCode() != null ? currentAllowance.getTaxCategoryCode() : "S", vatDueDateTypeCode, taxPercent);
+					final String reasonText = currentAllowance.getTaxExemptionReason();
+					if (reasonText != null) {
+						allowanceVATAmount.setVatExemptionReasonText(reasonText);
+					}
+					final String reasonCode = currentAllowance.getTaxExemptionReasonCode();
+					if (reasonCode != null) {
+						allowanceVATAmount.setVatExemptionReasonCode(reasonCode);
+					}
 					if (!currentAllowanceVatAmount.isPresent()) {
 						vatAmounts.add(allowanceVATAmount);
 					} else {
@@ -377,6 +389,14 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 					final Optional<VATAmount> currentChargeVatAmount = this.getCurrentVatAmount(vatAmounts, vatCategoryCode, taxPercent);
 					final BigDecimal chargeBasis = currentCharge.getAppliedAmount();
 					final VATAmount chargeVatAmount = new VATAmount(chargeBasis, chargeBasis.multiply(taxPercent.divide(new BigDecimal(100))), vatCategoryCode, vatDueDateTypeCode, taxPercent);
+					final String reasonText = currentCharge.getTaxExemptionReason();
+					if (reasonText != null) {
+						chargeVatAmount.setVatExemptionReasonText(reasonText);
+					}
+					final String reasonCode = currentCharge.getTaxExemptionReasonCode();
+					if (reasonCode != null) {
+						chargeVatAmount.setVatExemptionReasonCode(reasonCode);
+					}
 					if (!currentChargeVatAmount.isPresent()) {
 						vatAmounts.add(chargeVatAmount);
 					} else {
@@ -393,8 +413,8 @@ public class TransactionCalculator implements IAbsoluteValueProvider {
 		vatAmount.setCalculated(vatAmount.getCalculated().add(toAdd.getCalculated()));
 		if (isNotBlank(toAdd.getVatExemptionReasonText())) {
 			vatAmount.setVatExemptionReasonText(toAdd.getVatExemptionReasonText());
-				Optional.ofNullable(vatAmount.getVatExemptionReasonText()).filter(reasonText -> !reasonText.equals(toAdd.getVatExemptionReasonText())).ifPresent(
-				text -> vatAmount.setVatExemptionReasonText(String.join(", ", text, toAdd.getVatExemptionReasonText())));
+			Optional.ofNullable(vatAmount.getVatExemptionReasonText()).filter(reasonText -> !reasonText.equals(toAdd.getVatExemptionReasonText())).ifPresent(
+					text -> vatAmount.setVatExemptionReasonText(String.join(", ", text, toAdd.getVatExemptionReasonText())));
 		}
 	}
 

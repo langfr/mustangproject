@@ -6,12 +6,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
-import org.mustangproject.ZUGFeRD.ITradeProductInstanceType;
 import org.mustangproject.ZUGFeRD.IDesignatedProductClassification;
+import org.mustangproject.ZUGFeRD.IProductCharacteristicType;
+import org.mustangproject.ZUGFeRD.ITradeProductInstanceType;
 import org.mustangproject.ZUGFeRD.IZUGFeRDExportableProduct;
 import org.mustangproject.util.NodeMap;
+import org.mustangproject.util.StringUtils;
 import org.w3c.dom.Node;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-
 public class Product implements IZUGFeRDExportableProduct {
 	private static final HashMap<String, HashMap<String, String>> unitAbbrevs = new HashMap<>();
 
@@ -35,6 +37,7 @@ public class Product implements IZUGFeRDExportableProduct {
 		/**
 		 * @return the batchID
 		 */
+		@Override
 		public SchemedID getBatchID() {
 			return batchID;
 		}
@@ -50,6 +53,7 @@ public class Product implements IZUGFeRDExportableProduct {
 		/**
 		 * @return the supplierAssignedSerialID
 		 */
+		@Override
 		public SchemedID getSupplierAssignedSerialID() {
 			return supplierAssignedSerialID;
 		}
@@ -75,7 +79,7 @@ public class Product implements IZUGFeRDExportableProduct {
 	protected String countryOfOrigin;
 	protected ArrayList<Charge> charges = new ArrayList<>();
 	protected ArrayList<Allowance> allowances = new ArrayList<>();
-	protected HashMap<String, String> attributes = new HashMap<>();
+	protected HashMap<String, ProductCharacteristicType> attributes = new HashMap<>();
 	protected List<IDesignatedProductClassification> classifications = new ArrayList<>();
 	protected List<TradeProductInstanceType> individualTradeProductInstances = new ArrayList<>();
 
@@ -91,6 +95,18 @@ public class Product implements IZUGFeRDExportableProduct {
 		this.name = name;
 		this.description = description;
 		this.vatPercent = VATPercent;
+	}
+
+	/***
+	 * special constructor for parent items without VAT (because of child items with diverging VAT)
+	 * @param name product short name
+	 * @param description product long name
+	 * @param unit a two/three letter UN/ECE rec 20 unit code, e.g. "C62" for piece
+	 */
+	public Product(String name, String description, String unit) {
+		this.unit = unit;
+		this.name = name;
+		this.description = description;
 	}
 
 	public Product(Node node) {
@@ -113,13 +129,38 @@ public class Product implements IZUGFeRDExportableProduct {
 
 
 		nodeMap.getAllNodes("ApplicableProductCharacteristic").map(NodeMap::new).forEach(apcNodes -> { // ApplicableProductCharacteristic is 0 .. unbounded
-			String key = apcNodes.getAsStringOrNull("Description");
+			Optional<Node> typeCodeNode = apcNodes.getNode("TypeCode");
+			String desc = apcNodes.getAsStringOrNull("Description");
+			Optional<Node> valueMeasureNode = apcNodes.getNode("ValueMeasure");
 			String value = apcNodes.getAsStringOrNull("Value");
-			if (key != null && value != null) {
+			if (desc != null) { // key value of the map
 				if (attributes == null) {
 					attributes = new HashMap<>();
 				}
-				attributes.put(key, value);
+				ProductCharacteristicType characteristic = new ProductCharacteristicType();
+				if (typeCodeNode.isPresent()) {
+					ClassCode typeCode = new ClassCode(typeCodeNode.get().getTextContent());
+					if (typeCodeNode.get().hasAttributes()) {
+						if (typeCodeNode.get().getAttributes().getNamedItem("listID") != null) {
+							typeCode.setListID(typeCodeNode.get().getAttributes().getNamedItem("listID").getNodeValue());
+						}
+						if (typeCodeNode.get().getAttributes().getNamedItem("listVersionID") != null) {
+							typeCode.setListVersionID(typeCodeNode.get().getAttributes().getNamedItem("listVersionID").getNodeValue());
+						}
+					}
+					characteristic.setTypeCode(typeCode);
+				}
+				characteristic.setDescription(desc);
+				if (valueMeasureNode.isPresent()) {
+					characteristic.setValueMeasure(new BigDecimal(valueMeasureNode.get().getTextContent()));
+					if (valueMeasureNode.get().getAttributes().getNamedItem("unitCode") != null) {
+						characteristic.setUnitCode(valueMeasureNode.get().getAttributes().getNamedItem("unitCode").getNodeValue());
+					}
+				}
+				if (StringUtils.isNotBlank(value)) {
+					characteristic.setValue(value);
+				}
+				attributes.put(desc, characteristic);
 			}
 		});
 
@@ -162,7 +203,10 @@ public class Product implements IZUGFeRDExportableProduct {
 				if (attributes == null) {
 					attributes = new HashMap<>();
 				}
-				attributes.put(propertyName, propertyValue);
+				ProductCharacteristicType characteristic = new ProductCharacteristicType();
+				characteristic.setDescription(propertyName);
+				characteristic.setValue(propertyValue);
+				attributes.put(propertyName, characteristic);
 			}
 		});
 
@@ -421,24 +465,50 @@ public class Product implements IZUGFeRDExportableProduct {
 	}
 
 	@Override
+	public IProductCharacteristicType[] getCharacteristics() {
+		if (attributes.isEmpty()) {
+			return null;
+		} else {
+			return attributes.values().toArray(new IProductCharacteristicType[0]);
+		}
+	}
+
+	@Override
 	public HashMap<String, String> getAttributes() {
 		if (attributes.isEmpty()) {
 			return null;
 		} else {
-			return this.attributes;
+			HashMap<String, String> values = new HashMap<>();
+			for (Entry<String, ProductCharacteristicType> entry : attributes.entrySet()) {
+				values.put(entry.getKey(), entry.getValue().getValue());
+			}
+			return values;
 		}
 	}
 
 	public Product setAttributes(Map<String, String> attributes) {
 		this.attributes.clear();
 		if (attributes != null) {
-			this.attributes.putAll(attributes);
+			for (Entry<String, String> entry : attributes.entrySet()) {
+				ProductCharacteristicType characteristic = new ProductCharacteristicType();
+				characteristic.setDescription(entry.getKey());
+				characteristic.setValue(entry.getValue());
+				this.attributes.put(entry.getKey(), characteristic);
+			}
 		}
 		return this;
 	}
 
+	public Product addCharacteristic(ProductCharacteristicType characteristic) {
+		this.attributes.put(characteristic.getDescription(), characteristic);
+		return this;
+	}
+
 	public Product addAttribute(String name, String value) {
-		this.attributes.put(name, value);
+		ProductCharacteristicType characteristic = new ProductCharacteristicType();
+		characteristic.setDescription(name);
+		characteristic.setValue(value);
+		this.attributes.put(name, characteristic);
 		return this;
 	}
 
@@ -496,6 +566,7 @@ public class Product implements IZUGFeRDExportableProduct {
 	/**
 	 * @return individualTradeProductInstances
 	 */
+	@Override
 	public ITradeProductInstanceType[] getIndividualTradeProductInstances() {
 		if (individualTradeProductInstances.isEmpty()) {
 			return null;

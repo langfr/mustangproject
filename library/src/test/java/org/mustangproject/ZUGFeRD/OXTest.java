@@ -21,13 +21,11 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.junit.FixMethodOrder;
-import org.junit.runners.MethodSorters;
-import org.mustangproject.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -40,11 +38,22 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+import javax.xml.xpath.XPathExpressionException;
+
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.mustangproject.BankDetails;
+import org.mustangproject.Contact;
+import org.mustangproject.Invoice;
+import org.mustangproject.TradeParty;
+
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class OXTest extends MustangReaderTestCase {
 	private static final String TARGET_PDF = "./target/testout-OX.pdf";
 	private static final String TARGET_PDF_EDGE = "./target/testout-OX-edge.pdf";
 	private static final String TARGET_XML = "./target/testout-OX.xml";
+
 
 	protected class EdgeProduct implements IZUGFeRDExportableProduct {
 		private String description, name, unit;
@@ -210,7 +219,7 @@ public class OXTest extends MustangReaderTestCase {
 		Item[] allItems = new Item[3];
 		EdgeProduct designProduct = new EdgeProduct("", "Künstlerische Gestaltung (Stunde): Einer Beispielrechnung",
 				"HUR");
-		EdgeProduct balloonProduct = new EdgeProduct("", "Bestellerweiterung für E&F Umbau", "C62");// test for issue
+		EdgeProduct balloonProduct = new EdgeProduct("", "Bestellerweiterung für E&F Umbau", "C62"); // test for issue
 		// 103
 		EdgeProduct airProduct = new EdgeProduct("", "Heiße Luft pro Liter", "LTR");
 
@@ -248,21 +257,6 @@ public class OXTest extends MustangReaderTestCase {
 		return "AB321";
 	}
 
-	/**
-	 * Create the test case
-	 *
-	 * @param testName name of the test case
-	 */
-	public OXTest(String testName) {
-		super(testName);
-	}
-
-	/**
-	 * @return the suite of tests being tested
-	 */
-	public static Test suite() {
-		return new TestSuite(OXTest.class);
-	}
 
 	// //////// TESTS
 	// //////////////////////////////////////////////////////////////////////////////////////////
@@ -273,16 +267,17 @@ public class OXTest extends MustangReaderTestCase {
 	 * metadata, writes to @{code ./target/testout-*} and then imports to check the
 	 * values.
 	 */
+	@Test
 	public void testOXExport() {
 
 		// the writing part
 
-		try (InputStream SOURCE_PDF = this.getClass()
-				.getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
+		try (InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
+				OXExporterFromA1 oe = new OXExporterFromA1()) {
 
-			 OXExporterFromA1 oe = new OXExporterFromA1().setProducer("My Application")
+			 oe.setProducer("My Application")
 					 .setCreator(System.getProperty("user.name")).setZUGFeRDVersion(1).ignorePDFAErrors()
-					 .load(SOURCE_PDF)) {
+					 .load(SOURCE_PDF);
 			oe.setTransaction(this);
 			String theXML = new String(oe.getProvider().getXML(), StandardCharsets.UTF_8);
 			assertTrue(theXML.contains("<rsm:SCRDMCCBDACIOMessageStructure"));
@@ -298,11 +293,11 @@ public class OXTest extends MustangReaderTestCase {
 		assertTrue(zi.getUTF8().contains("<ram:TypeCode>220</ram:TypeCode>"));
 		assertTrue(zi.getUTF8().contains("<ram:ShipToTradeParty>"));
 		assertFalse(zi.getUTF8().contains("EUR"));
-		assertTrue(zi.getUTF8().contains("USD"));//currency should be USD, test for #150
+		assertTrue(zi.getUTF8().contains("USD")); //currency should be USD, test for #150
 
 		// Now also check the "invoice"Importer
 		assertEquals("496.00", zi.getAmount());
-		assertEquals(zi.getHolder(), getOwnOrganisationName());
+		assertEquals(getOwnOrganisationName(), zi.getHolder());
 		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(TARGET_PDF);
 		try {
 			Invoice i = zii.extractInvoice();
@@ -324,17 +319,18 @@ public class OXTest extends MustangReaderTestCase {
 
 	}
 
+	@Test
 	public void testOXEdgeExport() {
 
 		// the writing part
 
-		try (InputStream SOURCE_PDF = this.getClass()
-				.getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
+		try (InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505blanko.pdf");
+				OXExporterFromA1 oe = new OXExporterFromA1()) {
 
-			 OXExporterFromA1 oe = new OXExporterFromA1().setProducer("My Application")
+			oe.setProducer("My Application")
 					 .setCreator(System.getProperty("user.name")).setZUGFeRDVersion(1).ignorePDFAErrors()
-					 .load(SOURCE_PDF)) {
-			TradeParty rec=new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE");
+					 .load(SOURCE_PDF);
+			TradeParty rec = new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE");
 			Invoice i = new Invoice().setDueDate(new Date()).setIssueDate(new Date()).setDeliveryDate(new Date())
 					.setSender(new TradeParty("Test company", "teststr", "55232", "teststadt", "DE").addTaxID("DE4711").addVATID("DE0815").setContact(new Contact("Hans Test", "+49123456789", "test@example.org")).addBankDetails(new BankDetails("DE12500105170648489890", "COBADEFXXX")))
 					.setRecipient(rec)
@@ -356,7 +352,7 @@ public class OXTest extends MustangReaderTestCase {
 
 		// Now also check the "invoice"Importer
 		assertEquals("2.00", zi.getAmount());
-		assertEquals(zi.getHolder(), "Test company");
+		assertEquals("Test company", zi.getHolder());
 		ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(TARGET_PDF_EDGE);
 		try {
 			Invoice i = zii.extractInvoice();

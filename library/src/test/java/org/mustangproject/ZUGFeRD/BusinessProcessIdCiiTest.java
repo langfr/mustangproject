@@ -1,18 +1,16 @@
 package org.mustangproject.ZUGFeRD;
 
-import org.junit.jupiter.api.Test;
-import org.mustangproject.ZUGFeRD.Profiles;
-import org.mustangproject.ZUGFeRD.ZUGFeRD2PullProvider;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.mustangproject.Invoice;
-import org.mustangproject.Item;
-import org.mustangproject.Product;
-import org.mustangproject.TradeParty;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.mustangproject.Invoice;
+import org.mustangproject.Item;
+import org.mustangproject.Product;
+import org.mustangproject.TradeParty;
 
 /**
  * Unit tests for BT-23 (BusinessProcessSpecifiedDocumentContextParameter/ID) emission in CII output.
@@ -26,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BusinessProcessIdCiiTest {
 
     @Test
-    void xrechnung_nonRegression_defaultBusinessProcessId_isStillEmitted() throws Exception {
+    void xrechnung_nonRegression_defaultBusinessProcessId_isStillEmitted() {
         // ===== GIVEN: A minimal invoice (as provided) WITHOUT setting businessProcessId =====
 
         TradeParty buyer = new TradeParty("Client X", "3 rue C", "33000", "Bordeaux", "FR");
@@ -68,7 +66,7 @@ public class BusinessProcessIdCiiTest {
     }
 
     @Test
-    void whenBusinessProcessIdIsSet_itIsEmitted_inExtendedProfile() throws Exception {
+    void whenBusinessProcessIdIsSet_itIsEmitted_inExtendedProfile() {
         // ===== GIVEN: The same minimal invoice, but WITH an explicit businessProcessId =====
 
         TradeParty buyer = new TradeParty("Client X", "3 rue C", "33000", "Bordeaux", "FR");

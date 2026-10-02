@@ -1,6 +1,7 @@
 package org.mustangproject;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -168,7 +169,6 @@ public class Item implements IZUGFeRDExportableItem {
 			.forEach(this::addAdditionalReference);
 
 		// ubl
-
 		itemMap.getAsNodeMap("OrderLineReference")
 			// ubl
 			.flatMap(bordNodes -> bordNodes.getAsString("LineID"))
@@ -199,26 +199,46 @@ public class Item implements IZUGFeRDExportableItem {
 				npptpNodes.getAsBigDecimal("BasisQuantity").ifPresent(this::setBasisQuantity);
 			});
 			icnm.getAsNodeMap("GrossPriceProductTradePrice").ifPresent(gpptpNodes ->
-				gpptpNodes.getAsNodeMap("AppliedTradeAllowanceCharge").ifPresent(gpptpAtacNodes -> {
-
-						/** mustang attributes differences between net and gross price to the product */
-						String chargeIndicator = gpptpAtacNodes.getAsStringOrNull("ChargeIndicator");
-						if (chargeIndicator != null && gpptpAtacNodes.getAsBigDecimal("ActualAmount").isPresent()) {
-							BigDecimal actual = gpptpAtacNodes.getAsBigDecimal("ActualAmount").get();
-							if (chargeIndicator.equals("true")) {
-								product.addCharge(new Charge(actual));
-								setPrice(getPrice().subtract(actual)); // the gross price affects the net price, which is read,
-								// so if we do not ignore charges|allowances we have to re-compensate the net price
-							} else {
-								product.addAllowance(new Allowance(actual));
-								setPrice(getPrice().add(actual));
-							}
-
+				gpptpNodes.getAllNodes("AppliedTradeAllowanceCharge").map(NodeMap::new).forEach(gpptpAtacNodes ->
+					gpptpAtacNodes.getAsNodeMap("ChargeIndicator").ifPresent(ci -> {
+						String isChargeString = ci.getAsString("Indicator").get();
+						String percentString = gpptpAtacNodes.getAsStringOrNull("CalculationPercent");
+						String amountString = gpptpAtacNodes.getAsStringOrNull("ActualAmount");
+						String basisAmountString = gpptpAtacNodes.getAsStringOrNull("BasisAmount");
+						String reason = gpptpAtacNodes.getAsStringOrNull("Reason");
+						String reasonCode = gpptpAtacNodes.getAsStringOrNull("ReasonCode");
+						Allowance allowance = new Allowance();
+						Charge charge = new Charge();
+						if (amountString != null) {
+							allowance.setTotalAmount(new BigDecimal(amountString.trim()));
+							charge.setTotalAmount(new BigDecimal(amountString.trim()));
 						}
-					})
-				);
-			icnm.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).
-				forEach(this::addReferencedDocument);
+						if (basisAmountString != null) {
+							allowance.setBasisAmount(new BigDecimal(basisAmountString.trim()));
+							charge.setBasisAmount(new BigDecimal(basisAmountString.trim()));
+						}
+						if (percentString != null) {
+							allowance.setPercent(new BigDecimal(percentString.trim()));
+							charge.setPercent(new BigDecimal(percentString.trim()));
+						}
+						if (reason != null) {
+							allowance.setReason(reason);
+							charge.setReason(reason);
+						}
+						if (reasonCode != null) {
+							allowance.setReasonCode(reasonCode);
+							charge.setReasonCode(reasonCode);
+						}
+
+						if (isChargeString.equalsIgnoreCase("false")) {
+							product.addAllowance(allowance);
+							setPrice(getPrice().add(allowance.getTotalAmount()));
+						} else {
+							product.addCharge(charge);
+							setPrice(getPrice().subtract(charge.getTotalAmount()));
+						}
+					})));
+			icnm.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).forEach(this::addReferencedDocument);
 		});
 
 		// RequestedQuantity is for Order-X, BilledQuantity for FX and ZF
@@ -264,7 +284,7 @@ public class Item implements IZUGFeRDExportableItem {
 					String basisAmountString = stac.getAsStringOrNull("BasisAmount");
 					String reason = stac.getAsStringOrNull("Reason");
 					String reasonCode = stac.getAsStringOrNull("ReasonCode");
-					Charge izac = new Charge();
+					Charge izac;
 					if (isChargeString.equalsIgnoreCase("false")) {
 						izac = new Allowance();
 					} else {
@@ -301,7 +321,7 @@ public class Item implements IZUGFeRDExportableItem {
 			}
 			icnm.getAsNodeMap("SpecifiedTradeSettlementLineMonetarySummation")
 				.flatMap(cnm -> cnm.getAsBigDecimal("LineTotalAmount"))
-				.ifPresent(lineTotal -> setLineTotalAmount(lineTotal.setScale(2)));
+				.ifPresent(lineTotal -> setLineTotalAmount(lineTotal.setScale(Math.max(2, lineTotal.scale()), RoundingMode.HALF_UP)));
 
 			icnm.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).forEach(this::addAdditionalReference);
 
@@ -460,6 +480,7 @@ public class Item implements IZUGFeRDExportableItem {
 	 * @deprecated	use getBuyerOrderReferencedDocument().getLineID()
 	 * @return the line ID of the order (BT132)
 	 */
+	@SuppressWarnings("removal")
 	@Override
 	@Deprecated
 	public String getBuyerOrderReferencedDocumentLineID() {
@@ -855,6 +876,7 @@ public class Item implements IZUGFeRDExportableItem {
 	/**
 	 * @deprecated use getDeliveryNoteReferencedDocument.getIssuerAssignedID
 	 */
+	@SuppressWarnings("removal")
 	@Override
 	@Deprecated
 	public String getDeliveryNoteReferencedDocumentID() {
@@ -880,6 +902,7 @@ public class Item implements IZUGFeRDExportableItem {
 	/**
 	 * @deprecated use getDeliveryNoteReferencedDocument.getIssuerAssignedID
 	 */
+	@SuppressWarnings("removal")
 	@Override
 	@Deprecated
 	public Date getDeliveryNoteReferencedDocumentDate() {
@@ -906,6 +929,7 @@ public class Item implements IZUGFeRDExportableItem {
 	/**
 	 * @deprecated use getDeliveryNoteReferencedDocument.getLineID
 	 */
+	@SuppressWarnings("removal")
 	@Override
 	@Deprecated
 	public String getDeliveryNoteReferencedDocumentLineID() {

@@ -28,7 +28,7 @@ import java.math.RoundingMode;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class Charge extends TradeTax implements IZUGFeRDAllowanceCharge {
+public class Charge extends TradeTax<Charge> implements IZUGFeRDAllowanceCharge {
 
 	protected Integer sequenceNumeric;
 
@@ -216,6 +216,7 @@ public class Charge extends TradeTax implements IZUGFeRDAllowanceCharge {
 	/**
 	 * @deprecated use getTaxRateApplicablePercent() instead.
 	 */
+	@SuppressWarnings("deprecation")
 	@Deprecated
 	@JsonIgnore
 	@Override
@@ -226,8 +227,8 @@ public class Charge extends TradeTax implements IZUGFeRDAllowanceCharge {
 	/**
 	 * set the taxRateApplicablePercent.
 	 * @deprecated use setTaxRateApplicablePercent(BigDecimal) instead.
-	 * @param percent
-	 * @return
+	 * @param percent the percent value as bigdecimal
+	 * @return fluent setter
 	 */
 	@Deprecated
 	public Charge setTaxPercent(BigDecimal percent) {
@@ -238,6 +239,7 @@ public class Charge extends TradeTax implements IZUGFeRDAllowanceCharge {
 	/**
 	 * @deprecated use getTaxCategoryCode() instead.
 	 */
+	@SuppressWarnings("deprecation")
 	@Deprecated
 	@JsonIgnore
 	@Override
@@ -248,7 +250,7 @@ public class Charge extends TradeTax implements IZUGFeRDAllowanceCharge {
 	/**
 	 * @deprecated use setTaxCategoryCode(String) instead.
 	 * @param taxCategoryCode
-	 * @return
+	 * @return fluent setter
 	 */
 	@Deprecated
 	public Charge setCategoryCode(String taxCategoryCode) {

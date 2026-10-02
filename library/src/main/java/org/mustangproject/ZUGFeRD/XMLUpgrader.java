@@ -1,12 +1,12 @@
 package org.mustangproject.ZUGFeRD;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -42,11 +42,10 @@ public class XMLUpgrader {
 	 * Takes a filename of a ZF1 XML file and returns the string of ZF2 XML
 	 * @param xmlFilename the filename of the source
 	 * @return String the updated XML
-	 * @throws FileNotFoundException if the source could not be found
+	 * @throws IOException if the source could not be found
 	 * @throws TransformerException if the source could not be transformed
-	 * @throws UnsupportedEncodingException
 	 */
-	public String migrateFromV1ToV2(String xmlFilename) throws FileNotFoundException, TransformerException, UnsupportedEncodingException {
+	public String migrateFromV1ToV2(String xmlFilename) throws TransformerException, IOException {
 		/**
 		 * *
 		 * http://www.unece.org/fileadmin/DAM/cefact/xml/XML-Naming-And-Design-Rules-V2_1.pdf
@@ -56,14 +55,13 @@ public class XMLUpgrader {
 		mXsltTemplate = mFactory.newTemplates(new StreamSource(CLASS_LOADER.getResourceAsStream(RESOURCE_PATH + "stylesheets/ZF1ToZF2.xsl")));
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		applySchematronXsl(new FileInputStream(xmlFilename), baos);
+		applySchematronXsl(Files.newInputStream(Paths.get(xmlFilename)), baos);
 		String res = null;
 		res = baos.toString(StandardCharsets.UTF_8.name());
 		return res;
 	}
 
-	protected void applySchematronXsl(final InputStream xmlFile,
-								   final OutputStream EN16931Outstream) throws TransformerException {
+	protected void applySchematronXsl(final InputStream xmlFile, final OutputStream EN16931Outstream) throws TransformerException {
 		Transformer transformer = mXsltTemplate.newTransformer();
 		transformer.transform(new StreamSource(xmlFile), new StreamResult(EN16931Outstream));
 	}

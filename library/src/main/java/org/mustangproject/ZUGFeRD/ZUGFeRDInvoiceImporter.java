@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -56,10 +57,12 @@ import org.mustangproject.LogisticsServiceCharge;
 import org.mustangproject.PaymentTerms;
 import org.mustangproject.ReferencedDocument;
 import org.mustangproject.SchemedID;
+import org.mustangproject.SubjectCode;
 import org.mustangproject.TradeParty;
 import org.mustangproject.XMLTools;
 import org.mustangproject.Exceptions.StructureException;
 import org.mustangproject.util.NodeMap;
+import org.mustangproject.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -108,14 +111,32 @@ public class ZUGFeRDInvoiceImporter {
 		//constructor for extending classes
 	}
 
+	/***
+	 * Can throw an {@link ArithmeticException} during the recalculation of the aggregated values comparing them with the given ones.
+	 * To avoid this, call {@link ZUGFeRDInvoiceImporter#ZUGFeRDInvoiceImporter()} first, then {@link ZUGFeRDInvoiceImporter#doIgnoreCalculationErrors()} followed by {@link ZUGFeRDInvoiceImporter#setPDFFilename(String)}.
+	 * @param pdfFilename	the PDF file name
+	 * @throws ArithmeticException when calculated total doesn't match the given total
+	 */
 	public ZUGFeRDInvoiceImporter(String pdfFilename) {
 		setPDFFilename(pdfFilename);
 	}
 
+	/***
+	 * Can throw an {@link ArithmeticException} during the recalculation of the aggregated values comparing them with the given ones.
+	 * To avoid this, call {@link ZUGFeRDInvoiceImporter#ZUGFeRDInvoiceImporter()} first, then {@link ZUGFeRDInvoiceImporter#doIgnoreCalculationErrors()} followed by {@link ZUGFeRDInvoiceImporter#setInputStream(InputStream)}.
+	 * @param pdfStream	InputStream to the PDF file
+	 * @throws ArithmeticException when calculated total doesn't match the given total
+	 */
 	public ZUGFeRDInvoiceImporter(InputStream pdfStream) {
 		setInputStream(pdfStream);
 	}
 
+	/***
+	 * Can throw an {@link ArithmeticException} during the recalculation of the aggregated values comparing them with the given ones.
+	 * To avoid this, call {@link ZUGFeRDInvoiceImporter#ZUGFeRDInvoiceImporter()} first, then {@link ZUGFeRDInvoiceImporter#doIgnoreCalculationErrors()} followed by {@link ZUGFeRDInvoiceImporter#setPDFFilename(String)}.
+	 * @param pdfFilename	the PDF file name
+	 * @throws ArithmeticException when calculated total doesn't match the given total
+	 */
 	public void setPDFFilename(String pdfFilename) {
 		try (InputStream bis = Files.newInputStream(Paths.get(pdfFilename), StandardOpenOption.READ)) {
 			extractLowLevel(bis);
@@ -125,6 +146,12 @@ public class ZUGFeRDInvoiceImporter {
 		}
 	}
 
+	/***
+	 * Can throw an {@link ArithmeticException} during the recalculation of the aggregated values comparing them with the given ones.
+	 * To avoid this, call {@link ZUGFeRDInvoiceImporter#ZUGFeRDInvoiceImporter()} first, then {@link ZUGFeRDInvoiceImporter#doIgnoreCalculationErrors()} followed by {@link ZUGFeRDInvoiceImporter#setInputStream(InputStream)}.
+	 * @param pdfStream	InputStream to the PDF file
+	 * @throws ArithmeticException when calculated total doesn't match the given total
+	 */
 	public void setInputStream(InputStream pdfStream) {
 		try {
 			extractLowLevel(pdfStream);
@@ -222,7 +249,7 @@ public class ZUGFeRDInvoiceImporter {
 	}
 
 	/***
-	 * do not raise ParseExceptions even if the reproduced invoice total does not match the given value
+	 * do not raise ArithmeticException even if the reproduced invoice total does not match the given value
 	 */
 	public void doIgnoreCalculationErrors() {
 		ignoreCalculationErrors = true;
@@ -269,20 +296,11 @@ public class ZUGFeRDInvoiceImporter {
 			if (validFilenames.contains(filename)) {
 				containsMeta = true;
 
-				// String embeddedFilename = filePath + filename;
-				// File file = new File(filePath + filename);
-				// System.out.println("Writing " + embeddedFilename);
-				// ByteArrayOutputStream fileBytes=new
-				// ByteArrayOutputStream();
-				// FileOutputStream fos = new FileOutputStream(file);
-
 				try {
 					setRawXML(embeddedFile.toByteArray());
 				} catch (ParseException e) {
 					LOGGER.error("Failed to parse XML", e);
 				}
-				// fos.write(embeddedFile.getByteArray());
-				// fos.close();
 			}
 			if (filename.startsWith("additional_data")) {
 				additionalXMLs.put(filename, embeddedFile.toByteArray());
@@ -380,7 +398,8 @@ public class ZUGFeRDInvoiceImporter {
 	 * @param zpp the invoice to be altered
 	 * @return the parsed invoice object
 	 * @throws XPathExpressionException if xpath could not be evaluated
-	 * @throws ParseException if the grand total of the parsed invoice could not be replicated with the new invoice
+	 * @throws ParseException if the invoice xml cannot be parsed, e.g. caused by unparsable date values
+	 * @throws ArithmeticException when calculated total doesn't match the given total
 	 */
 	public Invoice extractInto(Invoice zpp) throws XPathExpressionException, ParseException {
 
@@ -547,12 +566,54 @@ public class ZUGFeRDInvoiceImporter {
 			}
 		}
 
+		String currency = extractString("//*[local-name()=\"ApplicableHeaderTradeSettlement\"]/*[local-name()=\"InvoiceCurrencyCode\"]|//*[local-name()=\"DocumentCurrencyCode\"]");
+		zpp.setCurrency(currency);
+		String taxCurrency = extractString("//*[local-name()=\"ApplicableHeaderTradeSettlement\"]/*[local-name()=\"TaxCurrencyCode\"]");
+		if (!taxCurrency.isEmpty()) {
+			zpp.setTaxCurrency(taxCurrency);
+		}
 		xpr = xpath.compile("//*[local-name()=\"SpecifiedTradeSettlementHeaderMonetarySummation\"]/*[local-name()=\"TaxTotalAmount\"]|//*[local-name()=\"TaxTotal\"]/*[local-name()=\"TaxAmount\"]");
 		NodeList taxTotalNodes = (NodeList) xpr.evaluate(getDocument(), XPathConstants.NODESET);
-		if (taxTotalNodes.getLength() > 0) {
-			String taxTotalStr = XMLTools.trimOrNull(taxTotalNodes.item(0));
-			if (zpp instanceof CalculatedInvoice && taxTotalStr != null) {
-				((CalculatedInvoice) zpp).setVATtotal(new BigDecimal(taxTotalStr));
+		if (zpp instanceof CalculatedInvoice) {
+			for (int i = 0; i < taxTotalNodes.getLength(); i++) {
+				String taxTotalStr = XMLTools.trimOrNull(taxTotalNodes.item(i));
+				if (taxTotalStr == null) {
+					continue;
+				}
+				String currencyID = XMLTools.trimOrNull(taxTotalNodes.item(i).getAttributes().getNamedItem("currencyID"));
+				if (zpp.getCurrency() != null && zpp.getCurrency().equalsIgnoreCase(currencyID)) {
+					((CalculatedInvoice) zpp).setVATtotal(new BigDecimal(taxTotalStr));
+				} else if (taxCurrency != null && taxCurrency.equalsIgnoreCase(currencyID)) {
+					((CalculatedInvoice) zpp).setVATTotalInTaxCurrency(new BigDecimal(taxTotalStr));
+				} else if (taxTotalNodes.getLength() == 1) {
+					// try to be lenient if the currencyID doesn't match or is missing, yet this is the only value provided
+					//  Might be wrong though.
+					((CalculatedInvoice) zpp).setVATtotal(new BigDecimal(taxTotalStr));
+				}
+			}
+		}
+
+		if (taxCurrency != null) {
+			xpr = xpath.compile("//*[local-name()=\"ApplicableHeaderTradeSettlement\"]/*[local-name()=\"TaxApplicableTradeCurrencyExchange\"]");
+			NodeList nodes = (NodeList) xpr.evaluate(getDocument(), XPathConstants.NODESET);
+			if (nodes.getLength() > 0 ) {
+				NodeList children = nodes.item(0).getChildNodes();
+				for (int index = 0; index < children.getLength(); index++) {
+					Node item = children.item(index);
+					if (item.getLocalName() != null && item.getLocalName().equals("ConversionRate")) {
+						String s = XMLTools.trimOrNull(item);
+						zpp.setTaxConversionRate(new BigDecimal(s));
+					}
+					if (item.getLocalName() != null && item.getLocalName().equals("ConversionRateDateTime")) {
+						NodeList dateTimeChilds = item.getChildNodes();
+						for (int dateChildIndex = 0; dateChildIndex < dateTimeChilds.getLength(); dateChildIndex++) {
+							if (dateTimeChilds.item(dateChildIndex).getLocalName() != null && dateTimeChilds.item(dateChildIndex).getLocalName().equals("DateTimeString")) {
+								String dateString = XMLTools.trimOrNull(dateTimeChilds.item(dateChildIndex));
+								zpp.setTaxConversionRateDateTime(parseDate(dateString, "yyyyMMdd"));
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -608,46 +669,16 @@ public class ZUGFeRDInvoiceImporter {
 							subjectCode = XMLTools.trimOrNull(includedNodeChilds.item(issueDateChildIndex));
 						}
 					}
-					switch (subjectCode) {
-						case "AAI":
-							includedNotes.add(IncludedNote.generalNote(content));
+					boolean foundCode = false;
+					for (SubjectCode code : SubjectCode.values()) {
+						if (code.toString().equals(subjectCode)) {
+							includedNotes.add(new IncludedNote(content, code));
+							foundCode = true;
 							break;
-						case "REG":
-							includedNotes.add(IncludedNote.regulatoryNote(content));
-							break;
-						case "ABL":
-							includedNotes.add(IncludedNote.legalNote(content));
-							break;
-						case "CUS":
-							includedNotes.add(IncludedNote.customsNote(content));
-							break;
-						case "SUR":
-							includedNotes.add(IncludedNote.sellerNote(content));
-							break;
-						case "TXD":
-							includedNotes.add(IncludedNote.taxNote(content));
-							break;
-						case "ACY":
-							includedNotes.add(IncludedNote.introductionNote(content));
-							break;
-						case "AAK":
-							includedNotes.add(IncludedNote.discountBonusNote(content));
-							break;
-						case "AAB":
-							includedNotes.add(IncludedNote.paymentTermNote(content));
-							break;
-						case "PMD":
-							includedNotes.add(IncludedNote.paymentDetailRemittanceInformationNote(content));
-							break;
-						case "ACB":
-							includedNotes.add(IncludedNote.additionalInformationNote(content));
-							break;
-						case "INV":
-							includedNotes.add(IncludedNote.invoiceInstructionNote(content));
-							break;
-						default:
-							includedNotes.add(IncludedNote.unspecifiedNote(content));
-							break;
+						}
+					}
+					if (!foundCode) {
+						includedNotes.add(IncludedNote.unspecifiedNote(content));
 					}
 				}
 			}
@@ -761,16 +792,11 @@ public class ZUGFeRDInvoiceImporter {
 			headerTradeAgreementNodesMap.getNode("BuyerOrderReferencedDocument").map(ReferencedDocument::fromNode).ifPresent(rd -> zpp.setBuyerOrderReferencedDocument(rd));
 			headerTradeAgreementNodesMap.getNode("SellerOrderReferencedDocument").map(ReferencedDocument::fromNode).ifPresent(rd -> zpp.setSellerOrderReferencedDocument(rd));
 			headerTradeAgreementNodesMap.getNode("ContractReferencedDocument").map(ReferencedDocument::fromNode).ifPresent(rd -> zpp.setContractReferencedDocument(rd));
-			headerTradeAgreementNodesMap.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).filter(rd -> rd.getTypeCode().equals("50")).findFirst().ifPresent(rd -> zpp.setTenderReferencedDocument(rd));
-			headerTradeAgreementNodesMap.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).filter(rd -> rd.getTypeCode().equals("130")).findFirst().ifPresent(rd -> zpp.setObjectIdentifierReferencedDocument(rd));
-			headerTradeAgreementNodesMap.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).filter(rd -> rd.getTypeCode().equals("916")).findFirst().ifPresent(rd -> zpp.setRelatedReferencedDocument(rd));
+			headerTradeAgreementNodesMap.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).filter(rd -> "50".equals(rd.getTypeCode())).findFirst().ifPresent(rd -> zpp.setTenderReferencedDocument(rd));
+			headerTradeAgreementNodesMap.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).filter(rd -> "130".equals(rd.getTypeCode())).findFirst().ifPresent(rd -> zpp.setObjectIdentifierReferencedDocument(rd));
+			headerTradeAgreementNodesMap.getAllNodes("AdditionalReferencedDocument").map(ReferencedDocument::fromNode).filter(rd -> "916".equals(rd.getTypeCode())).filter(rd -> !isPlainEmbeddedAttachment(rd)).findFirst().ifPresent(rd -> zpp.setRelatedReferencedDocument(rd));
 		}
 
-
-
-
-		String currency = extractString("//*[local-name()=\"ApplicableHeaderTradeSettlement\"]/*[local-name()=\"InvoiceCurrencyCode\"]|//*[local-name()=\"DocumentCurrencyCode\"]");
-		zpp.setCurrency(currency);
 
 		// Backward-compatible: keep the first Description as the plain-text paymentTermDescription
 		String paymentTermsDescription = extractString("//*[local-name()=\"SpecifiedTradePaymentTerms\"]/*[local-name()=\"Description\"]|//*[local-name()=\"PaymentTerms\"]/*[local-name()=\"Note\"]");
@@ -865,6 +891,9 @@ public class ZUGFeRDInvoiceImporter {
 					}
 					if (IBAN != null) {
 						BankDetails bd = new BankDetails(IBAN);
+						if (paymentMeansCode != null) {
+							bd.setPaymentMeansCode(paymentMeansCode);
+						}
 						if (BIC != null) {
 							bd.setBIC(BIC);
 						}
@@ -1072,14 +1101,20 @@ public class ZUGFeRDInvoiceImporter {
 		xpr = xpath.compile("//*[local-name()=\"ApplicableHeaderTradeSettlement\"]/*[local-name()=\"ApplicableTradeTax\"]");
 		NodeList docTaxNodes = (NodeList) xpr.evaluate(getDocument(), XPathConstants.NODESET);
 
+		xpr = xpath.compile("//*[local-name() = 'ApplicableHeaderTradeSettlement']//*[local-name() = 'ApplicableTradeTax']//*[local-name() = 'TaxPointDate']//*[local-name() = 'DateString']");
+		NodeList docTaxNodesTaxPointDate = (NodeList) xpr.evaluate(getDocument(), XPathConstants.NODESET);
+		if (docTaxNodesTaxPointDate.getLength() > 0) {
+			String dueDateString = XMLTools.trimOrNull(docTaxNodesTaxPointDate.item(0));
+			dueDate = parseDate(dueDateString, "yyyyMMdd");
+			zpp.setTaxPointDate(dueDate);
+		}
+
 		if (nodes.getLength() != 0) {
 			for (int i = 0; i < nodes.getLength(); i++) {
-
 				Node currentItemNode = nodes.item(i);
 				Item it = new Item(currentItemNode.getChildNodes(), recalcPrice);
 				it.enrichProductFromVATBreakdown(docTaxNodes);
 				zpp.addItem(it);
-
 			}
 
 			// now handling base64 encoded attachments AttachmentBinaryObject=CII, EmbeddedDocumentBinaryObject=UBL
@@ -1316,16 +1351,20 @@ public class ZUGFeRDInvoiceImporter {
 						Pattern pattern = Pattern.compile("#TAGE=(.*?)#", Pattern.CASE_INSENSITIVE);
 						Matcher matcher = pattern.matcher(currentLine);
 						boolean daysFound = matcher.find();
-						String days = matcher.group(1);
+						String days = daysFound ? matcher.group(1) : null;
 						pattern = Pattern.compile("#PROZENT=(.*?)#", Pattern.CASE_INSENSITIVE);
 						matcher = pattern.matcher(currentLine);
 						boolean percentFound = matcher.find();
-						String percent = matcher.group(1);
+						String percent = percentFound ? matcher.group(1) : null;
 
 						if (daysFound && percentFound) {
-							cd.setDays(Integer.valueOf(days));
-							cd.setPercent(new BigDecimal(percent));
-							zpp.addCashDiscount(cd);
+							try {
+								cd.setDays(Integer.valueOf(days));
+								cd.setPercent(new BigDecimal(percent));
+								zpp.addCashDiscount(cd);
+							} catch (NumberFormatException e) {
+								// markers present but their values are not numeric: could not parse skonto
+							}
 						} //else : could not parse skonto
 
 
@@ -1372,6 +1411,32 @@ public class ZUGFeRDInvoiceImporter {
 			}
 		}
 		return zpp;
+	}
+
+	/**
+	 * Whether this TypeCode-916 element is a BG-24 supporting document that the AttachmentBinaryObject /
+	 * EmbeddedDocumentBinaryObject scan already imports as an additionalReferencedDocument
+	 * (Invoice#embedFileInXML). Importing it into relatedReferencedDocument as well would make
+	 * ZUGFeRD2PullProvider write the very same element - payload included - a second time.
+	 *
+	 * Reported only when the FileAttachment can carry every value the element holds, so that dropping the
+	 * second copy cannot change what is written. The FileAttachment branch of the writer emits BT-122 from
+	 * the FILENAME, the type code, BT-123 from the description and BT-125 from the mime type + payload:
+	 *
+	 * - an element whose IssuerAssignedID differs from AttachmentBinaryObject/@filename (both are allowed
+	 *   to differ) would come back re-labelled with the filename, so it is kept;
+	 * - so is one declaring URIID, LineID, ReferenceTypeCode or FormattedIssueDateTime, which that branch
+	 *   cannot express at all.
+	 *
+	 * Writing a document twice is recoverable, losing a field the source declared is not.
+	 */
+	private static boolean isPlainEmbeddedAttachment(ReferencedDocument rd) {
+		return rd.getAttachmentBinaryObject() != null
+			&& Objects.equals(rd.getIssuerAssignedID(), rd.getAttachmentBinaryObject().getFilename())
+			&& StringUtils.isBlank(rd.getUriID())
+			&& StringUtils.isBlank(rd.getLineID())
+			&& StringUtils.isBlank(rd.getReferenceTypeCode())
+			&& rd.getFormattedIssueDateTime() == null;
 	}
 
 	private Date parseDate(String issueDateString, String datePattern) throws ParseException {

@@ -50,10 +50,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class Invoice implements IExportableTransaction {
 
 	protected boolean testIndicator;
+	protected String taxCurrency;
+	protected BigDecimal taxConversionRate;
+	protected Date taxConversionRateDateTime;
 	protected String documentName, documentCode, number, ownOrganisationFullPlaintextInfo, referenceNumber, shipToOrganisationID, shipToOrganisationName, shipToStreet, shipToZIP, shipToLocation, shipToCountry, ownForeignOrganisationID, ownOrganisationName, currency, paymentTermDescription;
 	protected String deliveryTypeCode;
-	protected Date issueDate, dueDate, deliveryDate;
-	protected TradeParty sender, recipient, deliveryAddress, endCustomerDeliveryAddress, payee, invoicer, invoicee;
+	protected Date issueDate, dueDate, deliveryDate, taxPointDate;
+	protected TradeParty sender, recipient, deliveryAddress, endCustomerDeliveryAddress, payee, invoicer, invoicee, taxRepresentative;
 	protected ArrayList<CashDiscount> cashDiscounts;
 	@JsonDeserialize(contentAs = Item.class)
 	protected List<IZUGFeRDExportableItem> zfItems;
@@ -88,6 +91,8 @@ public class Invoice implements IExportableTransaction {
 	private BigDecimal roundingAmount;
 	private String paymentReference; // Remittance information / Verwendungszweck, BT-83
 	private String businessProcessId;
+	private String accountingReference; // „Buyer accounting reference“ / „Buchungsreferenz“
+
 
 	public Invoice() {
 		zfItems = new ArrayList<>();
@@ -614,6 +619,7 @@ public class Invoice implements IExportableTransaction {
 	/***
 	 * @deprecated use senders' TradeParty's name instead
 	 * @see TradeParty
+	 * @return fluent setter
 	 */
 	@Deprecated
 	public Invoice setOwnOrganisationName(String ownOrganisationName) {
@@ -679,6 +685,36 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	@Override
+	public String getTaxCurrency() {
+		return taxCurrency;
+	}
+
+	public Invoice setTaxCurrency(String taxCurrency) {
+		this.taxCurrency = taxCurrency;
+		return this;
+	}
+
+	@Override
+	public BigDecimal getTaxConversionRate() {
+		return taxConversionRate;
+	}
+
+	public Invoice setTaxConversionRate(BigDecimal taxConversionRate) {
+		this.taxConversionRate = taxConversionRate;
+		return this;
+	}
+
+	@Override
+	public Date getTaxConversionRateDateTime() {
+		return taxConversionRateDateTime;
+	}
+
+	public Invoice setTaxConversionRateDateTime(Date taxConversionRateDateTime) {
+		this.taxConversionRateDateTime = taxConversionRateDateTime;
+		return this;
+	}
+
+	@Override
 	public String getPaymentTermDescription() {
 		return paymentTermDescription;
 	}
@@ -719,6 +755,16 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	@Override
+	public Date getTaxPointDate() {
+		return taxPointDate;
+	}
+
+	public Invoice setTaxPointDate(Date taxPointDate) {
+		this.taxPointDate = taxPointDate;
+		return this;
+	}
+
+	@Override
 	public TradeParty getSender() {
 		return sender;
 	}
@@ -735,7 +781,7 @@ public class Invoice implements IExportableTransaction {
 	/***
 	 * set the cent e.g. to reach the next 5ct mark for currencies in certain countries
 	 * e.g. in the Netherlands ("Rappenrundung")
-	 * @param amount
+	 * @param amount the decimal value to be added to the invoice due payable
 	 * @return fluent setter
 	 */
 	public Invoice setRoundingAmount(BigDecimal amount) {
@@ -899,7 +945,7 @@ public class Invoice implements IExportableTransaction {
 
 	/**
 	 * Set multiple payment terms when using the EXTENDED profile.
-	 * @return
+	 * @return fluent setter
 	 */
 	public Invoice addPaymentTerms(IZUGFeRDPaymentTerms paymentTerm) {
 		paymentTerms.add(paymentTerm);
@@ -954,6 +1000,22 @@ public class Invoice implements IExportableTransaction {
 	 */
 	public Invoice setPayee(TradeParty payee) {
 		this.payee = payee;
+		return this;
+	}
+
+	@Override
+	public TradeParty getTaxRepresentative() {
+		return this.taxRepresentative;
+	}
+
+	/***
+	 * seller's tax representative (BG-11), to be used when the seller invoices
+	 * under the VAT ID of a fiscal representative in another member state
+	 * @param taxRepresentative the seller's fiscal representative
+	 * @return fluent setter
+	 */
+	public Invoice setTaxRepresentative(TradeParty taxRepresentative) {
+		this.taxRepresentative = taxRepresentative;
 		return this;
 	}
 
@@ -1049,11 +1111,11 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	/***
-	 * adds a document level addition to the price
-	 * @see Charge
+	 *  adds a document level addition to the price
+	 *  @see Charge
 	 *
-	 * @param charge
-	 * @return fluent setter
+	 * @param charge the Charge Object with either absolute or relative amount to be added
+	 * @return  fluent setter
 	 */
 	public Invoice addLogisticServiceCharge(IZUGFeRDLogisticsServiceCharge charge) {
 		logisticsServiceCharges.add(charge);
@@ -1074,7 +1136,7 @@ public class Invoice implements IExportableTransaction {
 	/***
 	 * adds a referenced in the invoice
 	 * @param rd the referenced Document
-	 * @return
+	 * @return fluent setter
 	 */
 	public Invoice setContractReferencedDocument(ReferencedDocument rd) {
 		contractReferencedDocument = rd;
@@ -1289,7 +1351,7 @@ public class Invoice implements IExportableTransaction {
 	/**
 	 * @deprecated use setDespatchAdviceReferenced / getDespatchAdviceReferenced.setIssuerAssignedID
 	 * @param despatchAdviceReferencedDocumentID
-	 * @return
+	 * @return fluent setter
 	 */
 	@Deprecated
 	public Invoice setDespatchAdviceReferencedDocumentID(String despatchAdviceReferencedDocumentID) {
@@ -1315,8 +1377,8 @@ public class Invoice implements IExportableTransaction {
 
 	/**
 	 * @deprecated use setDeliveryNoteReferenced / getDeliveryNoteReferenced.setIssuerAssignedID
-	 * @param deliveryNoteReferencedDocumentID
-	 * @return
+	 * @param deliveryNoteReferencedDocumentID String with the ID
+	 * @return fluent setter
 	 */
 	@Deprecated
 	public Invoice setDeliveryNoteReferencedDocumentID(String deliveryNoteReferencedDocumentID) {
@@ -1364,6 +1426,7 @@ public class Invoice implements IExportableTransaction {
 
 	/**
 	 * @param despatchAdviceReferencedDocument the despatchAdviceReferencedDocument to set
+	 * @return fluent setter
 	 */
 	public Invoice setDespatchAdviceReferencedDocument(ReferencedDocument despatchAdviceReferencedDocument) {
 		this.despatchAdviceReferencedDocument = despatchAdviceReferencedDocument;
@@ -1433,4 +1496,13 @@ public class Invoice implements IExportableTransaction {
   		return businessProcessId;
 	}
 
+	public Invoice setAccountingReference(String id) {
+  		this.accountingReference = id;
+  		return this;
+	}
+
+	@Override
+	public String getAccountingReference() {
+  		return accountingReference;
+	}
 }

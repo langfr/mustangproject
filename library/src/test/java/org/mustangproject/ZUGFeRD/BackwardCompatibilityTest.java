@@ -18,6 +18,8 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.ByteArrayOutputStream;
@@ -29,7 +31,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.mustangproject.TradeParty;
 
 /***
@@ -38,7 +40,7 @@ import org.mustangproject.TradeParty;
  * @author jstaerk
  *
  */
-public class BackwardCompatibilityTest extends TestCase implements IExportableTransaction {
+public class BackwardCompatibilityTest implements IExportableTransaction {
 
 	private static final String TARGET_PDF_ZF1 = "./target/testout-MustangGnuaccountingBeispielRE-20171118_506zf1.pdf";
 	private static final String TARGET_PDF_ZF2 = "./target/testout-MustangGnuaccountingBeispielRE-20171118_506zf2.pdf";
@@ -52,13 +54,14 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 	 * importer test (which is probably redundant). As only Name Ascending is
 	 * supported for Test Unit sequence, I renamed the Exporter Test test-Z-Export
 	 */
+	@Test
 	public void testZF1Export() {
 
 
 		// the writing part
 		try (InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20190610_507blanko.pdf");
 			 IZUGFeRDExporter ze = new ZUGFeRDExporterFromA1()) {
-			ze.setZUGFeRDVersion(1).setProfile(Profiles.getByName("Extended",1)).load(SOURCE_PDF);
+			ze.setZUGFeRDVersion(1).setProfile(Profiles.getByName("Extended", 1)).load(SOURCE_PDF);
 			ze.setTransaction(this);
 			ze.disableAutoClose(true);
 			ze.export(TARGET_PDF_ZF1);
@@ -87,6 +90,7 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 		assertEquals(getNumber(), zi.getForeignReference());
 	}
 
+	@Test
 	public void testZF2Export() {
 
 
@@ -116,14 +120,16 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 		ZUGFeRDImporter zi = new ZUGFeRDImporter(TARGET_PDF_ZF2);
 
 		// Reading ZUGFeRD
-		assertEquals(zi.getAmount(), "571.04");
-		assertEquals(zi.getBIC(), getTradeSettlement()[0].getOwnBIC());
-		assertEquals(zi.getIBAN(), getTradeSettlement()[0].getOwnIBAN());
-		assertEquals(zi.getHolder(), getOwnOrganisationName());
-		assertEquals(zi.getForeignReference(), getNumber());
+		assertEquals("571.04", zi.getAmount());
+		assertEquals(getTradeSettlement()[0].getOwnBIC(), zi.getBIC());
+		assertEquals(getTradeSettlement()[0].getOwnIBAN(), zi.getIBAN());
+		assertEquals(getOwnOrganisationName(), zi.getHolder());
+		assertEquals(getNumber(), zi.getForeignReference());
 
 
 	}
+
+	@Test
 	public void testFXExport() {
 
 		// the writing part
@@ -207,15 +213,15 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 	}
 
 	class Item implements IZUGFeRDExportableItem {
-		public Item(BigDecimal price, BigDecimal quantity, Product product) {
+		private BigDecimal price, quantity;
+		private Product product;
+
+		Item(BigDecimal price, BigDecimal quantity, Product product) {
 			super();
 			this.price = price;
 			this.quantity = quantity;
 			this.product = product;
 		}
-
-		private BigDecimal price, quantity;
-		private Product product;
 
 		public BigDecimal getPrice() {
 			return price;
@@ -253,17 +259,16 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 	}
 
 	class Product implements IZUGFeRDExportableProduct {
-		public Product(String description, String name, String unit, BigDecimal vATPercent) {
+		private String description, name, unit;
+		private BigDecimal vatPercent;
+
+		Product(String description, String name, String unit, BigDecimal vATPercent) {
 			super();
 			this.description = description;
 			this.name = name;
 			this.unit = unit;
 			vatPercent = vATPercent;
 		}
-
-		private String description, name, unit;
-
-		private BigDecimal vatPercent;
 
 		public String getDescription() {
 			return description;
@@ -304,15 +309,14 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 	}
 
 
-
 	@Override
 	public IZUGFeRDExportableTradeParty getRecipient() {
-		return new TradeParty("name","street","zip","city","DE");
+		return new TradeParty("name", "street", "zip", "city", "DE");
 	}
 
 	@Override
 	public IZUGFeRDExportableTradeParty getSender() {
-		return new TradeParty("Bei Spiel GmbH","street","zip","city","DE");
+		return new TradeParty("Bei Spiel GmbH", "street", "zip", "city", "DE");
 	}
 
 
@@ -371,7 +375,6 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 	}
 
 
-
 	public String getOwnBIC() {
 		return "COBADEFFXXX";
 	}
@@ -426,8 +429,6 @@ public class BackwardCompatibilityTest extends TestCase implements IExportableTr
 	public String getOwnZIP() {
 		return "12345";
 	}
-
-
 
 
 }

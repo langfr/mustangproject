@@ -468,9 +468,12 @@ public class TradeParty implements IZUGFeRDExportableTradeParty {
 			return uriUniversalCommunicationId.getScheme();
 		}
 		return null;
-
 	}
 
+	public TradeParty setUriUniversalCommunicationIDScheme(SchemedID schemeID) {
+		this.uriUniversalCommunicationId = schemeID;
+		return this;
+	}
 
 	/***
 	 * 	sets the email of the organization (not the one of the contact person)
@@ -661,6 +664,7 @@ public class TradeParty implements IZUGFeRDExportableTradeParty {
 	 *
 	 * @return String the description, e.g. if it's a vat exempt company
 	 */
+	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -806,6 +810,7 @@ public class TradeParty implements IZUGFeRDExportableTradeParty {
 	 * e.g. which floor (if LineTwo=setAdditionalAddress has already been used e.g. for which building)
 	 * @return lineThree
 	 */
+	@Override
 	public String getAdditionalAddressExtension() {
 		return this.additionalAddressExtension;
 	}

@@ -20,12 +20,12 @@ package org.mustangproject.ZUGFeRD;
 
 import java.math.BigDecimal;
 
-public class IZUGFeRDAllowanceChargeImpl implements IZUGFeRDAllowanceCharge, IZUGFeRDTradeTax {
+public class IZUGFeRDAllowanceChargeImpl implements IZUGFeRDAllowanceCharge {
 	private BigDecimal totalAmount;
 	private String reason;
 	private String reasonCode;
 	private BigDecimal taxPercent;
-	private boolean isCharge=true;
+	private boolean isCharge = true;
 	private String taxExemptionReason;
 	private String taxExemptionReasonCode;
 

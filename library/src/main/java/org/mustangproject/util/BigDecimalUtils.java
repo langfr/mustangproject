@@ -3,8 +3,15 @@ package org.mustangproject.util;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class BigDecimalUtils {
+/***
+ * Some utilities to handle "floats", i.e. BigDecimals
+ * despite them having arbitrary precision
+ */
+public final class BigDecimalUtils {
 
+	private BigDecimalUtils() {
+		// avoid instantiation
+	}
 
 	/**
 	 * Calculates the logarithm of 10 for a BigDecimals absolute value and rounds it down.

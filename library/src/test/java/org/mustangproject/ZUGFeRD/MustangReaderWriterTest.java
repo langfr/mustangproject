@@ -18,24 +18,12 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
-import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
-import org.apache.pdfbox.pdmodel.common.PDMetadata;
-import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
-import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
-import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
-import org.apache.xmpbox.XMPMetadata;
-import org.apache.xmpbox.schema.PDFAIdentificationSchema;
-import org.apache.xmpbox.xml.DomXmpParser;
-import org.apache.xmpbox.xml.XmpParsingException;
-import org.junit.FixMethodOrder;
-import org.junit.runners.MethodSorters;
-import org.mustangproject.ZUGFeRD.model.DocumentContextParameterTypeConstants;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -45,9 +33,29 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Map;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+import org.apache.commons.io.IOUtils;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
+import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
+import org.apache.pdfbox.pdmodel.common.PDMetadata;
+import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
+import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
+import org.apache.xmpbox.XMPMetadata;
+import org.apache.xmpbox.schema.PDFAIdentificationSchema;
+import org.apache.xmpbox.xml.DomXmpParser;
+import org.apache.xmpbox.xml.XmpParsingException;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.mustangproject.ZUGFeRD.model.DocumentContextParameterTypeConstants;
+
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class MustangReaderWriterTest extends MustangReaderTestCase {
 
 	@Override
@@ -109,7 +117,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 	public IZUGFeRDExportableTradeParty getRecipient() {
 		return new RecipientTradeParty();
 	}
-	
+
 	@Override
 	public IZUGFeRDExportableTradeParty getSender() {
 		return new SenderTradeParty();
@@ -171,21 +179,6 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 		return "AB321";
 	}
 
-	/**
-	 * Create the test case
-	 *
-	 * @param testName name of the test case
-	 */
-	public MustangReaderWriterTest(String testName) {
-		super(testName);
-	}
-
-	/**
-	 * @return the suite of tests being tested
-	 */
-	public static Test suite() {
-		return new TestSuite(MustangReaderWriterTest.class);
-	}
 
 	// //////// TESTS
 	// //////////////////////////////////////////////////////////////////////////////////////////
@@ -196,26 +189,28 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 	 * to run before testZExport
 	 */
 
+	@Test
 	public void testAImport() {
 		InputStream inputStream = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20170509_505.pdf");
 		ZUGFeRDImporter zi = new ZUGFeRDImporter(inputStream);
 
 		// Reading ZUGFeRD
-		assertEquals(zi.getAmount(), "571.04");
-		assertEquals(zi.getBIC(), "COBADEFFXXX");
-		assertEquals(zi.getIBAN(), "DE88 2008 0000 0970 3757 00");
-		assertEquals(zi.getHolder(), getOwnOrganisationName());
-		assertEquals(zi.getForeignReference(), "RE-20170509/505");
-		assertEquals(zi.getBankName(), "Commerzbank");
-		assertEquals(zi.getSellerTradePartyAddress().getCityName(), "Stadthausen");
-		assertEquals(zi.getSellerTradePartyAddress().getCountryID(), "DE");
-		assertEquals(zi.getSellerTradePartyAddress().getCountrySubDivisionName(), null);
-		assertEquals(zi.getSellerTradePartyAddress().getLineOne(), "Ecke 12");
-		assertEquals(zi.getSellerTradePartyAddress().getLineThree(), null);
-		assertEquals(zi.getSellerTradePartyAddress().getLineTwo(), null);
-		assertEquals(zi.getSellerTradePartyAddress().getPostcodeCode(), "12345");
+		assertEquals("571.04", zi.getAmount());
+		assertEquals("COBADEFFXXX", zi.getBIC());
+		assertEquals("DE88 2008 0000 0970 3757 00", zi.getIBAN());
+		assertEquals(getOwnOrganisationName(), zi.getHolder());
+		assertEquals("RE-20170509/505", zi.getForeignReference());
+		assertEquals("Commerzbank", zi.getBankName());
+		assertEquals("Stadthausen", zi.getSellerTradePartyAddress().getCityName());
+		assertEquals("DE", zi.getSellerTradePartyAddress().getCountryID());
+		assertNull(zi.getSellerTradePartyAddress().getCountrySubDivisionName());
+		assertEquals("Ecke 12", zi.getSellerTradePartyAddress().getLineOne());
+		assertNull(zi.getSellerTradePartyAddress().getLineThree());
+		assertNull(zi.getSellerTradePartyAddress().getLineTwo());
+		assertEquals("12345", zi.getSellerTradePartyAddress().getPostcodeCode());
 	}
 
+	@Test
 	public void testForeignImport() {
 		InputStream inputStream = this.getClass().getResourceAsStream("/zugferd_invoice.pdf");
 		ZUGFeRDImporter zi = new ZUGFeRDImporter();
@@ -304,12 +299,10 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 	}
 
 
+	@Test
 	public void testMigratePDFA1ToA3() throws IOException {
 // just make sure there is no Exception
-		InputStream SOURCE_PDF = this.getClass()
-				.getResourceAsStream("/MustangGnuaccountingBeispielRE-20171118_506blanko.pdf");
-
-
+		InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20171118_506blanko.pdf");
 		IZUGFeRDExporter ze = new ZUGFeRDExporterFromA1().setAttachZUGFeRDHeaders(false).load(SOURCE_PDF);
 
 		File tempFile = File.createTempFile("ZUGFeRD-", "-test");
@@ -318,6 +311,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 		checkPdfA3B(tempFile);
 	}
 
+	@Test
 	public void testMigratePDFA1ToA3Stream() throws IOException {
 		// just make sure there is no Exception
 		InputStream SOURCE_PDF = this.getClass()
@@ -333,7 +327,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 		checkPdfA3B(tempFile);
 	}
 
-	private void checkPdfA3B(File tempFile) throws IOException, InvalidPasswordException {
+	private void checkPdfA3B(File tempFile) throws IOException {
 		try (PDDocument doc = Loader.loadPDF(tempFile)) {
 			PDMetadata metadata = doc.getDocumentCatalog().getMetadata();
 			InputStream exportXMPMetadata = metadata.exportXMPMetadata();
@@ -341,8 +335,8 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 			exportXMPMetadata.read(xmpBytes);
 			final XMPMetadata xmp = new DomXmpParser().parse(xmpBytes);
 			PDFAIdentificationSchema pdfaid = xmp.getPDFAIdentificationSchema();
-			assertEquals(pdfaid.getPart().intValue(), 3);
-			assertEquals(pdfaid.getConformance(), "U");
+			assertEquals(3, pdfaid.getPart().intValue());
+			assertEquals("U", pdfaid.getConformance());
 		} catch (XmpParsingException e) {
 			throw new IllegalStateException("Failed to read PDF", e);
 		}
@@ -356,6 +350,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 	 * importer test (which is probably redundant). As only Name Ascending is
 	 * supported for Test Unit sequence, I renamed the Exporter Test test-Z-Export
 	 */
+	@Test
 	public void testZExport() {
 
 		final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20171118_506new.pdf";
@@ -374,7 +369,7 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 			ze.export(baos);
 			ze.close();
 			String pdfContent = baos.toString(StandardCharsets.UTF_8.name());
-			assertFalse(pdfContent.indexOf("(via mustangproject.org") == -1);
+			assertNotEquals(-1, pdfContent.indexOf("(via mustangproject.org"));
 			// check for pdf-a schema extension
 //			assertFalse(pdfContent.indexOf("<zf:ConformanceLevel>EN 16931</zf:ConformanceLevel>") == -1);
 //			assertFalse(pdfContent.indexOf("<pdfaSchema:prefix>zf</pdfaSchema:prefix>") == -1);
@@ -388,27 +383,28 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 		ZUGFeRDImporter zi = new ZUGFeRDImporter(TARGET_PDF);
 
 		// Reading ZUGFeRD
-		assertEquals(zi.getAmount(), "571.04");
-		assertEquals(zi.getBIC(), "COBADEFFXXX");
-		assertEquals(zi.getReference(), getReferenceNumber());
-		assertEquals(zi.getIBAN(), "DE88 2008 0000 0970 3757 00");
-		assertEquals(zi.getHolder(), getOwnOrganisationName());
-		assertEquals(zi.getForeignReference(), getNumber());
+		assertEquals("571.04", zi.getAmount());
+		assertEquals("COBADEFFXXX", zi.getBIC());
+		assertEquals(getReferenceNumber(), zi.getReference());
+		assertEquals("DE88 2008 0000 0970 3757 00", zi.getIBAN());
+		assertEquals(getOwnOrganisationName(), zi.getHolder());
+		assertEquals(getNumber(), zi.getForeignReference());
 	}
 
 	/**
 	 * Quick and dirty copy of testZExport to check if v1 files contain
 	 * the correct profile string when the comfort profile is selected.
 	 */
+	@Test
 	public void testZExportv1Profile() {
 
 		final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20171118_506new.pdf";
 
 		// the writing part
-		try (InputStream SOURCE_PDF = this.getClass()
-			.getResourceAsStream("/MustangGnuaccountingBeispielRE-20190610_507blanko.pdf");
+		try (InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20190610_507blanko.pdf");
+				IZUGFeRDExporter ze = new ZUGFeRDExporterFromA1()) {
 
-			 IZUGFeRDExporter ze = new ZUGFeRDExporterFromA1().setZUGFeRDVersion(1).setProfile(Profiles.getByName("COMFORT",1)).load(SOURCE_PDF)) {
+			ze.setZUGFeRDVersion(1).setProfile(Profiles.getByName("COMFORT", 1)).load(SOURCE_PDF);
 
 			ze.setTransaction(this);
 			ze.disableAutoClose(true);
@@ -429,21 +425,18 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 	}
 
 
+	@Test
 	public void testFXExport() throws Exception {
 
 		final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20171118_506fx.pdf";
 
 		// the writing part
-		try (InputStream SOURCE_PDF = this.getClass()
-				.getResourceAsStream("/MustangGnuaccountingBeispielRE-20171118_506blanko.pdf");
+		try (InputStream SOURCE_PDF = this.getClass().getResourceAsStream("/MustangGnuaccountingBeispielRE-20171118_506blanko.pdf");
+				ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 
-			 ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1().setZUGFeRDVersion(2).setProfile(Profiles.getByName("EN16931")).load(SOURCE_PDF)) {
+			ze.setZUGFeRDVersion(2).setProfile(Profiles.getByName("EN16931")).load(SOURCE_PDF);
 			ByteArrayOutputStream result = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int length;
-			while ((length = SOURCE_PDF.read(buffer)) != -1) {
-				result.write(buffer, 0, length);
-			}
+			IOUtils.copy(SOURCE_PDF, result);
 
 			byte[] bytes = result.toByteArray();
 			ze.addAdditionalFile("test.pdf", bytes);
@@ -491,11 +484,11 @@ public class MustangReaderWriterTest extends MustangReaderTestCase {
 				return null;
 			}
 			PDEmbeddedFile embeddedFile = fileSpec.getEmbeddedFile();
-			String xmlContent = new String(embeddedFile.toByteArray(), StandardCharsets.UTF_8);
-			return xmlContent;
+			return new String(embeddedFile.toByteArray(), StandardCharsets.UTF_8);
 		}
 	}
 
+	@Test
 	public void testExceptionOnPDF14() {
 
 		final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20170509_505new.pdf";

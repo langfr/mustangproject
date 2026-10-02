@@ -1,6 +1,6 @@
 package org.mustangproject.ZUGFeRD;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mustangproject.Invoice;
 import org.mustangproject.Item;
 import org.mustangproject.Product;
@@ -100,6 +100,5 @@ public class ItemSellerTradePartyTest {
                 .nodesByXPath("(//*[local-name()='IncludedSupplyChainTradeLineItem'])[2]" +
                         "//*[local-name()='SpecifiedLineTradeAgreement']" +
                         "/*[local-name()='ItemSellerTradeParty']").isEmpty();
-     
     }
 }

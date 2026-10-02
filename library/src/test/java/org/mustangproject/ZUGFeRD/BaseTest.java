@@ -18,47 +18,32 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
+import org.junit.jupiter.api.Test;
 import org.mustangproject.XMLTools;
 
-public class BaseTest extends TestCase {
-	/**
-	 * Create the test case
-	 *
-	 * @param testName name of the test case
-	 */
-	public BaseTest(String testName) {
-		super(testName);
-	}
+public class BaseTest {
 
-	/**
-	 * @return the suite of tests being tested
-	 */
-	public static Test suite() {
-		return new TestSuite(BaseTest.class);
-	}
-
+	@Test
 	public void testCorrectDigits() {
-		assertEquals("0.00", XMLTools.nDigitFormat(BigDecimal.ZERO,2));
-		assertEquals("-1.10", XMLTools.nDigitFormat(new BigDecimal("-1.10"),2));
-		assertEquals("-1.10", XMLTools.nDigitFormat(new BigDecimal("-1.1"),2));
-		assertEquals("-1.01", XMLTools.nDigitFormat(new BigDecimal("-1.01"),2));
-		assertEquals("20000123.35", XMLTools.nDigitFormat(new BigDecimal("20000123.3489"),2));
-		assertEquals("20000123.34", XMLTools.nDigitFormat(new BigDecimal("20000123.3419"),2));
-		assertEquals("12.00", XMLTools.nDigitFormat(new BigDecimal("12"),2));
-		assertEquals("12", XMLTools.nDigitFormat(new BigDecimal("12"),0));
-		assertEquals("20000123.342", XMLTools.nDigitFormat(new BigDecimal("20000123.3419"),3));
+		assertEquals("0.00", XMLTools.nDigitFormat(BigDecimal.ZERO, 2));
+		assertEquals("-1.10", XMLTools.nDigitFormat(new BigDecimal("-1.10"), 2));
+		assertEquals("-1.10", XMLTools.nDigitFormat(new BigDecimal("-1.1"), 2));
+		assertEquals("-1.01", XMLTools.nDigitFormat(new BigDecimal("-1.01"), 2));
+		assertEquals("20000123.35", XMLTools.nDigitFormat(new BigDecimal("20000123.3489"), 2));
+		assertEquals("20000123.34", XMLTools.nDigitFormat(new BigDecimal("20000123.3419"), 2));
+		assertEquals("12.00", XMLTools.nDigitFormat(new BigDecimal("12"), 2));
+		assertEquals("12", XMLTools.nDigitFormat(new BigDecimal("12"), 0));
+		assertEquals("20000123.342", XMLTools.nDigitFormat(new BigDecimal("20000123.3419"), 3));
 
-		assertEquals("0.00", XMLTools.nDigitFormatDecimalRange(BigDecimal.ZERO,2, 2));
-		assertEquals("-1.10", XMLTools.nDigitFormatDecimalRange(new BigDecimal("-1.100000"), 4,2));
-		assertEquals("-1.101", XMLTools.nDigitFormatDecimalRange(new BigDecimal("-1.101000"),10, 3));
-		assertEquals("-1.10", XMLTools.nDigitFormatDecimalRange(new BigDecimal("-1.103"), 2,2));
-		assertEquals("4", XMLTools.nDigitFormatDecimalRange(new BigDecimal("4"),2, 0));
-		assertEquals("3.14", XMLTools.nDigitFormatDecimalRange(new BigDecimal("3.141526"),2, 0));
+		assertEquals("0.00", XMLTools.nDigitFormatDecimalRange(BigDecimal.ZERO, 2, 2));
+		assertEquals("-1.10", XMLTools.nDigitFormatDecimalRange(new BigDecimal("-1.100000"), 4, 2));
+		assertEquals("-1.101", XMLTools.nDigitFormatDecimalRange(new BigDecimal("-1.101000"), 10, 3));
+		assertEquals("-1.10", XMLTools.nDigitFormatDecimalRange(new BigDecimal("-1.103"), 2, 2));
+		assertEquals("4", XMLTools.nDigitFormatDecimalRange(new BigDecimal("4"), 2, 0));
+		assertEquals("3.14", XMLTools.nDigitFormatDecimalRange(new BigDecimal("3.141526"), 2, 0));
 
 
 	}

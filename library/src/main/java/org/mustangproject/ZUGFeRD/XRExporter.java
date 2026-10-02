@@ -20,18 +20,14 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class XRExporter implements IExporter {
 	IXMLProvider xmlProvider;
 	IExportableTransaction trans;
-
-	public XRExporter() {
-	}
-
 
 	@Override
 	public IExporter setTransaction(IExportableTransaction trans) throws IOException {
@@ -41,8 +37,7 @@ public class XRExporter implements IExporter {
 
 	@Override
 	public void export(String ZUGFeRDfilename) throws IOException {
-		export(new FileOutputStream(new File(ZUGFeRDfilename)));
-
+		export(Files.newOutputStream(Paths.get(ZUGFeRDfilename)));
 	}
 
 	@Override

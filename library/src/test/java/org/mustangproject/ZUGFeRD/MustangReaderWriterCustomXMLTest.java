@@ -18,13 +18,12 @@
  *********************************************************************** */
 package org.mustangproject.ZUGFeRD;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.junit.FixMethodOrder;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mustangproject.Invoice;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.ByteArrayOutputStream;
@@ -36,27 +35,12 @@ import java.text.SimpleDateFormat;
 
 import javax.xml.xpath.XPathExpressionException;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MustangReaderWriterCustomXMLTest extends TestCase {
-	/**
-	 * Create the test case
-	 *
-	 * @param testName name of the test case
-	 */
-	public MustangReaderWriterCustomXMLTest(String testName) {
-
-		super(testName);
-	}
-
-	/**
-	 * @return the suite of tests being tested
-	 */
-	public static Test suite() {
-		return new TestSuite(MustangReaderWriterCustomXMLTest.class);
-	}
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public class MustangReaderWriterCustomXMLTest {
 
 	// //////// TESTS
 	// //////////////////////////////////////////////////////////////////////////////////////////
+	@Test
 	public void testCustomZF2Export() {
 
 		final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20171118_506custom.pdf";
@@ -287,11 +271,11 @@ public class MustangReaderWriterCustomXMLTest extends TestCase {
 		ZUGFeRDImporter zi = new ZUGFeRDImporter(TARGET_PDF);
 
 		// Reading ZUGFeRD
-		assertEquals(zi.getAmount(), "571.04");
-		assertEquals(zi.getBIC(), "COBADEFFXXX");
-		assertEquals(zi.getIBAN(), "DE88 2008 0000 0970 3757 00");
-		assertEquals(zi.getHolder(), "Bei Spiel GmbH");
-		assertEquals(zi.getForeignReference(), "RE-20171118/506");
+		assertEquals("571.04", zi.getAmount());
+		assertEquals("COBADEFFXXX", zi.getBIC());
+		assertEquals("DE88 2008 0000 0970 3757 00", zi.getIBAN());
+		assertEquals("Bei Spiel GmbH", zi.getHolder());
+		assertEquals("RE-20171118/506", zi.getForeignReference());
 		try {
 			Invoice invoice = zi.extractInvoice();
 			assertEquals("deliverynote123", invoice.getZFItems()[0].getDeliveryNoteReferencedDocument().getIssuerAssignedID());
@@ -310,6 +294,7 @@ public class MustangReaderWriterCustomXMLTest extends TestCase {
 	 * importer test (which is probably redundant). As only Name Ascending is
 	 * supported for Test Unit sequence, I renamed the Exporter Test test-Z-Export
 	 */
+	@Test
 	public void testCustomZF1Export() {
 
 		final String TARGET_PDF = "./target/testout-MustangGnuaccountingBeispielRE-20170509_505custom.pdf";
@@ -321,7 +306,7 @@ public class MustangReaderWriterCustomXMLTest extends TestCase {
 			zea1.setProducer("My Application")
 					.setCreator("Test")
 					.setZUGFeRDVersion(1)
-					.setProfile(Profiles.getByName("BASIC",1))
+					.setProfile(Profiles.getByName("BASIC", 1))
 					.load(SOURCE_PDF);
 			/* we have much more information than just in the basic profile (comfort or extended) but it's perfectly valid to provide more information, just not less. */
 			String ownZUGFeRDXML = "<rsm:CrossIndustryDocument xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:12\" xmlns:udt=\"urn:un:unece:uncefact:data:standard:UnqualifiedDataType:15\" xmlns:rsm=\"urn:ferd:CrossIndustryDocument:invoice:1p0\">\n"
@@ -465,8 +450,8 @@ public class MustangReaderWriterCustomXMLTest extends TestCase {
 			zea1.export(baos);
 			zea1.close();
 			String pdfContent = baos.toString(StandardCharsets.UTF_8.name());
-			assertFalse(pdfContent.indexOf("(via mustangproject.org") == -1);
-			assertFalse(pdfContent.indexOf("<zf:ConformanceLevel>BASIC</zf:ConformanceLevel>") == -1);
+			assertNotEquals(-1, pdfContent.indexOf("(via mustangproject.org"));
+			assertNotEquals(-1, pdfContent.indexOf("<zf:ConformanceLevel>BASIC</zf:ConformanceLevel>"));
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -476,11 +461,11 @@ public class MustangReaderWriterCustomXMLTest extends TestCase {
 		ZUGFeRDImporter zi = new ZUGFeRDImporter(TARGET_PDF);
 
 		// Reading ZUGFeRD
-		assertEquals(zi.getAmount(), "571.04");
-		assertEquals(zi.getBIC(), "COBADEFFXXX");
-		assertEquals(zi.getIBAN(), "DE88 2008 0000 0970 3757 00");
-		assertEquals(zi.getHolder(), "Bei Spiel GmbH");
-		assertEquals(zi.getForeignReference(), "RE-20170509/505");
+		assertEquals("571.04", zi.getAmount());
+		assertEquals("COBADEFFXXX", zi.getBIC());
+		assertEquals("DE88 2008 0000 0970 3757 00", zi.getIBAN());
+		assertEquals("Bei Spiel GmbH", zi.getHolder());
+		assertEquals("RE-20170509/505", zi.getForeignReference());
 	}
 
 }

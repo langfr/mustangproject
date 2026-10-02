@@ -1,3 +1,31 @@
+- #1244 Import all GrossPriceProductTradePrice/AppliedTradeAllowanceCharge elements.
+- #1247 Support the passing of CompressParameters.
+- #1248 / #1250 Support ReceivableSpecifiedTradeAccountingAccount (BT-19).
+- #1252 Add rules fired / failed to PDF validation result from xml.
+- #1253 Add more DocumentCodeTypeConstants values.
+- #1255 Fix Version without using templating plugin, replace non-working references to implementation version.
+- #1257 Support for the latest 4451 codelist.
+- #1263 Migrate tests to JUnit5.
+- #1265 / #1269 Support a TaxPointDate (BT-7).
+- #1260 Skip unparseable #SKONTO# payment terms instead of aborting the whole import.
+- #1289 Invoiceimporter does not read payment typecode correctly
+
+
+2.26.0
+=======
+2026-08-25
+
+- Upgrade CEN EN16931 Schematron from v1.3.15 to v1.3.16
+- #1233 Add Seller tax representative (BG-11) to CII profiles, excluding Minimum
+- Import and Export TaxCurrencyCode (BT-6) and corresponding TaxTotalAmount (BT-111)
+- #1225: fix fluent API for subclasses of TradeTax (Charge, Allowance, LogisticsServiceCharge)
+- Modify valid version array in PDFValidator, add "3p0"
+- #1228 Allow import of invoices with a LineTotalAmount having more than 2 decimals. #1231
+- #1229 ZF_250 XSDs contain ten dangling schemaLocation references
+- #1219 #1223 #1220 Prevent NPE in Item.enrichProductFromVATBreakdown for VAT category "O".
+- #1243 Support TypeCode and ValueMeasure for ApplicableProductCharacteristic on EXTENDED profile.
+- Upgrade com.fasterxml.jackson.core to 2.22.2 from 2.22.1
+
 
 2.25.0
 =======

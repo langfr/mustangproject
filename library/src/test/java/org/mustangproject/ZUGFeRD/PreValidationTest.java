@@ -21,32 +21,39 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import junit.framework.TestCase;
-import org.junit.FixMethodOrder;
-import org.junit.runners.MethodSorters;
-import org.mustangproject.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.mustangproject.BankDetails;
+import org.mustangproject.Contact;
+import org.mustangproject.Invoice;
+import org.mustangproject.Item;
+import org.mustangproject.Product;
+import org.mustangproject.TradeParty;
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public class PreValidationTest {
+	private static final String TARGET_PDF = "./target/testout-Preval.pdf";
+	private static final String SOURCE_PDF = "/veraPDFtestsuite6-7-11-t01-fail-a.pdf";
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class PreValidationTest extends TestCase {
-	final String TARGET_PDF = "./target/testout-Preval.pdf";
-	final String SOURCE_PDF = "/veraPDFtestsuite6-7-11-t01-fail-a.pdf";
-
+	@Test
 	public void testFailIgnore() {
 
 		// the writing part
 
 
 		boolean hasEx = false;
-		try (InputStream source = this.getClass()
-			.getResourceAsStream(SOURCE_PDF)) {
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1().setProducer("My Application")
+		try (InputStream source = this.getClass().getResourceAsStream(SOURCE_PDF);
+			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
+			ze.setProducer("My Application")
 				.setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2)
 				.load(source);
 			ze.setTransaction(createInvoice());
@@ -57,9 +64,8 @@ public class PreValidationTest extends TestCase {
 		}
 		assertTrue(hasEx);
 		hasEx = false;
-		try (InputStream source = this.getClass()
-			.getResourceAsStream(SOURCE_PDF)) {
-			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1();
+		try (InputStream source = this.getClass().getResourceAsStream(SOURCE_PDF);
+			ZUGFeRDExporterFromA1 ze = new ZUGFeRDExporterFromA1()) {
 			ze.ignorePDFAErrors().load(source);
 
 			ze.setProducer("My Application").setCreator(System.getProperty("user.name")).setZUGFeRDVersion(2).
@@ -81,7 +87,7 @@ public class PreValidationTest extends TestCase {
 			.setRecipient(new TradeParty("Theodor Est", "Bahnstr. 42", "88802", "Spielkreis", "DE"))
 			.setReferenceNumber("991-01484-64")//leitweg-id
 			// not using any VAT, this is also a test of zero-rated goods:
-			.setNumber(number).addItem(new Item(new Product("Testprodukt", "", "C62", BigDecimal.ZERO), amount, new BigDecimal(1.0)));
+			.setNumber(number).addItem(new Item(new Product("Testprodukt", "", "C62", BigDecimal.ZERO), amount, new BigDecimal("1.0")));
 	}
 
 }

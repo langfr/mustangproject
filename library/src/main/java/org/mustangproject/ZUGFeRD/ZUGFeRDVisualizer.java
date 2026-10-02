@@ -22,6 +22,7 @@ package org.mustangproject.ZUGFeRD;
 
 import com.helger.commons.io.stream.StreamHelper;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
@@ -60,14 +61,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.EnumMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -99,6 +100,7 @@ public class ZUGFeRDVisualizer {
 	private TransformerFactory mFactory;
 	private Templates mXsltXRTemplate;
 	private Templates mXsltUBLTemplate;
+	private Templates mXsltUBLCreditNoteTemplate;
 	private Templates mXsltCIOTemplate;
 	private EnumMap<Language, Templates> mXsltHTMLTemplates;
 	private Templates mXsltPDFTemplate;
@@ -302,8 +304,8 @@ public class ZUGFeRDVisualizer {
 
 		toPDFfromFOP(fopInput, () -> {
 				try {
-					return new FileOutputStream(pdfFilename);
-				} catch (FileNotFoundException e) {
+					return Files.newOutputStream(Paths.get(pdfFilename));
+				} catch (IOException e) {
 					LOGGER.error("Failed to create PDF", e);
 				}
 			return null;
@@ -359,8 +361,8 @@ public class ZUGFeRDVisualizer {
 		}
 
 		FopFactoryBuilder builder = new FopFactoryBuilder(new File(".").toURI(), new ClasspathResolverURIAdapter()).setConfiguration(cfg);
-// Step 1: Construct a FopFactory by specifying a reference to the configuration file
-// (reuse if you plan to render multiple documents!)
+		// Step 1: Construct a FopFactory by specifying a reference to the configuration file
+		// (reuse if you plan to render multiple documents!)
 
 		FopFactory fopFactory = builder.build(); //FopFactory.newInstance(new File("c:\\Users\\jstaerk\\temp\\fop-config.xconf"));
 
@@ -373,8 +375,8 @@ public class ZUGFeRDVisualizer {
 
 		userAgent.getRendererOptions().put("pdf-a-mode", "PDF/A-3b");
 
-// Step 2: Set up output stream.
-// Note: Using BufferedOutputStream for performance reasons (helpful with FileOutputStreams).
+		// Step 2: Set up output stream.
+		// Note: Using BufferedOutputStream for performance reasons (helpful with FileOutputStreams).
 
 		try (OutputStream out = new BufferedOutputStream(outputStreamDelegate.get())) {
 
@@ -438,11 +440,11 @@ public class ZUGFeRDVisualizer {
 
 	protected void applyUBLCreditNote2XSLT(final InputStream xmlFile, final OutputStream htmlOutStream)
 		throws TransformerException {
-		if (mXsltUBLTemplate == null) {
-			mXsltUBLTemplate = mFactory.newTemplates(
+		if (mXsltUBLCreditNoteTemplate == null) {
+			mXsltUBLCreditNoteTemplate = mFactory.newTemplates(
 				new StreamSource(CLASS_LOADER.getResourceAsStream(RESOURCE_PATH + "stylesheets/ubl-creditnote-xr.xsl")));
 		}
-		Transformer transformer = mXsltUBLTemplate.newTransformer();
+		Transformer transformer = mXsltUBLCreditNoteTemplate.newTransformer();
 
 		transformer.transform(new StreamSource(xmlFile), new StreamResult(htmlOutStream));
 	}

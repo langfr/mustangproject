@@ -20,33 +20,45 @@
  */
 package org.mustangproject.ZUGFeRD;
 
-import java.io.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.util.Date;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mustangproject.BankDetails;
-import org.mustangproject.CII.CIIToUBL;
 import org.mustangproject.Contact;
 import org.mustangproject.Invoice;
 import org.mustangproject.Item;
 import org.mustangproject.Product;
 import org.mustangproject.ReferencedDocument;
 import org.mustangproject.TradeParty;
+import org.mustangproject.CII.CIIToUBL;
 
-import javax.xml.xpath.XPathExpressionException;
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UBLTest extends ResourceCase {
-	final String TARGET_XML = "./target/testout-1Lieferschein.xml";
 
-	public UBLTest() {
-	}
+	private static final String TARGET_XML = "./target/testout-1Lieferschein.xml";
 
 	@Test
 	@Order(2)
@@ -60,10 +72,10 @@ public class UBLTest extends ResourceCase {
 		String expected = null;
 		String result = null;
 		try {
-			final File tempFile = File.createTempFile("ZUGFeRD-UBL-", "-test");
-			c2u.convert(input, tempFile, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0");
+			final Path tempFile = Files.createTempFile("ZUGFeRD-UBL-", "-test");
+			c2u.convert(input, tempFile.toFile(), "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0");
 			expected = ResourceUtilities.readFile(StandardCharsets.UTF_8, expectedFile.getAbsolutePath());
-			result = ResourceUtilities.readFile(StandardCharsets.UTF_8, tempFile.getAbsolutePath());
+			result = ResourceUtilities.readFile(StandardCharsets.UTF_8, tempFile.toString());
 		} catch (final IOException e) {
 			fail("Exception should not happen: " + e.getMessage());
 		}
@@ -87,7 +99,7 @@ public class UBLTest extends ResourceCase {
 
 		try {
 			oe.setTransaction(i);
-			final ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			oe.export(baos);
 
 			final String theXML = baos.toString(StandardCharsets.UTF_8.name());
@@ -100,15 +112,15 @@ public class UBLTest extends ResourceCase {
 
 	}
 
-	public void testEdgeInvoiceImportUBL() {
+	@Test
+	public void testEdgeInvoiceImportUBL() throws IOException {
 
 		File UBLinputFile = getResourceAsFile("ubl/01.01a-INVOICE.ubl.xml");
 		boolean hasExceptions = false;
 
-		ZUGFeRDInvoiceImporter zii = null;
 		Invoice invoice = null;
 		try {
-			zii = new ZUGFeRDInvoiceImporter(new FileInputStream(UBLinputFile));
+			ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(Files.newInputStream(UBLinputFile.toPath(), StandardOpenOption.READ));
 			invoice = zii.extractInvoice();
 		} catch (XPathExpressionException | ParseException | FileNotFoundException e) {
 			hasExceptions = true;
@@ -123,14 +135,14 @@ public class UBLTest extends ResourceCase {
 
 	}
 
-	public void testEdgeInvoiceImportUBL2() {
+	@Test
+	public void testEdgeInvoiceImportUBL2() throws IOException {
 		File UBLinputFile = getResourceAsFile("ubl/04.01a-INVOICE_ubl.xml");
 		boolean hasExceptions = false;
 
-		ZUGFeRDInvoiceImporter zii = null;
 		Invoice invoice = null;
 		try {
-			zii = new ZUGFeRDInvoiceImporter(new FileInputStream(UBLinputFile));
+			ZUGFeRDInvoiceImporter zii = new ZUGFeRDInvoiceImporter(Files.newInputStream(UBLinputFile.toPath(), StandardOpenOption.READ));
 			invoice = zii.extractInvoice();
 		} catch (XPathExpressionException | ParseException | FileNotFoundException e) {
 			e.printStackTrace();
